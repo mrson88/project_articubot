@@ -70,54 +70,54 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
   wheel_r_.setup(cfg_.right_wheel_name, cfg_.enc_counts_per_rev);
 
 
-  for (const hardware_interface::ComponentInfo & joint : info_.joints)
-  {
-    // DiffBotSystem has exactly two states and one command interface on each joint
-    if (joint.command_interfaces.size() != 1)
-    {
-      RCLCPP_FATAL(
-        rclcpp::get_logger("DiffDriveArduinoHardware"),
-        "Joint '%s' has %zu command interfaces found. 1 expected.", joint.name.c_str(),
-        joint.command_interfaces.size());
-      return hardware_interface::CallbackReturn::ERROR;
-    }
+  // for (const hardware_interface::ComponentInfo & joint : info_.joints)
+  // {
+  //   // DiffBotSystem has exactly two states and one command interface on each joint
+  //   if (joint.command_interfaces.size() != 1)
+  //   {
+  //     RCLCPP_FATAL(
+  //       rclcpp::get_logger("DiffDriveArduinoHardware"),
+  //       "Joint '%s' has %zu command interfaces found. 1 expected.", joint.name.c_str(),
+  //       joint.command_interfaces.size());
+  //     return hardware_interface::CallbackReturn::ERROR;
+  //   }
 
-    if (joint.command_interfaces[0].name != hardware_interface::HW_IF_VELOCITY)
-    {
-      RCLCPP_FATAL(
-        rclcpp::get_logger("DiffDriveArduinoHardware"),
-        "Joint '%s' have %s command interfaces found. '%s' expected.", joint.name.c_str(),
-        joint.command_interfaces[0].name.c_str(), hardware_interface::HW_IF_VELOCITY);
-      return hardware_interface::CallbackReturn::ERROR;
-    }
+  //   if (joint.command_interfaces[0].name != hardware_interface::HW_IF_VELOCITY)
+  //   {
+  //     RCLCPP_FATAL(
+  //       rclcpp::get_logger("DiffDriveArduinoHardware"),
+  //       "Joint '%s' have %s command interfaces found. '%s' expected.", joint.name.c_str(),
+  //       joint.command_interfaces[0].name.c_str(), hardware_interface::HW_IF_VELOCITY);
+  //     return hardware_interface::CallbackReturn::ERROR;
+  //   }
 
-    if (joint.state_interfaces.size() != 2)
-    {
-      RCLCPP_FATAL(
-        rclcpp::get_logger("DiffDriveArduinoHardware"),
-        "Joint '%s' has %zu state interface. 2 expected.", joint.name.c_str(),
-        joint.state_interfaces.size());
-      return hardware_interface::CallbackReturn::ERROR;
-    }
+  //   if (joint.state_interfaces.size() != 2)
+  //   {
+  //     RCLCPP_FATAL(
+  //       rclcpp::get_logger("DiffDriveArduinoHardware"),
+  //       "Joint '%s' has %zu state interface. 2 expected.", joint.name.c_str(),
+  //       joint.state_interfaces.size());
+  //     return hardware_interface::CallbackReturn::ERROR;
+  //   }
 
-    if (joint.state_interfaces[0].name != hardware_interface::HW_IF_POSITION)
-    {
-      RCLCPP_FATAL(
-        rclcpp::get_logger("DiffDriveArduinoHardware"),
-        "Joint '%s' have '%s' as first state interface. '%s' expected.", joint.name.c_str(),
-        joint.state_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
-      return hardware_interface::CallbackReturn::ERROR;
-    }
+  //   if (joint.state_interfaces[0].name != hardware_interface::HW_IF_POSITION)
+  //   {
+  //     RCLCPP_FATAL(
+  //       rclcpp::get_logger("DiffDriveArduinoHardware"),
+  //       "Joint '%s' have '%s' as first state interface. '%s' expected.", joint.name.c_str(),
+  //       joint.state_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
+  //     return hardware_interface::CallbackReturn::ERROR;
+  //   }
 
-    if (joint.state_interfaces[1].name != hardware_interface::HW_IF_VELOCITY)
-    {
-      RCLCPP_FATAL(
-        rclcpp::get_logger("DiffDriveArduinoHardware"),
-        "Joint '%s' have '%s' as second state interface. '%s' expected.", joint.name.c_str(),
-        joint.state_interfaces[1].name.c_str(), hardware_interface::HW_IF_VELOCITY);
-      return hardware_interface::CallbackReturn::ERROR;
-    }
-  }
+  //   if (joint.state_interfaces[1].name != hardware_interface::HW_IF_VELOCITY)
+  //   {
+  //     RCLCPP_FATAL(
+  //       rclcpp::get_logger("DiffDriveArduinoHardware"),
+  //       "Joint '%s' have '%s' as second state interface. '%s' expected.", joint.name.c_str(),
+  //       joint.state_interfaces[1].name.c_str(), hardware_interface::HW_IF_VELOCITY);
+  //     return hardware_interface::CallbackReturn::ERROR;
+  //   }
+  // }
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -137,7 +137,8 @@ std::vector<hardware_interface::StateInterface> DiffDriveArduinoHardware::export
     wheel_r_.name, hardware_interface::HW_IF_VELOCITY, &wheel_r_.vel));
   for (size_t i = 0; i < joint_name_.size(); i++)
   {
-    // RCLCPP_INFO_STREAM(rclcpp::get_logger("ArduinobotInterface"), "get joint: " << joint_name_[i]);
+
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("ArticubotInterface"), "get joint: " << joint_name_[i]);
     state_interfaces.emplace_back(hardware_interface::StateInterface(
         joint_name_[i], hardware_interface::HW_IF_POSITION, &position_states_[i]));
         

@@ -9,7 +9,7 @@ node_modules/
 /dist
 /build
 /install
-
+/log
 # Ignore log files
 *.log
 

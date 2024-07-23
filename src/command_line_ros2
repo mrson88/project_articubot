@@ -9,5 +9,10 @@
     sudo apt install ros-humble-nav2-bringup -y
     sudo apt install ros-humble-turtlebot3-msgs -y
     sudo apt install ros-humble-turtlebot3 -y
-    sudo apt-get install ros-humble-hardware-interface
-    sudo apt install ros-humble-moveit
+    sudo apt-get install ros-humble-hardware-interface -y
+    sudo apt install ros-humble-moveit -y
+    sudo apt install libserial-dev -y
+    sudo pip3 install pyttsx3
+    sudo apt install espeak -y
+    sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers -y
+    sudo apt install ros-humble-twist-mux -y

@@ -1,0 +1,96 @@
+cmake_minimum_required(VERSION 3.8)
+project(articubot_remote)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(articubot_msgs REQUIRED)
+find_package(moveit_ros_planning_interface REQUIRED)
+find_package(rclpy REQUIRED)
+
+add_library(test_server SHARED src/test_server.cpp)
+target_include_directories(test_server PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_definitions(test_server
+  PRIVATE "TEST_SERVER_CPP_BUILDING_DLL")
+ament_target_dependencies(test_server
+  "articubot_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components"
+  "moveit_ros_planning_interface")
+rclcpp_components_register_node(test_server 
+  PLUGIN "articubot_remote::Test_server" 
+  EXECUTABLE test_server_node
+)
+add_executable(pick_and_place_node src/pick_and_place_node.cpp)
+target_include_directories(pick_and_place_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_features(pick_and_place_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+ament_target_dependencies(
+  pick_and_place_node
+  "moveit_ros_planning_interface"
+  "rclcpp"
+)
+
+install(TARGETS pick_and_place_node
+  DESTINATION lib/${PROJECT_NAME})
+
+
+
+add_library(task_server_articubot SHARED src/task_server_articubot.cpp)
+target_include_directories(task_server_articubot PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_definitions(task_server_articubot
+  PRIVATE "ARTICUBOT_SERVER_CPP_BUILDING_DLL")
+ament_target_dependencies(task_server_articubot
+  "articubot_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components"
+  "moveit_ros_planning_interface")
+rclcpp_components_register_node(task_server_articubot 
+  PLUGIN "articubot_remote::Task_server_articubot" 
+  EXECUTABLE articubot_server_node
+)
+
+ament_python_install_package(${PROJECT_NAME})
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(TARGETS 
+  test_server
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS 
+  task_server_articubot
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  ${PROJECT_NAME}/test_server.py
+  ${PROJECT_NAME}/test.py
+  ${PROJECT_NAME}/alexa_interface.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+ament_package()

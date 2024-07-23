@@ -1,13 +1,13 @@
-
-    sudo apt-get install ros-humble-gazebo-*
-    sudo apt install ros-humble-cartographer
-    sudo apt install ros-humble-cartographer-ros
-    sudo apt install ros-humble-navigation2
-    sudo apt install ros-humble-nav2-*
-    sudo apt install ros-humble-tf2-*
-    sudo apt install ros-humble-tf-*
-    sudo apt install ros-humble-nav2-bringup
-    source ~/.bashrc
     sudo apt install ros-humble-dynamixel-sdk
-    sudo apt install ros-humble-turtlebot3-msgs
-    sudo apt install ros-humble-turtlebot3
+    sudo apt-get install ros-humble-gazebo-*
+    sudo apt install ros-humble-cartographer -y
+    sudo apt install ros-humble-cartographer-ros -y
+    sudo apt install ros-humble-navigation2 -y
+    sudo apt install ros-humble-nav2-* -y
+    sudo apt install ros-humble-tf2-* -y
+    sudo apt install ros-humble-tf-* -y
+    sudo apt install ros-humble-nav2-bringup -y
+    sudo apt install ros-humble-turtlebot3-msgs -y
+    sudo apt install ros-humble-turtlebot3 -y
+    sudo apt-get install ros-humble-hardware-interface
+    sudo apt install ros-humble-moveit

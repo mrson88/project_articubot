@@ -109,8 +109,19 @@ public:
     ss << "u " << k_p << ":" << k_d << ":" << k_i << ":" << k_o << "\r";
     send_msg(ss.str());
   }
-  void setServoPosition(int val_11, int val_22);
-  void getServoPosition(int pos_11);
+void ArduinoComms::setServoPosition(int val_11, int val_22)
+{
+    std::stringstream ss;
+    ss << "s " << val_11 << " " << val_22 << "\r";
+    send_msg(ss.str(), true);
+}
+
+void ArduinoComms::getServoPosition(int pos_11)
+{
+    std::stringstream ss;
+    ss << "t " << pos_11  << "\r";
+    send_msg(ss.str(), true);
+}
   
 private:
     LibSerial::SerialPort serial_conn_;

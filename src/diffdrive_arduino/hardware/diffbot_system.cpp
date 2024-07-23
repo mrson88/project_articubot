@@ -160,8 +160,8 @@ std::vector<hardware_interface::CommandInterface> DiffDriveArduinoHardware::expo
   {
     command_interfaces.emplace_back(hardware_interface::CommandInterface(
         joint_name_[i], hardware_interface::HW_IF_POSITION, &position_commands_[i]));
-    // RCLCPP_INFO_STREAM(rclcpp::get_logger("ArduinobotInterface"), "get joint: " << joint_name_[i]);
-    // RCLCPP_INFO_STREAM(rclcpp::get_logger("ArduinobotInterface"), "joint_size: " << joint_name_.size());
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("ArticubotInterface"), "get joint: " << joint_name_[i]);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("ArticubotInterface"), "joint_size: " << joint_name_.size());
   }
   return command_interfaces;
 }

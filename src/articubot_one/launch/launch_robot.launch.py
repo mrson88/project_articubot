@@ -65,26 +65,61 @@ def generate_launch_description():
         arguments=["diff_cont"],
     )
 
-    delayed_diff_drive_spawner = RegisterEventHandler(
-        event_handler=OnProcessStart(
-            target_action=controller_manager,
-            on_start=[diff_drive_spawner],
-        )
-    )
+    # delayed_diff_drive_spawner = RegisterEventHandler(
+    #     event_handler=OnProcessStart(
+    #         target_action=controller_manager,
+    #         on_start=[diff_drive_spawner],
+    #     )
+    # )
 
-    joint_broad_spawner = Node(
+    # joint_broad_spawner = Node(
+    #     package="controller_manager",
+    #     executable="spawner",
+    #     arguments=["joint_broad"],
+    # )
+
+    # delayed_joint_broad_spawner = RegisterEventHandler(
+    #     event_handler=OnProcessStart(
+    #         target_action=controller_manager,
+    #         on_start=[joint_broad_spawner],
+    #     )
+    # )
+
+    joint_arm_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_broad"],
+        arguments=["arm_controller"],
+    )
+    joint_gripper_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["gripper_controller"],
+    )
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster"
+        ],
     )
 
-    delayed_joint_broad_spawner = RegisterEventHandler(
-        event_handler=OnProcessStart(
-            target_action=controller_manager,
-            on_start=[joint_broad_spawner],
-        )
-    )
+    moveit=IncludeLaunchDescription(os.path.join(
+        get_package_share_directory("articubot_moveit"),
+        "launch",
+        "moveit.launch.py"
+    ))
 
+    robot_ros=IncludeLaunchDescription(os.path.join(
+        get_package_share_directory("robot_rosgpt"),
+        "launch",
+        "robot_ros.launch.py"
+    ))
+
+    robot_speech_reg=IncludeLaunchDescription(os.path.join(
+        get_package_share_directory("robot_speech_to_text"),
+        "launch",
+        "speech_to_text.launch.py"
+    ))
 
     # Code for delaying a node (I haven't tested how effective it is)
     # 
@@ -110,6 +145,14 @@ def generate_launch_description():
         # joystick,
         twist_mux,
         delayed_controller_manager,
-        delayed_diff_drive_spawner,
-        delayed_joint_broad_spawner
+        diff_drive_spawner,
+        # delayed_diff_drive_spawner,
+        # delayed_joint_broad_spawner,
+        joint_arm_spawner,
+        joint_gripper_spawner,
+        joint_state_broadcaster_spawner,
+        # rviz,
+        moveit,
+        robot_ros,
+        robot_speech_reg,
     ])

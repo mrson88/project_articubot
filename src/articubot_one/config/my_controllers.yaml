@@ -103,7 +103,7 @@ gripper_controller:
   ros__parameters:
     joints:
       - joint_4
-      - joint_5
+      # - joint_5
     # interface_name: position
       
     command_interfaces:

@@ -120,7 +120,12 @@ def generate_launch_description():
         "launch",
         "speech_to_text.launch.py"
     ))
+    camera_realsense_node=Node(
+            package='realsense2_camera',
+            executable='realsense2_camera_node',
+            output='screen',
 
+    )
     # Code for delaying a node (I haven't tested how effective it is)
     # 
     # First add the below lines to imports
@@ -155,4 +160,5 @@ def generate_launch_description():
         moveit,
         robot_ros,
         robot_speech_reg,
+        camera_realsense_node
     ])

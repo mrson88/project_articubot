@@ -37,7 +37,7 @@ def generate_launch_description():
     
     is_sim_arg = DeclareLaunchArgument(
         'is_sim',
-        default_value='True'
+        default_value='False'
     )
     declare_loaded_description = DeclareLaunchArgument(
         'loaded_description',
@@ -93,7 +93,7 @@ def generate_launch_description():
         parameters=[
                     # moveit_config.to_dict(), 
                     robot_description,
-                    {'use_sim_time': True},
+                    {'use_sim_time': False},
                     {'publish_robot_description_semantic': True},
                     kinematics_yaml,
                     ompl_planning_pipeline_config,
@@ -168,9 +168,9 @@ def generate_launch_description():
 
             move_group_node, 
             rviz_node,
-            remote_interface,
+            # remote_interface,
             static_tf,
-            # arm_pnp_as,
+            arm_pnp_as,
 
             
         ]

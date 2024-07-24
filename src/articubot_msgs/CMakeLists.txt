@@ -15,6 +15,15 @@ find_package(control_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 
+
+install(
+  DIRECTORY
+    action
+    msg
+    srv
+  DESTINATION
+    share/${PROJECT_NAME}/
+)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/AddTwoInts.srv"
   "srv/EulerToQuaternion.srv"

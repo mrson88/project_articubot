@@ -16,3 +16,5 @@
     sudo apt install espeak -y
     sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers -y
     sudo apt install ros-humble-twist-mux -y
+    sudo apt install ros-humble-realsense2-camera -y
+

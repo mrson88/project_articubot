@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
         # Initialize camera subscriber
         self.camera_subscriber = self.node.create_subscription(
             Image,
-            '/camera/color/image_raw',  # Adjust this topic to match your camera's topic
+            '/camera/camera/color/image_raw',  # Adjust this topic to match your camera's topic
             self.camera_callback,
             10)
 

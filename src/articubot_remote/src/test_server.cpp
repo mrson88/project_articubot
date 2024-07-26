@@ -142,13 +142,13 @@ switch (goal_handle->get_goal()->task){
       move_group_gripper_interface.move();
 
 
-      move_group_interface.setNamedTarget("vertical");
-      move_group_interface.move();
-      std::vector<double> arm_joint_goal;
-      arm_joint_goal = {0.0, -0.5, 1.0,1.2, 0.2};
+      // move_group_interface.setNamedTarget("vertical");
+      // move_group_interface.move();
+      // std::vector<double> arm_joint_goal;
+      // arm_joint_goal = {0.0, -0.5, -1.0,-1.2, 0.2};
 
-      move_group_interface.setJointValueTarget(arm_joint_goal);
-      move_group_interface.move();
+      // move_group_interface.setJointValueTarget(arm_joint_goal);
+      // move_group_interface.move();
       result->success = true;
       goal_handle->succeed(result);
       RCLCPP_INFO(get_logger(), "Goal succeeded");

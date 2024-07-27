@@ -20,7 +20,7 @@ def generate_launch_description():
     use_ros2_control = LaunchConfiguration('use_ros2_control')
     is_sim_arg = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='True'
+        default_value='false'
     )
     # Process the URDF file
     pkg_path = os.path.join(get_package_share_directory('articubot_one'))

@@ -126,6 +126,13 @@ def generate_launch_description():
             output='screen',
 
     )
+
+    ldlidar_node = IncludeLaunchDescription(
+      launch_description_source=PythonLaunchDescriptionSource([
+          get_package_share_directory('ldlidar_stl_ros2'),
+          '/launch/ld06.launch.py'
+      ])
+  )
     # Code for delaying a node (I haven't tested how effective it is)
     # 
     # First add the below lines to imports
@@ -160,5 +167,6 @@ def generate_launch_description():
         moveit,
         robot_ros,
         robot_speech_reg,
-        camera_realsense_node
+        camera_realsense_node,
+        ldlidar_node
     ])

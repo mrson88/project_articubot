@@ -236,13 +236,13 @@ void setup() {
 #endif
 
   /* Attach servos if used */
-#ifdef USE_SERVOS
-  int i;
-  for (i = 0; i < 6; i++) {
-    SweepServo().setTargetPosition(i, servoInitPosition[i]);
-  }
-#endif
-}
+// #ifdef USE_SERVOS
+//   int i;
+//   for (i = 0; i < 6; i++) {
+//     SweepServo().setTargetPosition(i, servoInitPosition[i]);
+//   }
+// #endif
+// }
 
 /* Enter the main loop.  Read and parse input from the serial port
    and run any valid commands. Run a PID calculation at the target

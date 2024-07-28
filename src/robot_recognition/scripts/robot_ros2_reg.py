@@ -16,7 +16,7 @@ from geometry_msgs.msg import Point
 from articubot_msgs.action import ArticubotTask
 from rclpy.action import ActionClient
 from rclpy.action.client import ClientGoalHandle, GoalStatus
-# from Facerec_QT.face_rec import FaceRecognition,read_db,write_db
+from Facerec_QT.face_rec import FaceRecognition,read_db,write_db
 import numpy as np
 from geometry_msgs.msg import PointStamped, PoseStamped
 from tf_transformations import quaternion_from_euler
@@ -85,7 +85,7 @@ class Camera_subscriber(Node):
         self.frame_height = 480
         self.frame_width = 640
         self.depth_image=[]
-        # self.face_recognition = FaceRecognition(0.7, self.frame_height, self.frame_width)
+        self.face_recognition = FaceRecognition(0.7, self.frame_height, self.frame_width)
         self.findball = False
 
     # def camera_info_callback(self, msg):
@@ -152,7 +152,7 @@ class Camera_subscriber(Node):
 
         img = bridge.imgmsg_to_cv2(data, "bgr8")
         
-        # results, ids = self.face_recognition.process_frame(img, self.recognition_on, self.registration_data)
+        results, ids = self.face_recognition.process_frame(img, self.recognition_on, self.registration_data)
         results = self.model(results, conf=0.5,verbose=False)
         self.yolov8_inference.header.frame_id = "inference"
         self.yolov8_inference.header.stamp = camera_subscriber.get_clock().now().to_msg()

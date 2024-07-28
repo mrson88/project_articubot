@@ -46,11 +46,11 @@ class Camera_subscriber(Node):
             'camera/camera/depth/image_rect_raw',
             self.depth_camera_callback,
             1)
-        # self.create_subscription(
-        #     CameraInfo,
-        #     '/camera/depth/camera_info',
-        #     self.camera_info_callback,
-        #     10)
+        self.create_subscription(
+            CameraInfo,
+            'camera/camera/depth/camera_info',
+            self.camera_info_callback,
+            10)
         self.publisher_point = self.create_publisher(PointStamped, 'point_3d', 10)
         self.subscription_depth
         self.yolov8_pub = self.create_publisher(Yolov8Inference, "/Yolov8_Inference", 1)
@@ -88,8 +88,8 @@ class Camera_subscriber(Node):
         # self.face_recognition = FaceRecognition(0.7, self.frame_height, self.frame_width)
         self.findball = False
 
-    # def camera_info_callback(self, msg):
-    #     self.camera_info = msg
+    def camera_info_callback(self, msg):
+        self.camera_info = msg
 
     def timer_callback(self):
         msg = Twist()

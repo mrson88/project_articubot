@@ -152,7 +152,7 @@ class Camera_subscriber(Node):
 
         img = bridge.imgmsg_to_cv2(data, "bgr8")
         
-        results, ids = self.face_recognition.process_frame(img, self.recognition_on, self.registration_data)
+        # results, ids = self.face_recognition.process_frame(img, self.recognition_on, self.registration_data)
         results = self.model(results, conf=0.5,verbose=False)
         self.yolov8_inference.header.frame_id = "inference"
         self.yolov8_inference.header.stamp = camera_subscriber.get_clock().now().to_msg()

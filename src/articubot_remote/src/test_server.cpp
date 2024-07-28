@@ -95,7 +95,7 @@ private:
   
   double GRIPPER_DEFAULT = to_radians(-20);
   double GRIPPER_OPEN = to_radians(-40);
-  double GRIPPER_CLOSE = to_radians(120);
+  double GRIPPER_CLOSE = to_radians(180);
 
   double goal_p_x = goal_handle->get_goal()->p_x;
   double goal_p_y = goal_handle->get_goal()->p_y;

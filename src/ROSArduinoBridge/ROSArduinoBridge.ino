@@ -312,11 +312,11 @@ void loop() {
       SweepServo().setTargetPosition(i, servoCurrentPosition[i]);
     }
   }
-  else {
-    int i;
-    for (i = 0; i < N_SERVOS; i++) {
-      SweepServo().setTargetPosition(i, servoCurrentPosition[i]);
-    }
-  }
+  // else {
+  //   int i;
+  //   for (i = 0; i < N_SERVOS; i++) {
+  //     SweepServo().setTargetPosition(i, servoCurrentPosition[i]);
+  //   }
+  // }
 #endif
 }

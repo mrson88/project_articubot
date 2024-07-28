@@ -32,7 +32,7 @@ class Camera_subscriber(Node):
 
         self.subscription = self.create_subscription(
             Image,
-            '/camera/camera/color/image_raw',
+            'color/image_raw',
             self.camera_callback,
             1)
         # self.subscription = self.create_subscription(
@@ -43,7 +43,7 @@ class Camera_subscriber(Node):
         self.subscription 
         self.subscription_depth = self.create_subscription(
             Image,
-            '/camera/camera/depth/image_rect_raw',
+            'depth/image_rect_raw',
             self.depth_camera_callback,
             1)
         # self.create_subscription(

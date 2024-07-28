@@ -314,7 +314,7 @@ class Camera_subscriber(Node):
         time1 = time.time()
         self.publisher_.publish(msg)
         annotated_frame=self.yolov8_reg(img)
-        annotated_frame=self.detect_hand_one(annotated_frame)
+        # annotated_frame=self.detect_hand_one(annotated_frame)
         # annotated_frame=self.detect_hand(annotated_frame)
         # annotated_frame,self.class_id,self.confidence,self.xcentre=start(img)
         

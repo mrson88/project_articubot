@@ -146,7 +146,7 @@ class Camera_subscriber(Node):
 
 
     def camera_callback(self, data):
-        if self.depth_image is None or self.camera_info is None:
+        if self.depth_image is None :
             return
         # msg = Twist()
 

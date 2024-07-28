@@ -167,6 +167,6 @@ def generate_launch_description():
         moveit,
         # robot_ros,
         # robot_speech_reg,
-        # camera_realsense_node,
-        # ldlidar_node
+        camera_realsense_node,
+        ldlidar_node
     ])

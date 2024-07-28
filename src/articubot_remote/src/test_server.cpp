@@ -137,10 +137,14 @@ switch (goal_handle->get_goal()->task){
       // move_group_interface.move();
       move_group_interface.setNamedTarget("home");
       move_group_interface.move();
-      gripper_joint_values = {GRIPPER_DEFAULT};
+      gripper_joint_values = {GRIPPER_OPEN};
       move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
       move_group_gripper_interface.move();
 
+
+      gripper_joint_values = {GRIPPER_DEFAULT};
+      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
+      move_group_gripper_interface.move();
 
       // move_group_interface.setNamedTarget("vertical");
       // move_group_interface.move();

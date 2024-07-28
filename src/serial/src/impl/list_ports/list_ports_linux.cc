@@ -155,7 +155,7 @@ get_sysfs_info(const string& device_path)
 
     string sys_device_path = format( "/sys/class/tty/%s/device", device_name.c_str() );
 
-    if( device_name.compare(0,6,"ttyUSB") == 1 )
+    if( device_name.compare(0,6,"ttyUSB") == 0 )
     {
         sys_device_path = dirname( dirname( realpath( sys_device_path ) ) );
 

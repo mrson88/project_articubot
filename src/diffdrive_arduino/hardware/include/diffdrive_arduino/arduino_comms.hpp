@@ -113,14 +113,14 @@ void setServoPosition(int val_11, int val_22)
 {
     std::stringstream ss;
     ss << "s " << val_11 << " " << val_22 << "\r";
-    send_msg(ss.str(), true);
+    send_msg(ss.str());
 }
 
 void getServoPosition(int pos_11)
 {
     std::stringstream ss;
     ss << "t " << pos_11  << "\r";
-    send_msg(ss.str(), true);
+    send_msg(ss.str());
 }
   
 private:

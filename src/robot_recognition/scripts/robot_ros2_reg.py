@@ -95,7 +95,7 @@ class Camera_subscriber(Node):
         msg = Twist()
         if self.findball:
             # if (time.time() - self.lastrcvtime < self.rcv_timeout_secs):
-            if self.inference_result.class_name=="sports ball" or self.inference_result.class_name=="frisbee" or self.inference_result.class_name=="persons":
+            if self.inference_result.class_name=="sports ball" or self.inference_result.class_name=="frisbee" or self.inference_result.class_name=="person":
                 self.get_logger().info('Target: {}={}'.format(self.inference_result.class_name,self.target_dist))
                 print(self.target_dist)
                 if (self.target_dist > self.max_size_thresh):

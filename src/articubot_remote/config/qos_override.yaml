@@ -1,0 +1,26 @@
+/topic_name:
+  publisher:
+    qos_overrides:
+      /parameter_events:
+        publisher:
+          history: keep_last
+          depth: 1000
+          lease_duration: 20
+          liveliness: automatic
+          liveliness_lease_duration: 30
+          max_message_size: 256  # This sets the payload size in bytes
+  subscription:
+    qos_overrides:
+      /parameter_events:
+        subscription:
+          history: keep_last
+          depth: 1000
+          reliability: reliable
+          durability: volatile
+          deadline:
+            sec: 2
+          lifespan:
+            sec: 2
+          liveliness: automatic
+          liveliness_lease_duration: 30
+          max_message_size: 256  # This sets the payload size in bytes

@@ -91,7 +91,7 @@ class ArmRobotControllerNode(Node):
         return self.position_and_orientation
         # self.bridge = CvBridge()
 
-    def send_goal_robot_arm(self, p_x,p_y,p_z,or_x,or_y,or_z,order):
+    def send_goal_robot_arm(self, p_x,p_y,p_z,or_x,or_y,or_z,or_w,order):
         self.detect=False
         goal_msg = ArticubotTask.Goal()
         goal_msg.task = order
@@ -101,6 +101,7 @@ class ArmRobotControllerNode(Node):
         goal_msg.or_x=or_x
         goal_msg.or_y=or_y
         goal_msg.or_z=or_z
+        goal_msg.or_w=or_w
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_robot_arm_callback)
         self.get_logger().info('Result: {0}'.format(self._send_goal_future.add_done_callback(self.goal_response_robot_arm_callback)))
@@ -321,7 +322,7 @@ class MainWindow(QMainWindow):
         print(self.point)
     def control_arm_to_position(self):
 
-        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],0)
+        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6],0)
     def update_label(self):
         for i, slider in enumerate(self.joint_sliders):
             value = slider.value() / 100.0  # Convert to -1.0 to 1.0 range
@@ -367,10 +368,10 @@ class MainWindow(QMainWindow):
         self.node.send_goal_robot_arm(0.5,1.2,1.2,1.2,0.0,0.0,1)
 
     def move_to_position1(self):
-        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],1)
+        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6],1)
 
     def move_to_position2(self):
-        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],2)
+        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6],2)
 
     def publish_joint_states(self, positions):
         msg = JointState()

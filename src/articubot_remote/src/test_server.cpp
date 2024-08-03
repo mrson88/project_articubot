@@ -204,17 +204,19 @@ switch (goal_handle->get_goal()->task){
       std::vector<double> gripper_joint_goal;
       geometry_msgs::msg::Pose msg;
       tf2::Quaternion q;
-      std::vector<double> joint_group_positions;
+      gripper_joint_goal = {GRIPPER_OPEN};
+      move_group_gripper_interface.setJointValueTarget(gripper_joint_goal);
+      move_group_gripper_interface.move();
       msg.position.x = goal_p_x;
       msg.position.y = goal_p_y;
       msg.position.z = goal_p_z;
-      msg.orientation.x = goal_or_x;
-      msg.orientation.y = goal_or_y;
-      msg.orientation.z = goal_or_z;
-      msg.orientation.w = goal_or_w;
-
+      q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
+      msg.orientation = tf2::toMsg(q);
       move_group_interface.setPoseTarget(msg);
+
+      RCLCPP_INFO(get_logger(), "Executing goal 2");  
       move_group_interface.move();
+
       result->success = true;
       goal_handle->succeed(result);
       RCLCPP_INFO(get_logger(), "Goal succeeded");

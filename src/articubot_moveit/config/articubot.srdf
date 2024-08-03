@@ -65,4 +65,15 @@
     <disable_collisions link1="claw_support" link2="camera_link" reason="Adjacent" />
     <disable_collisions link1="claw_support" link2="camera_link" reason="Never"/>
     <disable_collisions link1="arm_base_link" link2="camera_link" reason="Never"/>
+    <disable_collisions link1="forearm_link" link2="camera_link" reason="Never"/>
+    <disable_collisions link1="hand_2_link" link2="camera_link" reason="Never"/>
+    <disable_collisions link1="hand_3_link" link2="camera_link" reason="Never"/>
+    <disable_collisions link1="arm_base_link" link2="base_footprint" reason="Never"/>
+    <disable_collisions link1="arm_base_link" link2="base_footprint" reason="Adjacent"/>
+    <disable_collisions link1="arm_base_link" link2="chassis" reason="Adjacent"/>
+    <disable_collisions link1="arm_base_link" link2="chassis" reason="Never"/>
+    <disable_collisions link1="chassis" link2="claw_support" reason="Never"/>
+    <disable_collisions link1="chassis" link2="camera_link" reason="Never"/>
+
+
 </robot>

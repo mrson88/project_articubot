@@ -149,7 +149,7 @@ def generate_launch_description():
             output='screen',
             parameters=[
                     robot_description,
-                    {'use_sim_time': True},
+                    {'use_sim_time': False},
                     {'publish_robot_description_semantic': True},
                     kinematics_yaml,
                     ompl_planning_pipeline_config,

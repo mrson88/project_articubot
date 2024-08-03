@@ -164,32 +164,32 @@ switch (goal_handle->get_goal()->task){
       std::vector<double> gripper_joint_goal;
       geometry_msgs::msg::Pose msg;
       tf2::Quaternion q;
-      gripper_joint_goal = {GRIPPER_OPEN};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_goal);
-      move_group_gripper_interface.move();
-      msg.position.x = goal_p_x;
-      msg.position.y = goal_p_y;
-      msg.position.z = goal_p_z;
-      q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
-      msg.orientation = tf2::toMsg(q);
-      move_group_interface.setPoseTarget(msg);
+      // gripper_joint_goal = {GRIPPER_OPEN};
+      // move_group_gripper_interface.setJointValueTarget(gripper_joint_goal);
+      // move_group_gripper_interface.move();
+      // msg.position.x = goal_p_x;
+      // msg.position.y = goal_p_y;
+      // msg.position.z = goal_p_z;
+      // q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
+      // msg.orientation = tf2::toMsg(q);
+      // move_group_interface.setPoseTarget(msg);
 
-      RCLCPP_INFO(get_logger(), "Executing goal 1");  
-      move_group_interface.move();
+      // RCLCPP_INFO(get_logger(), "Executing goal 1");  
+      // move_group_interface.move();
 
 
-      gripper_joint_values = {GRIPPER_CLOSE};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
-      move_group_gripper_interface.move();
+      // gripper_joint_values = {GRIPPER_CLOSE};
+      // move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
+      // move_group_gripper_interface.move();
 
       // move_group_gripper_interface.move();
       // move_group_interface.setNamedTarget("vertical");
       // move_group_interface.move();
       move_group_interface.setNamedTarget("home");
       move_group_interface.move();
-      gripper_joint_values = {GRIPPER_DEFAULT};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
-      move_group_gripper_interface.move();
+      // gripper_joint_values = {GRIPPER_DEFAULT};
+      // move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
+      // move_group_gripper_interface.move();
 
 
 
@@ -201,19 +201,16 @@ switch (goal_handle->get_goal()->task){
     case 2:
     {
 
-      moveit::core::RobotStatePtr current_state = move_group_interface.getCurrentState(10);
+      std::vector<double> gripper_joint_goal;
+      geometry_msgs::msg::Pose msg;
+      tf2::Quaternion q;
       std::vector<double> joint_group_positions;
-      // current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
-      joint_group_positions[0] = -1.0;  // radians
-      // move_group_interface.setJointValueTarget(joint_group_positions);
-      // std::vector<double> arm_joint_goal;
-      // arm_joint_goal = {0.5, -1.2, -1.2,-1.2, 0.5};
-
-      // move_group_interface.setJointValueTarget(arm_joint_goal);
-      // move_group_interface.setNamedTarget("home");
-      // moveit::planning_interface::MoveGroupInterface::Plan arm_plan;
-      // bool arm_plan_success = (arm_move_group.plan(arm_plan) == moveit::core::MoveItErrorCode::SUCCESS);
-      move_group_interface.move();
+      msg.position.x = goal_p_x;
+      msg.position.y = goal_p_y;
+      msg.position.z = goal_p_z;
+      q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
+      msg.orientation = tf2::toMsg(q);
+      move_group_interface.setPoseTarget(msg);
       break;
     }
     default:

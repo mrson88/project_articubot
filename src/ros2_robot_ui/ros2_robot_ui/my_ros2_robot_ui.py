@@ -322,7 +322,7 @@ class MainWindow(QMainWindow):
         print(self.point)
     def control_arm_to_position(self):
 
-        self.node.send_goal_robot_arm(0,self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6])
+        self.node.send_goal_robot_arm(self.point[6],self.point[5],self.point[4],self.point[3],self.point[2],self.point[1],self.point[0],0)
     def update_label(self):
         for i, slider in enumerate(self.joint_sliders):
             value = slider.value() / 100.0  # Convert to -1.0 to 1.0 range

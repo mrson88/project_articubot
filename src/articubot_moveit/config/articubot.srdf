@@ -60,7 +60,7 @@
     <disable_collisions link1="claw_support" link2="gripper_right" reason="Adjacent" />
     <disable_collisions link1="claw_support" link2="gripper_left" reason="Adjacent" />
     <disable_collisions link1="gripper_right" link2="gripper_left" reason="Adjacent" />
-    <disable_collisions link1="arm_base_link" link2="camera_link" reason="Adjacent" />
+    <!-- <disable_collisions link1="arm_base_link" link2="camera_link" reason="Adjacent" />
     <disable_collisions link1="forearm_link" link2="camera_link" reason="Adjacent" />
-    <disable_collisions link1="claw_support" link2="camera_link" reason="Adjacent" />
+    <disable_collisions link1="claw_support" link2="camera_link" reason="Adjacent" /> -->
 </robot>

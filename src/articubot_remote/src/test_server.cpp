@@ -91,6 +91,12 @@ private:
   using moveit::planning_interface::MoveGroupInterface;
   auto move_group_interface = MoveGroupInterface(node, "arm_robot");
    auto move_group_gripper_interface = MoveGroupInterface(node, "gripper");
+
+  move_group_interface.setPlannerId("RRTConnect");
+  move_group_interface.setPlanningTime(10.0);
+  move_group_interface.setNumPlanningAttempts(10);
+  move_group_interface.setMaxVelocityScalingFactor(0.1);
+  move_group_interface.setMaxAccelerationScalingFactor(0.1);
   std::vector<double> gripper_joint_values;
   
   double GRIPPER_DEFAULT = to_radians(-20);

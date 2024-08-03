@@ -367,10 +367,10 @@ class MainWindow(QMainWindow):
         self.node.send_goal_robot_arm(0.5,1.2,1.2,1.2,0.0,0.0,1)
 
     def move_to_position1(self):
-        self.publish_joint_states([0.5, -0.3, 0.2, 0.1, 0.0, 0.0])
+        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],1)
 
     def move_to_position2(self):
-        self.publish_joint_states([-0.2, 0.4, -0.1, 0.3, 0.1, 0.0])
+        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],2)
 
     def publish_joint_states(self, positions):
         msg = JointState()

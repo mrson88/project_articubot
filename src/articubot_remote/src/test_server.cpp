@@ -208,8 +208,11 @@ switch (goal_handle->get_goal()->task){
       msg.position.x = goal_p_x;
       msg.position.y = goal_p_y;
       msg.position.z = goal_p_z;
-      q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
-      msg.orientation = tf2::toMsg(q);
+      msg.orientation.x = goal_or_x;
+      msg.orientation.y = goal_or_y;
+      msg.orientation.z = goal_or_z;
+      msg.orientation.w = goal_or_w;
+
       move_group_interface.setPoseTarget(msg);
       break;
     }

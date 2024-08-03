@@ -214,6 +214,10 @@ switch (goal_handle->get_goal()->task){
       msg.orientation.w = goal_or_w;
 
       move_group_interface.setPoseTarget(msg);
+      move_group_interface.move();
+      result->success = true;
+      goal_handle->succeed(result);
+      RCLCPP_INFO(get_logger(), "Goal succeeded");
       break;
     }
     default:

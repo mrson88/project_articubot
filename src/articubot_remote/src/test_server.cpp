@@ -210,9 +210,7 @@ switch (goal_handle->get_goal()->task){
       std::vector<double> gripper_joint_goal;
       geometry_msgs::msg::Pose msg;
       tf2::Quaternion q;
-      gripper_joint_goal = {GRIPPER_OPEN};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_goal);
-      move_group_gripper_interface.move();
+
       msg.position.x = goal_p_x;
       msg.position.y = goal_p_y;
       msg.position.z = goal_p_z;

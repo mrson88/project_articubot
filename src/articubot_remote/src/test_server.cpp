@@ -435,8 +435,23 @@
 // }  // namespace arduinobot_remote
 
 // RCLCPP_COMPONENTS_REGISTER_NODE(articubot_remote::Test_server)
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2/LinearMath/Matrix3x3.h>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
@@ -444,15 +459,11 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include "geometry_msgs/msg/quaternion.hpp"
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <memory>
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include <string>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_model/robot_model.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit_msgs/msg/display_trajectory.hpp>
-#include <moveit_msgs/msg/planning_scene.hpp>
-#include <memory>
-#include <string>
-#include <thread>
 
 double to_radians(const double deg_angle)
 {
@@ -465,7 +476,6 @@ using namespace std::placeholders;
 
 namespace articubot_remote
 {
-
 class Test_server : public rclcpp::Node
 {
 public:
@@ -497,8 +507,12 @@ private:
   rclcpp_action::CancelResponse cancelCallback(
       const std::shared_ptr<rclcpp_action::ServerGoalHandle<articubot_msgs::action::ArticubotTask>> goal_handle)
   {
-    RCLCPP_INFO(get_logger(), "Received request to cancel goal");
     (void)goal_handle;
+    RCLCPP_INFO(get_logger(), "Received request to cancel goal");
+    auto arm_move_group = std::make_shared<moveit::planning_interface::MoveGroupInterface>(shared_from_this(), "arm_robot");
+    auto gripper_move_group = std::make_shared<moveit::planning_interface::MoveGroupInterface>(shared_from_this(), "gripper");
+    arm_move_group->stop();
+    gripper_move_group->stop();
     return rclcpp_action::CancelResponse::ACCEPT;
   }
 
@@ -513,7 +527,7 @@ private:
   void acceptedCallback(
       const std::shared_ptr<rclcpp_action::ServerGoalHandle<articubot_msgs::action::ArticubotTask>> goal_handle)
   {
-    std::thread{std::bind(&Test_server::execute, this, _1), goal_handle}.detach();
+    std::thread{ std::bind(&Test_server::execute, this, _1), goal_handle }.detach();
   }
 
   void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<articubot_msgs::action::ArticubotTask>> goal_handle)
@@ -531,6 +545,8 @@ private:
     auto move_group_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, PLANNING_GROUP);
     auto move_group_gripper_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, "gripper");
 
+    // Cấu hình OMPL
+    move_group_interface->setPlannerId("RRTConnect");
     move_group_interface->setPlanningTime(20.0);
     move_group_interface->setNumPlanningAttempts(20);
     move_group_interface->setMaxVelocityScalingFactor(0.1);
@@ -549,105 +565,75 @@ private:
     double goal_or_y = goal_handle->get_goal()->or_y;
     double goal_or_z = goal_handle->get_goal()->or_z;
     double goal_or_w = goal_handle->get_goal()->or_w;
+    (void)goal_or_w;  // Để tránh cảnh báo về biến không sử dụng
 
     geometry_msgs::msg::Pose target_pose;
     target_pose.position.x = goal_p_x;
     target_pose.position.y = goal_p_y;
     target_pose.position.z = goal_p_z;
-    target_pose.orientation.x = goal_or_x;
-    target_pose.orientation.y = goal_or_y;
-    target_pose.orientation.z = goal_or_z;
-    target_pose.orientation.w = goal_or_w;
+    tf2::Quaternion q;
+    q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
+    target_pose.orientation = tf2::toMsg(q);
 
     // Kiểm tra tính hợp lệ của mục tiêu
-    auto start_state = move_group_interface->getCurrentState();
-    RCLCPP_INFO(get_logger(), "Start state is valid: %s", start_state->satisfiesBounds() ? "true" : "false");
-
-    auto goal_state = std::make_shared<moveit::core::RobotState>(*start_state);
-    const moveit::core::JointModelGroup* joint_model_group = 
-      goal_state->getJointModelGroup(move_group_interface->getName());
-    
-    bool found_ik = goal_state->setFromIK(joint_model_group, target_pose, 10, 0.1);
+    auto current_state = move_group_interface->getCurrentState();
+    const robot_state::JointModelGroup* joint_model_group = current_state->getJointModelGroup(PLANNING_GROUP);
+    bool found_ik = current_state->setFromIK(joint_model_group, target_pose, 10, 0.1);
 
     if (!found_ik) {
-      RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
-      result->success = false;
-      goal_handle->abort(result);
-      return;
-    }
-
-    RCLCPP_INFO(get_logger(), "Goal state is valid: %s", goal_state->satisfiesBounds() ? "true" : "false");
-
-    // Kiểm tra va chạm
-    planning_scene::PlanningScenePtr planning_scene = planning_scene::PlanningScene::clone(move_group_interface->getPlanningScene());
-    collision_detection::CollisionResult collision_result;
-    planning_scene->checkCollision(collision_detection::CollisionRequest(), collision_result, *goal_state);
-    if (collision_result.collision) {
-      RCLCPP_WARN(get_logger(), "Mục tiêu gây ra va chạm");
-    }
-
-    move_group_interface->setPoseTarget(target_pose);
-
-    // Lập kế hoạch và thực thi
-    moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-    bool success = false;
-    std::vector<std::string> planners = {"RRTstar", "RRTConnect", "PRMstar", "LBKPIECE"};
-    
-    for (const auto& planner : planners) {
-      move_group_interface->setPlannerId(planner);
-      RCLCPP_INFO(get_logger(), "Attempting to plan with %s", planner.c_str());
-      success = (move_group_interface->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
-      if (success) {
-        RCLCPP_INFO(get_logger(), "Planning succeeded with %s", planner.c_str());
-        break;
-      }
-    }
-
-    if (success) {
-      RCLCPP_INFO(get_logger(), "Lập kế hoạch thành công, thực thi...");
-      move_group_interface->execute(my_plan);
-    } else {
-      RCLCPP_ERROR(get_logger(), "Lập kế hoạch thất bại với tất cả các planner");
-      
-      // Thử Cartesian path
-      RCLCPP_INFO(get_logger(), "Attempting Cartesian path planning...");
-      std::vector<geometry_msgs::msg::Pose> waypoints;
-      waypoints.push_back(move_group_interface->getCurrentPose().pose);
-      waypoints.push_back(target_pose);
-
-      moveit_msgs::msg::RobotTrajectory trajectory;
-      double fraction = move_group_interface->computeCartesianPath(waypoints, 0.01, 0.0, trajectory);
-
-      if (fraction > 0.0) {
-        RCLCPP_INFO(get_logger(), "Cartesian path (%.2f%% achieved)", fraction * 100.0);
-        my_plan.trajectory_ = trajectory;
-        success = true;
-        move_group_interface->execute(my_plan);
-      } else {
-        RCLCPP_ERROR(get_logger(), "Cartesian path planning failed");
-        
-        // Ghi log chi tiết về trạng thái hiện tại và mục tiêu
-        auto current_pose = move_group_interface->getCurrentPose().pose;
-        RCLCPP_INFO(get_logger(), "Vị trí hiện tại: x=%.3f, y=%.3f, z=%.3f", 
-                    current_pose.position.x, current_pose.position.y, current_pose.position.z);
-        RCLCPP_INFO(get_logger(), "Mục tiêu: x=%.3f, y=%.3f, z=%.3f", 
-                    target_pose.position.x, target_pose.position.y, target_pose.position.z);
-
-        // In ra giới hạn khớp
-        for (const auto& joint_name : joint_model_group->getVariableNames()) {
-          const moveit::core::VariableBounds& bounds = goal_state->getJointModel(joint_name)->getVariableBounds()[0];
-          if (bounds.position_bounded_) {
-            RCLCPP_INFO(get_logger(), "Joint %s bounds: [%.3f, %.3f]", 
-                        joint_name.c_str(), bounds.min_position_, bounds.max_position_);
-          }
-        }
-
+        RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
         result->success = false;
         goal_handle->abort(result);
         return;
-      }
     }
 
+    // In thông tin về trạng thái hiện tại và mục tiêu
+    auto current_pose = move_group_interface->getCurrentPose().pose;
+    RCLCPP_INFO(get_logger(), "Current pose: x=%.3f, y=%.3f, z=%.3f",
+                current_pose.position.x, current_pose.position.y, current_pose.position.z);
+    RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f",
+                target_pose.position.x, target_pose.position.y, target_pose.position.z);
+
+    // Kiểm tra xung đột
+    moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+    planning_scene::PlanningScenePtr planning_scene = std::make_shared<planning_scene::PlanningScene>(move_group_interface->getRobotModel());
+    collision_detection::CollisionRequest collision_request;
+    collision_detection::CollisionResult collision_result;
+    planning_scene->checkCollision(collision_request, collision_result, *current_state);
+    if (collision_result.collision) {
+        RCLCPP_WARN(get_logger(), "Current state is in collision");
+    }
+
+    // Thử lập kế hoạch với nhiều thuật toán
+    std::vector<std::string> planners = {"RRTConnect", "RRTstar", "PRMstar", "LBKPIECE", "BKPIECE"};
+    bool success = false;
+    moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+
+    for (const auto& planner : planners) {
+        move_group_interface->setPlannerId(planner);
+        RCLCPP_INFO(get_logger(), "Attempting to plan with %s", planner.c_str());
+        
+        auto error_code = move_group_interface->plan(my_plan);
+        success = (error_code == moveit::core::MoveItErrorCode::SUCCESS);
+        
+        if (success) {
+            RCLCPP_INFO(get_logger(), "Planning succeeded with %s", planner.c_str());
+            break;
+        } else {
+            RCLCPP_WARN(get_logger(), "Planning failed with %s", planner.c_str());
+        }
+    }
+
+    if (success) {
+        move_group_interface->execute(my_plan);
+        result->success = true;
+        goal_handle->succeed(result);
+        RCLCPP_INFO(get_logger(), "Goal succeeded");
+    } else {
+        RCLCPP_ERROR(get_logger(), "Planning failed with all attempted planners");
+        result->success = false;
+        goal_handle->abort(result);
+    }
     // Xử lý các task cụ thể (giữ nguyên phần này từ mã gốc của bạn)
     switch (goal_handle->get_goal()->task) {
       case 0:
@@ -692,35 +678,22 @@ private:
         goal_handle->abort(result);
         return;
     }
-
+    // Log thông tin về khung lập kế hoạch và link end-effector
     RCLCPP_INFO(get_logger(), "Planning frame: %s", move_group_interface->getPlanningFrame().c_str());
     RCLCPP_INFO(get_logger(), "End effector link: %s", move_group_interface->getEndEffectorLink().c_str());
     RCLCPP_INFO(get_logger(), "Available planning groups:");
     std::vector<std::string> group_names = move_group_interface->getJointModelGroupNames();
     for (const auto& group_name : group_names) {
-      RCLCPP_INFO(get_logger(), "  %s", group_name.c_str());
+        RCLCPP_INFO(get_logger(), "  %s", group_name.c_str());
     }
 
-    for (size_t i = 0; i < current_joint.size(); i++) {
-      RCLCPP_INFO(get_logger(), "Joint %ld: %f", i, current_joint[i]);
+    // Log thông tin về các khớp hiện tại
+    for (size_t i = 0; i < current_joint.size(); i++)
+    {
+        RCLCPP_INFO(this->get_logger(), "Joint %ld: %f", i, current_joint[i]);
     }
-
-    geometry_msgs::msg::PoseStamped current_pose = move_group_interface->getCurrentPose();
-    RCLCPP_INFO(get_logger(), "Current position: x=%.3f, y=%.3f, z=%.3f", 
-                current_pose.pose.position.x, 
-                current_pose.pose.position.y, 
-                current_pose.pose.position.z);
-    RCLCPP_INFO(get_logger(), "Current orientation: x=%.3f, y=%.3f, z=%.3f, w=%.3f", 
-                current_pose.pose.orientation.x, 
-                current_pose.pose.orientation.y, 
-                current_pose.pose.orientation.z,
-                current_pose.pose.orientation.w);
-
-    result->success = true;
-    goal_handle->succeed(result);
   }
 };
-
 }  // namespace articubot_remote
 
 RCLCPP_COMPONENTS_REGISTER_NODE(articubot_remote::Test_server)

@@ -622,8 +622,8 @@ for (size_t i = 0; i < current_joint_values.size(); ++i) {
     RCLCPP_INFO(get_logger(), "Joint %zu: %.3f", i, current_joint_values[i]);
 }
 move_group_interface->setNamedTarget("home");  // Giả sử bạn có một vị trí "home" được định nghĩa
-bool success = (move_group_interface->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
-if (success) {
+bool success_move_to_home = (move_group_interface->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
+if (success_move_to_home) {
     move_group_interface->execute(my_plan);
     RCLCPP_INFO(get_logger(), "Moved to home position");
 } else {

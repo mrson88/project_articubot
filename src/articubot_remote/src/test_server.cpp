@@ -437,7 +437,8 @@
 // RCLCPP_COMPONENTS_REGISTER_NODE(articubot_remote::Test_server)
 
 
-
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
@@ -674,7 +675,35 @@ private:
     for (size_t i = 0; i < current_joint.size(); i++) {
       RCLCPP_INFO(get_logger(), "Joint %ld: %f", i, current_joint[i]);
     }
+geometry_msgs::msg::PoseStamped current_pose = move_group_interface->getCurrentPose();
+double x = current_pose.pose.position.x;
+double y = current_pose.pose.position.y;
+double z = current_pose.pose.position.z;
 
+double qx = current_pose.pose.orientation.x;
+double qy = current_pose.pose.orientation.y;
+double qz = current_pose.pose.orientation.z;
+double qw = current_pose.pose.orientation.w;
+RCLCPP_INFO(get_logger(), "Current position: x=%.3f, y=%.3f, z=%.3f", 
+            current_pose.pose.position.x, 
+            current_pose.pose.position.y, 
+            current_pose.pose.position.z);
+RCLCPP_INFO(get_logger(), "Current orientation: x=%.3f, y=%.3f, z=%.3f, w=%.3f", 
+            current_pose.pose.orientation.x, 
+            current_pose.pose.orientation.y, 
+            current_pose.pose.orientation.z,
+            current_pose.pose.orientation.w);
+
+tf2::Quaternion q(
+    current_pose.pose.orientation.x,
+    current_pose.pose.orientation.y,
+    current_pose.pose.orientation.z,
+    current_pose.pose.orientation.w);
+tf2::Matrix3x3 m(q);
+double roll, pitch, yaw;
+m.getRPY(roll, pitch, yaw);
+
+RCLCPP_INFO(get_logger(), "Current RPY: roll=%.3f, pitch=%.3f, yaw=%.3f", roll, pitch, yaw);
     result->success = true;
     goal_handle->succeed(result);
   }

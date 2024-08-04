@@ -694,16 +694,16 @@ RCLCPP_INFO(get_logger(), "Current orientation: x=%.3f, y=%.3f, z=%.3f, w=%.3f",
             current_pose.pose.orientation.z,
             current_pose.pose.orientation.w);
 
-tf2::Quaternion q(
-    current_pose.pose.orientation.x,
-    current_pose.pose.orientation.y,
-    current_pose.pose.orientation.z,
-    current_pose.pose.orientation.w);
-tf2::Matrix3x3 m(q);
-double roll, pitch, yaw;
-m.getRPY(roll, pitch, yaw);
+// tf2::Quaternion q(
+//     current_pose.pose.orientation.x,
+//     current_pose.pose.orientation.y,
+//     current_pose.pose.orientation.z,
+//     current_pose.pose.orientation.w);
+// tf2::Matrix3x3 m(q);
+// double roll, pitch, yaw;
+// m.getRPY(roll, pitch, yaw);
 
-RCLCPP_INFO(get_logger(), "Current RPY: roll=%.3f, pitch=%.3f, yaw=%.3f", roll, pitch, yaw);
+// RCLCPP_INFO(get_logger(), "Current RPY: roll=%.3f, pitch=%.3f, yaw=%.3f", roll, pitch, yaw);
     result->success = true;
     goal_handle->succeed(result);
   }

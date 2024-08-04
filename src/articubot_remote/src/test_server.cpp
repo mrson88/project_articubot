@@ -567,7 +567,7 @@ private:
     const moveit::core::JointModelGroup* joint_model_group = 
       goal_state->getJointModelGroup(move_group_interface->getName());
     
-    bool found_ik = goal_state->setFromIK(joint_model_group, target_pose, 10, 0.1);
+    bool found_ik = goal_state->setFromIK(joint_model_group, target_pose);
 
     if (!found_ik) {
       RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");

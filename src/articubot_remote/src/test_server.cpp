@@ -600,14 +600,34 @@ private:
 
     RCLCPP_INFO(get_logger(), "Goal state is valid: %s", goal_state->satisfiesBounds() ? "true" : "false");
 
-    // Kiểm tra va chạm
-    // planning_scene::PlanningScenePtr planning_scene = planning_scene::PlanningScene::clone(move_group_interface->getPlanningScene());
-    // collision_detection::CollisionResult collision_result;
-    // planning_scene->checkCollision(collision_detection::CollisionRequest(), collision_result, *goal_state);
-    // if (collision_result.collision) {
-    //   RCLCPP_WARN(get_logger(), "Mục tiêu gây ra va chạm");
-    // }
+bool success = move_group_interface->setApproximateJointValueTarget(target_pose);
+if (success) {
+    RCLCPP_INFO(get_logger(), "Successfully set approximate joint value target");
+} else {
+    RCLCPP_ERROR(get_logger(), "Failed to set approximate joint value target");
+}
+collision_detection::CollisionRequest collision_request;
+collision_detection::CollisionResult collision_result;
+planning_scene::PlanningScenePtr planning_scene = std::make_shared<planning_scene::PlanningScene>(move_group_interface->getRobotModel());
+planning_scene->checkCollision(collision_request, collision_result, *current_state);
+if (collision_result.collision) {
+    RCLCPP_WARN(get_logger(), "Current state is in collision");
+}
 
+
+std::vector<double> seed_state;
+current_state->copyJointGroupPositions(joint_model_group, seed_state);
+for (int i = 0; i < 10; ++i) {
+    // Thay đổi seed state một chút
+    for (auto& value : seed_state) {
+        value += ((double)rand() / RAND_MAX - 0.5) * 0.1;
+    }
+    bool found_ik = current_state->setFromIK(joint_model_group, target_pose, 10, 0.1, [](const auto& seed_state, const auto& joints, const auto& pose){return true;}, kinematics::KinematicsQueryOptions(), seed_state);
+    if (found_ik) {
+        RCLCPP_INFO(get_logger(), "Found IK solution with seed %d", i);
+        break;
+    }
+}
     move_group_interface->setPoseTarget(target_pose);
 
     // Lập kế hoạch và thực thi

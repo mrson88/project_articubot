@@ -83,7 +83,8 @@ class ArmRobotControllerNode(Node):
             #     f'Orientation (RPY degrees): roll={math.degrees(roll):.2f}, '
             #     f'pitch={math.degrees(pitch):.2f}, yaw={math.degrees(yaw):.2f}'
             # )
-            self.position_and_orientation  = [position.x,position.y,position.z,math.degrees(roll),math.degrees(pitch),math.degrees(yaw),orientation.w]
+            # self.position_and_orientation  = [position.x,position.y,position.z,math.degrees(roll),math.degrees(pitch),math.degrees(yaw),orientation.w]
+            self.position_and_orientation  = [position.x,position.y,position.z,orientation.x,orientation.y,orientation.z,orientation.w]
 
         except TransformException as ex:
             print(

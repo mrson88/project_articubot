@@ -586,7 +586,7 @@ private:
 
     geometry_msgs::msg::Pose near_target = current_pose;
     near_target.position.x += 0.1;  // Di chuyển 10cm theo trục x   
-    bool found_ik = goal_state->setFromIK(joint_model_group, target_pose);     
+    bool found_ik = goal_state->setFromIK(joint_model_group, near_target);     
     if (!found_ik) {
       RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
       result->success = false;

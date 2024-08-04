@@ -578,12 +578,12 @@ private:
     RCLCPP_INFO(get_logger(), "Goal state is valid: %s", goal_state->satisfiesBounds() ? "true" : "false");
 
     // Kiểm tra va chạm
-    planning_scene::PlanningScenePtr planning_scene = planning_scene::PlanningScene::clone(move_group_interface->getPlanningFrame());
-    collision_detection::CollisionResult collision_result;
-    planning_scene->checkCollision(collision_detection::CollisionRequest(), collision_result, *goal_state);
-    if (collision_result.collision) {
-      RCLCPP_WARN(get_logger(), "Mục tiêu gây ra va chạm");
-    }
+    // planning_scene::PlanningScenePtr planning_scene = planning_scene::PlanningScene::clone(move_group_interface->getPlanningFrame());
+    // collision_detection::CollisionResult collision_result;
+    // planning_scene->checkCollision(collision_detection::CollisionRequest(), collision_result, *goal_state);
+    // if (collision_result.collision) {
+    //   RCLCPP_WARN(get_logger(), "Mục tiêu gây ra va chạm");
+    // }
 
     move_group_interface->setPoseTarget(target_pose);
 
@@ -605,13 +605,13 @@ private:
                   target_pose.position.x, target_pose.position.y, target_pose.position.z);
 
       // In ra giới hạn khớp
-      for (const auto& joint_name : joint_model_group->getVariableNames()) {
-        const auto& bounds = joint_model_group->getVariableCount(joint_name);
-        if (bounds.position_bounded_) {
-          RCLCPP_INFO(get_logger(), "Joint %s bounds: [%.3f, %.3f]", 
-                      joint_name.c_str(), bounds.min_position_, bounds.max_position_);
-        }
-      }
+      // for (const auto& joint_name : joint_model_group->getVariableNames()) {
+      //   const auto& bounds = joint_model_group->getVariableCount(joint_name);
+      //   if (bounds.position_bounded_) {
+      //     RCLCPP_INFO(get_logger(), "Joint %s bounds: [%.3f, %.3f]", 
+      //                 joint_name.c_str(), bounds.min_position_, bounds.max_position_);
+      //   }
+      // }
 
       result->success = false;
       goal_handle->abort(result);

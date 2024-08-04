@@ -556,10 +556,13 @@ private:
     target_pose.position.x = goal_p_x;
     target_pose.position.y = goal_p_y;
     target_pose.position.z = goal_p_z;
-    target_pose.position.w = goal_or_w;
-    tf2::Quaternion q;
-    q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
-    target_pose.orientation = tf2::toMsg(q);
+    target_pose.orientation.x = goal_or_x;
+    target_pose.orientation.y = goal_or_y;
+    target_pose.orientation.z = goal_or_z;
+    target_pose.orientation.w = goal_or_w;
+    // tf2::Quaternion q;
+    // q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
+    // target_pose.orientation = tf2::toMsg(q);
 
     // Kiểm tra tính hợp lệ của mục tiêu
     auto start_state = move_group_interface->getCurrentState();

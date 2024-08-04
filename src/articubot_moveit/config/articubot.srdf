@@ -4,11 +4,11 @@
 
 
     <group name="arm_robot">
-        <joint name="arm_base_forearm_joint"/>
+        <!-- <joint name="arm_base_forearm_joint"/>
         <joint name="forearm_hand_1_joint"/>
         <joint name="forearm_hand_2_joint"/>
         <joint name="forearm_hand_3_joint"/>
-        <joint name="forearm_claw_joint"/>
+        <joint name="forearm_claw_joint"/> -->
         <!-- <joint name="camera_joint"/> -->
         
         <!-- <chain base_link="arm_base_link" tip_link="claw_support" /> -->
@@ -16,6 +16,8 @@
 
     </group>
     <group name="gripper">
+        <link name="gripper_right" />
+        <link name="gripper_left" />
         <joint name="joint_4"/>
 
     </group>
@@ -45,8 +47,8 @@
         <joint name="joint_4" value="0"/>
         <!-- <joint name="joint_5" value="0"/> -->
     </group_state>
-
-    <end_effector name="end_effector" parent_link="claw_support" group="arm_robot" />
+    <end_effector name="gripper" parent_link="claw_support" group="gripper" parent_group="arm_robot" />
+    <!-- <end_effector name="end_effector" parent_link="claw_support" group="arm_robot" /> -->
     <!-- <virtual_joint name="table" type="fixed" parent_frame="chassis" child_link="arm_base_link" /> -->
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->
@@ -68,8 +70,6 @@
     <disable_collisions link1="forearm_link" link2="camera_link" reason="Never"/>
     <disable_collisions link1="hand_2_link" link2="camera_link" reason="Never"/>
     <disable_collisions link1="hand_3_link" link2="camera_link" reason="Never"/>
-    <disable_collisions link1="arm_base_link" link2="base_footprint" reason="Never"/>
-    <disable_collisions link1="arm_base_link" link2="base_footprint" reason="Adjacent"/>
     <disable_collisions link1="arm_base_link" link2="chassis" reason="Adjacent"/>
     <disable_collisions link1="arm_base_link" link2="chassis" reason="Never"/>
     <disable_collisions link1="chassis" link2="claw_support" reason="Never"/>

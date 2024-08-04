@@ -34,7 +34,7 @@
     <group_state name="home" group="arm_robot">
         <!-- <joint name="mobile_base_arm_joint" value="0"/> -->
         <joint name="arm_base_forearm_joint" value="0"/>
-        <joint name="forearm_hand_1_joint" value="1.2"/>
+        <joint name="forearm_hand_1_joint" value="-1.2"/>
         <joint name="forearm_hand_2_joint" value="-1.2"/>
         <joint name="forearm_hand_3_joint" value="-1.2"/>
         <joint name="forearm_claw_joint" value="0"/>

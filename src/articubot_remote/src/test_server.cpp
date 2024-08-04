@@ -723,16 +723,16 @@ private:
       RCLCPP_INFO(get_logger(), "Joint %ld: %f", i, current_joint[i]);
     }
 
-    geometry_msgs::msg::PoseStamped current_pose = move_group_interface->getCurrentPose();
-    RCLCPP_INFO(get_logger(), "Current position: x=%.3f, y=%.3f, z=%.3f", 
-                current_pose.pose.position.x, 
-                current_pose.pose.position.y, 
-                current_pose.pose.position.z);
-    RCLCPP_INFO(get_logger(), "Current orientation: x=%.3f, y=%.3f, z=%.3f, w=%.3f", 
-                current_pose.pose.orientation.x, 
-                current_pose.pose.orientation.y, 
-                current_pose.pose.orientation.z,
-                current_pose.pose.orientation.w);
+    // geometry_msgs::msg::PoseStamped current_pose = move_group_interface->getCurrentPose();
+    // RCLCPP_INFO(get_logger(), "Current position: x=%.3f, y=%.3f, z=%.3f", 
+    //             current_pose.pose.position.x, 
+    //             current_pose.pose.position.y, 
+    //             current_pose.pose.position.z);
+    // RCLCPP_INFO(get_logger(), "Current orientation: x=%.3f, y=%.3f, z=%.3f, w=%.3f", 
+    //             current_pose.pose.orientation.x, 
+    //             current_pose.pose.orientation.y, 
+    //             current_pose.pose.orientation.z,
+    //             current_pose.pose.orientation.w);
 
     result->success = true;
     goal_handle->succeed(result);

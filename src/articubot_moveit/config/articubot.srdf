@@ -11,7 +11,7 @@
         <joint name="forearm_claw_joint"/> -->
         <!-- <joint name="camera_joint"/> -->
         
-        <!-- <chain base_link="arm_base_link" tip_link="claw_support" /> -->
+        <chain base_link="arm_base_link" tip_link="claw_support" />
         
 
     </group>

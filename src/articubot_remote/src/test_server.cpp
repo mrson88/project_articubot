@@ -615,19 +615,7 @@ if (collision_result.collision) {
 }
 
 
-std::vector<double> seed_state;
-goal_state->copyJointGroupPositions(joint_model_group, seed_state);
-for (int i = 0; i < 10; ++i) {
-    // Thay đổi seed state một chút
-    for (auto& value : seed_state) {
-        value += ((double)rand() / RAND_MAX - 0.5) * 0.1;
-    }
-    bool found_ik = goal_state->setFromIK(joint_model_group, target_pose, 10, 0.1, [](const auto& seed_state, const auto& joints, const auto& pose){return true;}, kinematics::KinematicsQueryOptions(), seed_state);
-    if (found_ik) {
-        RCLCPP_INFO(get_logger(), "Found IK solution with seed %d", i);
-        break;
-    }
-}
+
     move_group_interface->setPoseTarget(target_pose);
 
     // Lập kế hoạch và thực thi

@@ -727,10 +727,10 @@ private:
       RCLCPP_INFO(get_logger(), "Joint %ld: %f", i, current_joint[i]);
     }
 
-    auto current_pose = move_group_interface->getCurrentPose().pose;
+    auto current_pose_final = move_group_interface->getCurrentPose().pose;
     RCLCPP_INFO(get_logger(), "Current pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
-                current_pose.position.x, current_pose.position.y, current_pose.position.z,
-                current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w);
+                current_pose_final.position.x, current_pose_final.position.y, current_pose_final.position.z,
+                current_pose_final.orientation.x, current_pose_final.orientation.y, current_pose_final.orientation.z, current_pose_final.orientation.w);
 
     result->success = true;
     goal_handle->succeed(result);

@@ -567,8 +567,26 @@ private:
     const moveit::core::JointModelGroup* joint_model_group = 
       goal_state->getJointModelGroup(move_group_interface->getName());
     
-    bool found_ik = goal_state->setFromIK(joint_model_group, target_pose);
 
+    auto current_pose = move_group_interface->getCurrentPose().pose;
+    RCLCPP_INFO(get_logger(), "Current pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
+                current_pose.position.x, current_pose.position.y, current_pose.position.z,
+                current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w);
+    RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
+                target_pose.position.x, target_pose.position.y, target_pose.position.z,
+                target_pose.orientation.x, target_pose.orientation.y, target_pose.orientation.z, target_pose.orientation.w);
+
+    for (const auto& joint_name : joint_model_group->getVariableNames()) {
+        const moveit::core::VariableBounds& bounds = current_state->getJointModel(joint_name)->getVariableBounds()[0];
+        if (bounds.position_bounded_) {
+            RCLCPP_INFO(get_logger(), "Joint %s bounds: [%.3f, %.3f]", 
+                        joint_name.c_str(), bounds.min_position_, bounds.max_position_);
+        }
+    }       
+
+    geometry_msgs::msg::Pose near_target = current_pose;
+    near_target.position.x += 0.1;  // Di chuyển 10cm theo trục x   
+    bool found_ik = goal_state->setFromIK(joint_model_group, target_pose);     
     if (!found_ik) {
       RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
       result->success = false;

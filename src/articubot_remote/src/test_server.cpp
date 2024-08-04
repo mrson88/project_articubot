@@ -532,8 +532,8 @@ private:
     auto move_group_gripper_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, "gripper");
 
     move_group_interface->setPlannerId("RRTConnect");
-    move_group_interface->setPlanningTime(10.0);
-    move_group_interface->setNumPlanningAttempts(10);
+    move_group_interface->setPlanningTime(20.0);
+    move_group_interface->setNumPlanningAttempts(20);
     move_group_interface->setMaxVelocityScalingFactor(0.1);
     move_group_interface->setMaxAccelerationScalingFactor(0.1);
 
@@ -550,12 +550,13 @@ private:
     double goal_or_y = goal_handle->get_goal()->or_y;
     double goal_or_z = goal_handle->get_goal()->or_z;
     double goal_or_w = goal_handle->get_goal()->or_w;
-    (void)goal_or_w;  // Để tránh cảnh báo về biến không sử dụng
+    // (void)goal_or_w;  // Để tránh cảnh báo về biến không sử dụng
 
     geometry_msgs::msg::Pose target_pose;
     target_pose.position.x = goal_p_x;
     target_pose.position.y = goal_p_y;
     target_pose.position.z = goal_p_z;
+    target_pose.position.w = goal_or_w;
     tf2::Quaternion q;
     q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
     target_pose.orientation = tf2::toMsg(q);

@@ -585,7 +585,7 @@ private:
     // }       
 
     geometry_msgs::msg::Pose near_target = current_pose;
-    near_target.position.x += 0.1;  // Di chuyển 10cm theo trục x   
+    near_target.position.x += 0.01;  // Di chuyển 10cm theo trục x   
 
       RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
                 near_target.position.x, near_target.position.y, near_target.position.z,

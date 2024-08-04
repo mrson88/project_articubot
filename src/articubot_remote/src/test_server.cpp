@@ -531,7 +531,7 @@ private:
     auto move_group_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, PLANNING_GROUP);
     auto move_group_gripper_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, "gripper");
 
-    move_group_interface->setPlannerId("RRTConnect");
+    move_group_interface->setPlannerId("RRTstar");
     move_group_interface->setPlanningTime(20.0);
     move_group_interface->setNumPlanningAttempts(20);
     move_group_interface->setMaxVelocityScalingFactor(0.1);

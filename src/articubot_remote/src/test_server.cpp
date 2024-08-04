@@ -534,8 +534,8 @@ private:
     move_group_interface->setPlannerId("RRTstar");
     move_group_interface->setPlanningTime(20.0);
     move_group_interface->setNumPlanningAttempts(20);
-    move_group_interface->setMaxVelocityScalingFactor(0.1);
-    move_group_interface->setMaxAccelerationScalingFactor(0.1);
+    // move_group_interface->setMaxVelocityScalingFactor(0.1);
+    // move_group_interface->setMaxAccelerationScalingFactor(0.1);
 
     std::vector<double> gripper_joint_values;
     

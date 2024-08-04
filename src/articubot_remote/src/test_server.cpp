@@ -531,8 +531,8 @@ private:
     auto move_group_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, PLANNING_GROUP);
     auto move_group_gripper_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, "gripper");
 
-    move_group_interface->setPlanningTime(20.0);
-    move_group_interface->setNumPlanningAttempts(20);
+    move_group_interface->setPlanningTime(10.0);
+    move_group_interface->setNumPlanningAttempts(10);
     move_group_interface->setMaxVelocityScalingFactor(0.1);
     move_group_interface->setMaxAccelerationScalingFactor(0.1);
 
@@ -628,7 +628,7 @@ private:
     // Lập kế hoạch và thực thi
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
     bool success = false;
-    std::vector<std::string> planners = {"RRTstar", "RRTConnect", "PRMstar", "LBKPIECE"};
+    std::vector<std::string> planners = { "RRTConnect"};
     
     for (const auto& planner : planners) {
       move_group_interface->setPlannerId(planner);

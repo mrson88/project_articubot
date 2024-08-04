@@ -205,7 +205,7 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_activate(
   }
       comms_.send_empty_msg();
     comms_.setServoPosition(0,90);
-    comms_.setServoPosition(1,160);
+    comms_.setServoPosition(1,20);
     comms_.setServoPosition(2,20);
     comms_.setServoPosition(3,20);
     comms_.setServoPosition(4,90);

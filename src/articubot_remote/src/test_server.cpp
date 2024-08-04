@@ -572,9 +572,9 @@ private:
     RCLCPP_INFO(get_logger(), "Current pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
                 current_pose.position.x, current_pose.position.y, current_pose.position.z,
                 current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w);
-    // RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
-    //             target_pose.position.x, target_pose.position.y, target_pose.position.z,
-    //             target_pose.orientation.x, target_pose.orientation.y, target_pose.orientation.z, target_pose.orientation.w);
+    RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
+                target_pose.position.x, target_pose.position.y, target_pose.position.z,
+                target_pose.orientation.x, target_pose.orientation.y, target_pose.orientation.z, target_pose.orientation.w);
 
     // for (const auto& joint_name : joint_model_group->getVariableNames()) {
     //     const moveit::core::VariableBounds& bounds = current_state->getJointModel(joint_name)->getVariableBounds()[0];
@@ -584,43 +584,43 @@ private:
     //     }
     // }       
 
-    geometry_msgs::msg::Pose near_target = current_pose;
-    near_target.position.x += 0.01;  // Di chuyển 10cm theo trục x   
+//     geometry_msgs::msg::Pose near_target = current_pose;
+//     near_target.position.x += 0.01;  // Di chuyển 10cm theo trục x   
 
-      RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
-                near_target.position.x, near_target.position.y, near_target.position.z,
-                near_target.orientation.x, near_target.orientation.y, near_target.orientation.z, near_target.orientation.w);
-    // bool found_ik = goal_state->setFromIK(joint_model_group, near_target);     
-    // if (!found_ik) {
-    //   RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
-    //   result->success = false;
-    //   goal_handle->abort(result);
-    //   return;
-    // }
+//       RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
+//                 near_target.position.x, near_target.position.y, near_target.position.z,
+//                 near_target.orientation.x, near_target.orientation.y, near_target.orientation.z, near_target.orientation.w);
+//     // bool found_ik = goal_state->setFromIK(joint_model_group, near_target);     
+//     // if (!found_ik) {
+//     //   RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
+//     //   result->success = false;
+//     //   goal_handle->abort(result);
+//     //   return;
+//     // }
 
-    // RCLCPP_INFO(get_logger(), "Goal state is valid: %s", goal_state->satisfiesBounds() ? "true" : "false");
+//     // RCLCPP_INFO(get_logger(), "Goal state is valid: %s", goal_state->satisfiesBounds() ? "true" : "false");
 
-bool success_appro = move_group_interface->setApproximateJointValueTarget(target_pose);
-if (success_appro) {
-    RCLCPP_INFO(get_logger(), "Successfully set approximate joint value target");
-} else {
-    RCLCPP_ERROR(get_logger(), "Failed to set approximate joint value target");
-}
-collision_detection::CollisionRequest collision_request;
-collision_detection::CollisionResult collision_result;
-planning_scene::PlanningScenePtr planning_scene = std::make_shared<planning_scene::PlanningScene>(move_group_interface->getRobotModel());
-planning_scene->checkCollision(collision_request, collision_result, *goal_state);
-if (collision_result.collision) {
-    RCLCPP_WARN(get_logger(), "Current state is in collision");
-        for (const auto& contact : collision_result.contacts) {
-        RCLCPP_INFO(get_logger(), "Collision between: %s and %s", contact.first.first.c_str(), contact.first.second.c_str());
-    }
-}
-std::vector<double> current_joint_values;
-goal_state->copyJointGroupPositions(joint_model_group, current_joint_values);
-for (size_t i = 0; i < current_joint_values.size(); ++i) {
-    RCLCPP_INFO(get_logger(), "Joint %zu: %.3f", i, current_joint_values[i]);
-}
+// bool success_appro = move_group_interface->setApproximateJointValueTarget(target_pose);
+// if (success_appro) {
+//     RCLCPP_INFO(get_logger(), "Successfully set approximate joint value target");
+// } else {
+//     RCLCPP_ERROR(get_logger(), "Failed to set approximate joint value target");
+// }
+// collision_detection::CollisionRequest collision_request;
+// collision_detection::CollisionResult collision_result;
+// planning_scene::PlanningScenePtr planning_scene = std::make_shared<planning_scene::PlanningScene>(move_group_interface->getRobotModel());
+// planning_scene->checkCollision(collision_request, collision_result, *goal_state);
+// if (collision_result.collision) {
+//     RCLCPP_WARN(get_logger(), "Current state is in collision");
+//         for (const auto& contact : collision_result.contacts) {
+//         RCLCPP_INFO(get_logger(), "Collision between: %s and %s", contact.first.first.c_str(), contact.first.second.c_str());
+//     }
+// }
+// std::vector<double> current_joint_values;
+// goal_state->copyJointGroupPositions(joint_model_group, current_joint_values);
+// for (size_t i = 0; i < current_joint_values.size(); ++i) {
+//     RCLCPP_INFO(get_logger(), "Joint %zu: %.3f", i, current_joint_values[i]);
+// }
 
 
     move_group_interface->setPoseTarget(target_pose);
@@ -678,15 +678,7 @@ for (size_t i = 0; i < current_joint_values.size(); ++i) {
                         joint_name.c_str(), bounds.min_position_, bounds.max_position_);
           }
         }
-    moveit::planning_interface::MoveGroupInterface::Plan my_plan_to_home;
-    move_group_interface->setNamedTarget("home");  // Giả sử bạn có một vị trí "home" được định nghĩa
-    bool success_move_to_home = (move_group_interface->plan(my_plan_to_home) == moveit::core::MoveItErrorCode::SUCCESS);
-    if (success_move_to_home) {
-        move_group_interface->execute(my_plan_to_home);
-        RCLCPP_INFO(get_logger(), "Moved to home position");
-    } else {
-        RCLCPP_ERROR(get_logger(), "Failed to move to home position");
-    }
+
         result->success = false;
         goal_handle->abort(result);
         return;

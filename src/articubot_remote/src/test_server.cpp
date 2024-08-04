@@ -572,9 +572,9 @@ private:
     RCLCPP_INFO(get_logger(), "Current pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
                 current_pose.position.x, current_pose.position.y, current_pose.position.z,
                 current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w);
-    RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
-                target_pose.position.x, target_pose.position.y, target_pose.position.z,
-                target_pose.orientation.x, target_pose.orientation.y, target_pose.orientation.z, target_pose.orientation.w);
+    // RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
+    //             target_pose.position.x, target_pose.position.y, target_pose.position.z,
+    //             target_pose.orientation.x, target_pose.orientation.y, target_pose.orientation.z, target_pose.orientation.w);
 
     // for (const auto& joint_name : joint_model_group->getVariableNames()) {
     //     const moveit::core::VariableBounds& bounds = current_state->getJointModel(joint_name)->getVariableBounds()[0];
@@ -586,6 +586,10 @@ private:
 
     geometry_msgs::msg::Pose near_target = current_pose;
     near_target.position.x += 0.1;  // Di chuyển 10cm theo trục x   
+
+      RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
+                near_target.position.x, near_target.position.y, near_target.position.z,
+                near_target.orientation.x, near_target.orientation.y, near_target.orientation.z, near_target.orientation.w);
     bool found_ik = goal_state->setFromIK(joint_model_group, near_target);     
     if (!found_ik) {
       RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");

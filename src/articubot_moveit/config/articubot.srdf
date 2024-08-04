@@ -4,14 +4,14 @@
 
 
     <group name="arm_robot">
-        <!-- <joint name="arm_base_forearm_joint"/>
+        <joint name="arm_base_forearm_joint"/>
         <joint name="forearm_hand_1_joint"/>
         <joint name="forearm_hand_2_joint"/>
         <joint name="forearm_hand_3_joint"/>
-        <joint name="forearm_claw_joint"/> -->
+        <joint name="forearm_claw_joint"/>
         <!-- <joint name="camera_joint"/> -->
         
-        <chain base_link="arm_base_link" tip_link="claw_support" />
+        <!-- <chain base_link="arm_base_link" tip_link="claw_support" /> -->
         
 
     </group>

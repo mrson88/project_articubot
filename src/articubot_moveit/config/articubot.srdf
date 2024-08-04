@@ -46,7 +46,7 @@
         <!-- <joint name="joint_5" value="0"/> -->
     </group_state>
 
-    <end_effector name="end_effector" parent_link="hand_3_link" group="arm_robot" />
+    <end_effector name="end_effector" parent_link="claw_support" group="arm_robot" />
     <!-- <virtual_joint name="table" type="fixed" parent_frame="chassis" child_link="arm_base_link" /> -->
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->

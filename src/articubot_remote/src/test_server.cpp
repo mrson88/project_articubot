@@ -116,13 +116,16 @@ private:
 switch (goal_handle->get_goal()->task){
     case 0:
     {
-
+      RCLCPP_INFO(get_logger(), "Executing goal 0");  
       std::vector<double> gripper_joint_goal;
       geometry_msgs::msg::Pose msg;
       tf2::Quaternion q;
       gripper_joint_goal = {GRIPPER_OPEN};
       move_group_gripper_interface.setJointValueTarget(gripper_joint_goal);
       move_group_gripper_interface.move();
+
+      RCLCPP_INFO(get_logger(), "Vị trí hiện tại: x=%.3f, y=%.3f, z=%.3f, orx=%.3f, ory=%.3f, orz=%.3f, orw=%.3f", 
+                  goal_p_x, goal_p_y, goal_p_z,goal_or_x,goal_or_y,goal_or_z,goal_or_w);
       msg.position.x = goal_p_x;
       msg.position.y = goal_p_y;
       msg.position.z = goal_p_z;
@@ -130,7 +133,7 @@ switch (goal_handle->get_goal()->task){
       msg.orientation = tf2::toMsg(q);
       move_group_interface.setPoseTarget(msg);
 
-      RCLCPP_INFO(get_logger(), "Executing goal 0");  
+      RCLCPP_INFO(get_logger(), "Finish goal 0");  
       move_group_interface.move();
 
 

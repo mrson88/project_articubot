@@ -49,9 +49,9 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
   position_states_.reserve(info_.joints.size());
   prev_position_commands_.reserve(info_.joints.size());
   joint_name_={"arm_base_forearm_joint","forearm_hand_1_joint","forearm_hand_2_joint","forearm_hand_3_joint","forearm_claw_joint","joint_4"};
-  position_commands_ = { 0.0, -1.2, -1.2, -1.2 ,0.0, 0.0,};
-  prev_position_commands_ = {  0.0, -1.2, -1.2, -1.2 ,0.0, 0.0,};
-  position_states_ = {  0.0, -1.2, -1.2, -1.2 ,0.0, 0.0, };
+  position_commands_ = { 0.0, 1.2, -1.2, -1.2 ,0.0, 0.0,};
+  prev_position_commands_ = {  0.0, 1.2, -1.2, -1.2 ,0.0, 0.0,};
+  position_states_ = {  0.0, 1.2, -1.2, -1.2 ,0.0, 0.0, };
 
   if (info_.hardware_parameters.count("pid_p") > 0)
   {

@@ -612,9 +612,23 @@ planning_scene::PlanningScenePtr planning_scene = std::make_shared<planning_scen
 planning_scene->checkCollision(collision_request, collision_result, *goal_state);
 if (collision_result.collision) {
     RCLCPP_WARN(get_logger(), "Current state is in collision");
+        for (const auto& contact : collision_result.contacts) {
+        RCLCPP_INFO(get_logger(), "Collision between: %s and %s", contact.first.first.c_str(), contact.first.second.c_str());
+    }
 }
-
-
+std::vector<double> current_joint_values;
+current_state->copyJointGroupPositions(joint_model_group, current_joint_values);
+for (size_t i = 0; i < current_joint_values.size(); ++i) {
+    RCLCPP_INFO(get_logger(), "Joint %zu: %.3f", i, current_joint_values[i]);
+}
+move_group_interface->setNamedTarget("home");  // Giả sử bạn có một vị trí "home" được định nghĩa
+bool success = (move_group_interface->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
+if (success) {
+    move_group_interface->execute(my_plan);
+    RCLCPP_INFO(get_logger(), "Moved to home position");
+} else {
+    RCLCPP_ERROR(get_logger(), "Failed to move to home position");
+}
 
     move_group_interface->setPoseTarget(target_pose);
 

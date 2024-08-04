@@ -600,8 +600,8 @@ private:
 
     RCLCPP_INFO(get_logger(), "Goal state is valid: %s", goal_state->satisfiesBounds() ? "true" : "false");
 
-bool success = move_group_interface->setApproximateJointValueTarget(target_pose);
-if (success) {
+bool success_appro = move_group_interface->setApproximateJointValueTarget(target_pose);
+if (success_appro) {
     RCLCPP_INFO(get_logger(), "Successfully set approximate joint value target");
 } else {
     RCLCPP_ERROR(get_logger(), "Failed to set approximate joint value target");

@@ -567,14 +567,14 @@ private:
     auto goal_state = std::make_shared<moveit::core::RobotState>(*start_state);
     const moveit::core::JointModelGroup* joint_model_group = 
       goal_state->getJointModelGroup(move_group_interface->getName());
-    bool found_ik = goal_state->setFromIK(joint_model_group, target_pose, 10, 0.1);
+    // bool found_ik = goal_state->setFromIK(joint_model_group, target_pose, 10, 0.1);
 
-    if (!found_ik) {
-      RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
-      result->success = false;
-      goal_handle->abort(result);
-      return;
-    }
+    // if (!found_ik) {
+    //   RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
+    //   result->success = false;
+    //   goal_handle->abort(result);
+    //   return;
+    // }
 
     RCLCPP_INFO(get_logger(), "Goal state is valid: %s", goal_state->satisfiesBounds() ? "true" : "false");
 

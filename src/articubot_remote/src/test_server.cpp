@@ -590,15 +590,15 @@ private:
       RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f, ox=%.3f, oy=%.3f, oz=%.3f, ow=%.3f",
                 near_target.position.x, near_target.position.y, near_target.position.z,
                 near_target.orientation.x, near_target.orientation.y, near_target.orientation.z, near_target.orientation.w);
-    bool found_ik = goal_state->setFromIK(joint_model_group, near_target);     
-    if (!found_ik) {
-      RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
-      result->success = false;
-      goal_handle->abort(result);
-      return;
-    }
+    // bool found_ik = goal_state->setFromIK(joint_model_group, near_target);     
+    // if (!found_ik) {
+    //   RCLCPP_ERROR(get_logger(), "Không tìm thấy giải pháp IK cho mục tiêu");
+    //   result->success = false;
+    //   goal_handle->abort(result);
+    //   return;
+    // }
 
-    RCLCPP_INFO(get_logger(), "Goal state is valid: %s", goal_state->satisfiesBounds() ? "true" : "false");
+    // RCLCPP_INFO(get_logger(), "Goal state is valid: %s", goal_state->satisfiesBounds() ? "true" : "false");
 
 bool success_appro = move_group_interface->setApproximateJointValueTarget(target_pose);
 if (success_appro) {

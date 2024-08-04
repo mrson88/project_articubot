@@ -680,14 +680,14 @@ private:
       RCLCPP_INFO(get_logger(), "Joint %ld: %f", i, current_joint[i]);
     }
 geometry_msgs::msg::PoseStamped current_pose = move_group_interface->getCurrentPose();
-double x = current_pose.pose.position.x;
-double y = current_pose.pose.position.y;
-double z = current_pose.pose.position.z;
+// double x = current_pose.pose.position.x;
+// double y = current_pose.pose.position.y;
+// double z = current_pose.pose.position.z;
 
-double qx = current_pose.pose.orientation.x;
-double qy = current_pose.pose.orientation.y;
-double qz = current_pose.pose.orientation.z;
-double qw = current_pose.pose.orientation.w;
+// double qx = current_pose.pose.orientation.x;
+// double qy = current_pose.pose.orientation.y;
+// double qz = current_pose.pose.orientation.z;
+// double qw = current_pose.pose.orientation.w;
 RCLCPP_INFO(get_logger(), "Current position: x=%.3f, y=%.3f, z=%.3f", 
             current_pose.pose.position.x, 
             current_pose.pose.position.y, 

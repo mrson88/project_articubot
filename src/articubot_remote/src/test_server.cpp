@@ -621,15 +621,7 @@ goal_state->copyJointGroupPositions(joint_model_group, current_joint_values);
 for (size_t i = 0; i < current_joint_values.size(); ++i) {
     RCLCPP_INFO(get_logger(), "Joint %zu: %.3f", i, current_joint_values[i]);
 }
-    moveit::planning_interface::MoveGroupInterface::Plan my_plan_to_home;
-move_group_interface->setNamedTarget("home");  // Giả sử bạn có một vị trí "home" được định nghĩa
-bool success_move_to_home = (move_group_interface->plan(my_plan_to_home) == moveit::core::MoveItErrorCode::SUCCESS);
-if (success_move_to_home) {
-    move_group_interface->execute(my_plan_to_home);
-    RCLCPP_INFO(get_logger(), "Moved to home position");
-} else {
-    RCLCPP_ERROR(get_logger(), "Failed to move to home position");
-}
+
 
     move_group_interface->setPoseTarget(target_pose);
 
@@ -686,7 +678,15 @@ if (success_move_to_home) {
                         joint_name.c_str(), bounds.min_position_, bounds.max_position_);
           }
         }
-
+    moveit::planning_interface::MoveGroupInterface::Plan my_plan_to_home;
+    move_group_interface->setNamedTarget("home");  // Giả sử bạn có một vị trí "home" được định nghĩa
+    bool success_move_to_home = (move_group_interface->plan(my_plan_to_home) == moveit::core::MoveItErrorCode::SUCCESS);
+    if (success_move_to_home) {
+        move_group_interface->execute(my_plan_to_home);
+        RCLCPP_INFO(get_logger(), "Moved to home position");
+    } else {
+        RCLCPP_ERROR(get_logger(), "Failed to move to home position");
+    }
         result->success = false;
         goal_handle->abort(result);
         return;

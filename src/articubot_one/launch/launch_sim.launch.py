@@ -102,7 +102,7 @@ def generate_launch_description():
         get_package_share_directory("articubot_moveit"),
         "launch",
         "moveit.launch.py"
-    ))
+    ), launch_arguments={'use_sim_time': 'true'}.items())
 
     robot_ros=IncludeLaunchDescription(os.path.join(
         get_package_share_directory("robot_rosgpt"),
@@ -131,8 +131,8 @@ def generate_launch_description():
         joint_state_broadcaster_spawner,
         # rviz,
         moveit,
-        robot_ros,
-        robot_speech_reg,
+        # robot_ros,
+        # robot_speech_reg,
 
 
 

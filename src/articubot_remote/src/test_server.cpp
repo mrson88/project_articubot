@@ -576,13 +576,13 @@ private:
                 target_pose.position.x, target_pose.position.y, target_pose.position.z,
                 target_pose.orientation.x, target_pose.orientation.y, target_pose.orientation.z, target_pose.orientation.w);
 
-    for (const auto& joint_name : joint_model_group->getVariableNames()) {
-        const moveit::core::VariableBounds& bounds = current_state->getJointModel(joint_name)->getVariableBounds()[0];
-        if (bounds.position_bounded_) {
-            RCLCPP_INFO(get_logger(), "Joint %s bounds: [%.3f, %.3f]", 
-                        joint_name.c_str(), bounds.min_position_, bounds.max_position_);
-        }
-    }       
+    // for (const auto& joint_name : joint_model_group->getVariableNames()) {
+    //     const moveit::core::VariableBounds& bounds = current_state->getJointModel(joint_name)->getVariableBounds()[0];
+    //     if (bounds.position_bounded_) {
+    //         RCLCPP_INFO(get_logger(), "Joint %s bounds: [%.3f, %.3f]", 
+    //                     joint_name.c_str(), bounds.min_position_, bounds.max_position_);
+    //     }
+    // }       
 
     geometry_msgs::msg::Pose near_target = current_pose;
     near_target.position.x += 0.1;  // Di chuyển 10cm theo trục x   

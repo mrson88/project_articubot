@@ -689,13 +689,14 @@ private:
     switch (goal_handle->get_goal()->task) {
       case 0:
         // Mở gripper
-      gripper_joint_values = {GRIPPER_OPEN};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
-      move_group_gripper_interface.move();       
-        // Đóng gripper
         gripper_joint_values = {GRIPPER_OPEN};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
-      move_group_gripper_interface.move();    
+        move_group_gripper_interface->setJointValueTarget(gripper_joint_values);
+        move_group_gripper_interface->move();
+        
+        // Đóng gripper
+        gripper_joint_values = {GRIPPER_CLOSE};
+        move_group_gripper_interface->setJointValueTarget(gripper_joint_values);
+        move_group_gripper_interface->move();
         
         // Di chuyển về home
         move_group_interface->setNamedTarget("home");
@@ -703,13 +704,13 @@ private:
         
         // Mở gripper
         gripper_joint_values = {GRIPPER_OPEN};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
-      move_group_gripper_interface.move();    
+        move_group_gripper_interface->setJointValueTarget(gripper_joint_values);
+        move_group_gripper_interface->move();
         
         // Đặt gripper về vị trí mặc định
         gripper_joint_values = {GRIPPER_DEFAULT};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
-      move_group_gripper_interface.move();    
+        move_group_gripper_interface->setJointValueTarget(gripper_joint_values);
+        move_group_gripper_interface->move();
         break;
       
       case 1:

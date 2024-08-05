@@ -143,7 +143,13 @@ class MainWindow(QMainWindow):
             '/arm_controller/follow_joint_trajectory', 
             10
         )
+        self.publisher_joint_gripper_commend = self.node.create_publisher(
+            JointTrajectory, 
+            '/gripper_controller/follow_joint_trajectory', 
+            10
+        )
         self.action_client = ActionClient(self.node, FollowJointTrajectory, '/arm_controller/follow_joint_trajectory')
+        self.action_client_gripper = ActionClient(self.node, FollowJointTrajectory, '/gripper_controller/follow_joint_trajectory')
         self.action_client_navigation = ActionClient(self.node, NavigateToPose, 'navigate_to_pose')
         self.bridge = CvBridge()       
         # Initialize camera subscriber
@@ -333,11 +339,11 @@ class MainWindow(QMainWindow):
         goal_msg = FollowJointTrajectory.Goal()
         
         trajectory = JointTrajectory()
-        trajectory.joint_names = ['arm_base_forearm_joint', 'forearm_hand_1_joint', 'forearm_hand_2_joint', 'forearm_hand_3_joint', 'forearm_claw_joint','joint_4']   # Adjust joint names as needed
+        trajectory.joint_names = ['arm_base_forearm_joint', 'forearm_hand_1_joint', 'forearm_hand_2_joint', 'forearm_hand_3_joint', 'forearm_claw_joint']   # Adjust joint names as needed
         
         point = JointTrajectoryPoint()
         point.positions = [slider.value() / 100.0 for slider in self.joint_sliders]
-        point.time_from_start.sec = 2  # Move to position in 2 seconds
+        point.time_from_start.sec = 4  # Move to position in 2 seconds
         
         trajectory.points = [point]
         goal_msg.trajectory = trajectory

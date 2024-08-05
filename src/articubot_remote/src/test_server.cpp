@@ -481,7 +481,10 @@ private:
 
     if (success) {
       RCLCPP_INFO(get_logger(), "Lập kế hoạch thành công, thực thi...");
-      // move_group_interface->execute(my_plan);
+        // Mở gripper
+      move_group_gripper_interface->setNamedTarget("open");
+      move_group_gripper_interface->move(); 
+      move_group_interface->execute(my_plan);
     } else {
       RCLCPP_ERROR(get_logger(), "Lập kế hoạch thất bại với tất cả các planner");
       
@@ -529,9 +532,7 @@ private:
     // Xử lý các task cụ thể (giữ nguyên phần này từ mã gốc của bạn)
     switch (goal_handle->get_goal()->task) {
       case 0:
-        // Mở gripper
-        move_group_gripper_interface->setNamedTarget("open");
-        move_group_gripper_interface->move();       
+      
         // Đóng gripper
         gripper_joint_values = {GRIPPER_CLOSE};
         move_group_gripper_interface->setNamedTarget("closed");

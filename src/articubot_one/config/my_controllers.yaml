@@ -99,12 +99,7 @@ arm_controller:
     open_loop_control: true
     allow_integration_in_goal_trajectories: true
     # Add these parameters for smoother motion
-    gains:
-      arm_base_forearm_joint: {p: 100.0, i: 0.01, d: 10.0}
-      forearm_hand_1_joint: {p: 100.0, i: 0.01, d: 10.0}
-      forearm_hand_2_joint: {p: 100.0, i: 0.01, d: 10.0}
-      forearm_hand_3_joint: {p: 100.0, i: 0.01, d: 10.0}
-      forearm_claw_joint: {p: 100.0, i: 0.01, d: 10.0}
+
     
     constraints:
       goal_time: 0.5

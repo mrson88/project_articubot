@@ -84,7 +84,7 @@
  -->
 
 
-<?xml version="1.0" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <robot name="articubot">
     <group name="arm_robot">
         <joint name="arm_base_forearm_joint" />

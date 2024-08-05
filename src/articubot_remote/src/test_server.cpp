@@ -534,7 +534,7 @@ private:
         move_group_gripper_interface->move();       
         // Đóng gripper
         gripper_joint_values = {GRIPPER_CLOSE};
-        move_group_gripper_interface->setNamedTarget("close");
+        move_group_gripper_interface->setNamedTarget("closed");
         move_group_gripper_interface->move();
         
         // Di chuyển về home

@@ -220,7 +220,7 @@
         <child link = "gripper_right"/>
         <origin xyz="0 0.05 ${hand_length/8}"/>
         <axis xyz="1 0 0"/>
-        <limit lower="-${PI / 2}" upper="0.0" 
+        <limit lower="-${PI / 2}" upper="${PI / 2}" 
                effort="100" velocity="100"/>
     </joint>
     <joint name ="joint_5" type="revolute">

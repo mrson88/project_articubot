@@ -221,7 +221,7 @@
         <origin xyz="0 0.05 ${hand_length/8}"/>
         <axis xyz="1 0 0"/>
         <limit lower="-${PI / 2}" upper="${PI / 2}" 
-               effort="100" velocity="100"/>
+               effort="100" velocity="10.0"/>
     </joint>
     <joint name ="joint_5" type="revolute">
         <parent link="claw_support"/>
@@ -229,7 +229,7 @@
         <origin xyz="0 -.05 ${hand_length/8}"/>
         <axis xyz="1 0 0"/>
         <limit lower="-${PI / 2}" upper="${PI / 2}" 
-               effort="100" velocity="100"/>
+               effort="100" velocity="10.0"/>
         <mimic joint="joint_4" multiplier="-1"/>
     </joint>
 

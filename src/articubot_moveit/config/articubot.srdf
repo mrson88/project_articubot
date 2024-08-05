@@ -52,6 +52,7 @@
     </group_state>
     <end_effector name="gripper" parent_link="claw_support" group="gripper" parent_group="arm_robot" />
  
+   <disable_collisions link1="chassis" link2="arm_base_link" reason="Adjacent" />
     <disable_collisions link1="arm_base_link" link2="forearm_link" reason="Adjacent" />
     <disable_collisions link1="forearm_link" link2="hand_1_link" reason="Adjacent" />
     <disable_collisions link1="hand_1_link" link2="hand_2_link" reason="Adjacent" />
@@ -59,7 +60,44 @@
     <disable_collisions link1="hand_3_link" link2="claw_support" reason="Adjacent" />
     <disable_collisions link1="claw_support" link2="gripper_right" reason="Adjacent" />
     <disable_collisions link1="claw_support" link2="gripper_left" reason="Adjacent" />
-    <disable_collisions link1="gripper_right" link2="gripper_left" reason="Adjacent" />
+
+    <disable_collisions link1="gripper_right" link2="gripper_left" reason="Never" />
+    <disable_collisions link1="chassis" link2="forearm_link" reason="Never" />
+    <disable_collisions link1="chassis" link2="hand_1_link" reason="Never" />
+    <disable_collisions link1="chassis" link2="hand_2_link" reason="Never" />
+    <disable_collisions link1="chassis" link2="hand_3_link" reason="Never" />
+    <disable_collisions link1="chassis" link2="claw_support" reason="Never" />
+    <disable_collisions link1="chassis" link2="gripper_right" reason="Never" />
+    <disable_collisions link1="chassis" link2="gripper_left" reason="Never" />
+
+    <disable_collisions link1="arm_base_link" link2="hand_1_link" reason="Never" />
+    <disable_collisions link1="arm_base_link" link2="hand_2_link" reason="Never" />
+    <disable_collisions link1="arm_base_link" link2="hand_3_link" reason="Never" />
+    <disable_collisions link1="arm_base_link" link2="claw_support" reason="Never" />
+    <disable_collisions link1="arm_base_link" link2="gripper_right" reason="Never" />
+    <disable_collisions link1="arm_base_link" link2="gripper_left" reason="Never" />
+
+    <disable_collisions link1="forearm_link" link2="hand_2_link" reason="Never" />
+    <disable_collisions link1="forearm_link" link2="hand_3_link" reason="Never" />
+    <disable_collisions link1="forearm_link" link2="claw_support" reason="Never" />
+    <disable_collisions link1="forearm_link" link2="gripper_right" reason="Never" />
+    <disable_collisions link1="forearm_link" link2="gripper_left" reason="Never" />
+
+    <disable_collisions link1="hand_1_link" link2="hand_3_link" reason="Never" />
+    <disable_collisions link1="hand_1_link" link2="claw_support" reason="Never" />
+    <disable_collisions link1="hand_1_link" link2="gripper_right" reason="Never" />
+    <disable_collisions link1="hand_1_link" link2="gripper_left" reason="Never" />
+
+    <disable_collisions link1="hand_2_link" link2="claw_support" reason="Never" />
+    <disable_collisions link1="hand_2_link" link2="gripper_right" reason="Never" />
+    <disable_collisions link1="hand_2_link" link2="gripper_left" reason="Never" />
+
+    <disable_collisions link1="hand_3_link" link2="gripper_right" reason="Never" />
+    <disable_collisions link1="hand_3_link" link2="gripper_left" reason="Never" />
+
+    <disable_collisions link1="chassis" link2="left_wheel" reason="Adjacent" />
+    <disable_collisions link1="chassis" link2="right_wheel" reason="Adjacent" />
+
     <disable_collisions link1="arm_base_link" link2="camera_link" reason="Adjacent" />
     <disable_collisions link1="forearm_link" link2="camera_link" reason="Adjacent" />
     <disable_collisions link1="claw_support" link2="camera_link" reason="Adjacent" />
@@ -72,14 +110,7 @@
     <disable_collisions link1="arm_base_link" link2="chassis" reason="Never"/>
     <disable_collisions link1="chassis" link2="claw_support" reason="Never"/>
     <disable_collisions link1="chassis" link2="camera_link" reason="Never"/>
-    <disable_collisions link1="arm_base_link" link2="forearm_link" reason="Never" />
-    <disable_collisions link1="forearm_link" link2="hand_1_link" reason="Never" />
-    <disable_collisions link1="hand_1_link" link2="hand_2_link" reason="Never" />
-    <disable_collisions link1="hand_2_link" link2="hand_3_link" reason="Never" />
-    <disable_collisions link1="hand_3_link" link2="claw_support" reason="Never" />
-    <disable_collisions link1="claw_support" link2="gripper_right" reason="Never" />
-    <disable_collisions link1="claw_support" link2="gripper_left" reason="Never" />
-    <disable_collisions link1="gripper_right" link2="gripper_left" reason="Never" />
+
     <disable_collisions link1="arm_base_link" link2="camera_link" reason="Never" />
     <disable_collisions link1="forearm_link" link2="camera_link" reason="Never" />
     <disable_collisions link1="claw_support" link2="camera_link" reason="Never" />

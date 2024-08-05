@@ -534,7 +534,8 @@ private:
       case 0:
         // Mở gripper
         gripper_joint_values = {GRIPPER_OPEN};
-        move_group_gripper_interface->setJointValueTarget(gripper_joint_values);
+        // move_group_gripper_interface->setJointValueTarget(gripper_joint_values);
+        move_group_gripper_interface->setNamedTarget("open");
         move_group_gripper_interface->move();
         
         // Đóng gripper

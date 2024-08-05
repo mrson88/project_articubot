@@ -467,7 +467,7 @@ private:
     // Lập kế hoạch và thực thi
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
     bool success = false;
-    std::vector<std::string> planners = { "RRTConnect","RRTstar","PRMstar","FMT","BFMT","LBKPIECE","BKPIECE"};
+    std::vector<std::string> planners = { "RRTConnect","RRTstar","PRMstar","LBKPIECE","BKPIECE"};
     
     for (const auto& planner : planners) {
       move_group_interface->setPlannerId(planner);

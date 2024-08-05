@@ -481,7 +481,7 @@ private:
 
     if (success) {
       RCLCPP_INFO(get_logger(), "Lập kế hoạch thành công, thực thi...");
-      move_group_interface->execute(my_plan);
+      // move_group_interface->execute(my_plan);
     } else {
       RCLCPP_ERROR(get_logger(), "Lập kế hoạch thất bại với tất cả các planner");
       

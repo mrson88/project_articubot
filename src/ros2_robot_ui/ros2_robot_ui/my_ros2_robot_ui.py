@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
     def initUI(self):
         self.setWindowTitle('Arm Robot Controller')
         self.setGeometry(100, 100, 1280, 768)
-        self.joint_names=['arm_base_forearm_joint', 'forearm_hand_1_joint', 'forearm_hand_2_joint', 'forearm_hand_3_joint', 'forearm_claw_joint','joint_4']
+        self.joint_names=['arm_base_forearm_joint', 'forearm_hand_1_joint', 'forearm_hand_2_joint', 'forearm_hand_3_joint', 'forearm_claw_joint']
         self.position_and_orientation_name=['Px','Py','Pz','Orx','Ory','Orz','Orw']
         main_layout = QHBoxLayout()
     

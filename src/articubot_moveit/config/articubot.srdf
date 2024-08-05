@@ -76,12 +76,12 @@
     <disable_collisions link1="forearm_link" link2="camera_link" reason="Never" />
     <disable_collisions link1="claw_support" link2="camera_link" reason="Never" />
 
-</robot>
+</robot> -->
 
 
 
 
- -->
+
 
 
 <?xml version="1.0" encoding="UTF-8"?>

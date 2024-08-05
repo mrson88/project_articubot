@@ -333,7 +333,7 @@ class MainWindow(QMainWindow):
         goal_msg = FollowJointTrajectory.Goal()
         
         trajectory = JointTrajectory()
-        trajectory.joint_names = ['arm_base_forearm_joint', 'forearm_hand_1_joint', 'forearm_hand_2_joint', 'forearm_hand_3_joint', 'forearm_claw_joint']   # Adjust joint names as needed
+        trajectory.joint_names = ['arm_base_forearm_joint', 'forearm_hand_1_joint', 'forearm_hand_2_joint', 'forearm_hand_3_joint', 'forearm_claw_joint','joint_4']   # Adjust joint names as needed
         
         point = JointTrajectoryPoint()
         point.positions = [slider.value() / 100.0 for slider in self.joint_sliders]

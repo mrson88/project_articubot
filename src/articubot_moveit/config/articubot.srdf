@@ -39,14 +39,17 @@
         <joint name="forearm_claw_joint" value="0"/>
     </group_state>
     <group_state name="open" group="gripper">
-        <joint name="joint_4" value="-0.785"/>
+        <joint name="joint_4" value="-0.5"/>
 
     </group_state>
-    <group_state name="closed" group="gripper">
+    <group_state name="normal" group="gripper">
         <joint name="joint_4" value="0"/>
 
     </group_state>
+    <group_state name="closed" group="gripper">
+        <joint name="joint_4" value="0.5"/>
 
+    </group_state>
     <end_effector name="gripper" parent_link="claw_support" group="gripper" parent_group="arm_robot" />
  
     <disable_collisions link1="arm_base_link" link2="forearm_link" reason="Adjacent" />

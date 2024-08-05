@@ -95,7 +95,7 @@ arm_controller:
 
     state_interfaces:
       - position
-
+      - velocity
     open_loop_control: true
     allow_integration_in_goal_trajectories: true
     # Add these parameters for smoother motion

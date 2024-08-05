@@ -96,10 +96,10 @@ private:
    auto move_group_gripper_interface = MoveGroupInterface(node, "gripper");
 
   move_group_interface.setPlannerId("RRTConnect");
-  move_group_interface.setPlanningTime(10.0);
-  move_group_interface.setNumPlanningAttempts(10);
-  move_group_interface.setMaxVelocityScalingFactor(0.1);
-  move_group_interface.setMaxAccelerationScalingFactor(0.1);
+  move_group_interface.setPlanningTime(20.0);
+  move_group_interface.setNumPlanningAttempts(20);
+  // move_group_interface.setMaxVelocityScalingFactor(0.1);
+  // move_group_interface.setMaxAccelerationScalingFactor(0.1);
   std::vector<double> gripper_joint_values;
   
   double GRIPPER_DEFAULT = to_radians(-20);
@@ -123,8 +123,9 @@ switch (goal_handle->get_goal()->task){
       std::vector<double> gripper_joint_goal;
       geometry_msgs::msg::Pose msg;
       tf2::Quaternion q;
-      gripper_joint_goal = {GRIPPER_OPEN};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_goal);
+      move_group_gripper_interface->setNamedTarget("open");
+      // gripper_joint_goal = {GRIPPER_OPEN};
+      // move_group_gripper_interface.setJointValueTarget(gripper_joint_goal);
       move_group_gripper_interface.move();
 
       RCLCPP_INFO(get_logger(), "Vị trí hiện tại: x=%.3f, y=%.3f, z=%.3f, orx=%.3f, ory=%.3f, orz=%.3f, orw=%.3f", 
@@ -142,9 +143,9 @@ switch (goal_handle->get_goal()->task){
       move_group_interface.move();
 
 
-
-      gripper_joint_values = {GRIPPER_CLOSE};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
+      move_group_gripper_interface->setNamedTarget("close");
+      // gripper_joint_values = {GRIPPER_CLOSE};
+      // move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
       move_group_gripper_interface.move();
 
       // move_group_gripper_interface.move();
@@ -152,22 +153,16 @@ switch (goal_handle->get_goal()->task){
       // move_group_interface.move();
       move_group_interface.setNamedTarget("home");
       move_group_interface.move();
-      gripper_joint_values = {GRIPPER_OPEN};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
+      // gripper_joint_values = {GRIPPER_OPEN};
+      // move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
+      move_group_gripper_interface->setNamedTarget("open");
       move_group_gripper_interface.move();
 
 
-      gripper_joint_values = {GRIPPER_DEFAULT};
-      move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
+      // gripper_joint_values = {GRIPPER_DEFAULT};
+      // move_group_gripper_interface.setJointValueTarget(gripper_joint_values);
+      move_group_gripper_interface->setNamedTarget("normal");
       move_group_gripper_interface.move();
-
-      // move_group_interface.setNamedTarget("vertical");
-      // move_group_interface.move();
-      // std::vector<double> arm_joint_goal;
-      // arm_joint_goal = {0.0, -0.5, -1.0,-1.2, 0.2};
-
-      // move_group_interface.setJointValueTarget(arm_joint_goal);
-      // move_group_interface.move();
       result->success = true;
       goal_handle->succeed(result);
       RCLCPP_INFO(get_logger(), "Goal succeeded");

@@ -107,14 +107,22 @@
 
     <end_effector name="arm_tool" parent_link="claw_support" parent_group="arm_robot" group="gripper"/>
 
-    <group_state name="home" group="arm_robot">
-        <joint name="arm_base_forearm_joint" value="0" />
-        <joint name="forearm_hand_1_joint" value="0" />
-        <joint name="forearm_hand_2_joint" value="0" />
-        <joint name="forearm_hand_3_joint" value="0" />
-        <joint name="forearm_claw_joint" value="0" />
-    </group_state>
 
+    <group_state name="vertical" group="arm_robot">
+        <joint name="arm_base_forearm_joint" value="0"/>
+        <joint name="forearm_hand_1_joint" value="0"/>
+        <joint name="forearm_hand_2_joint" value="0"/>
+        <joint name="forearm_hand_3_joint" value="0"/>
+        <joint name="forearm_claw_joint" value="0"/>
+    </group_state>
+    <group_state name="home" group="arm_robot">
+
+        <joint name="arm_base_forearm_joint" value="0"/>
+        <joint name="forearm_hand_1_joint" value="-0.85"/>
+        <joint name="forearm_hand_2_joint" value="-1.2"/>
+        <joint name="forearm_hand_3_joint" value="-1.2"/>
+        <joint name="forearm_claw_joint" value="0"/>
+    </group_state>
     <group_state name="open" group="gripper">
         <joint name="joint_4" value="-0.785" />
     </group_state>

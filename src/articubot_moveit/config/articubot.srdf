@@ -86,96 +86,82 @@
 
 <?xml version="1.0" encoding="UTF-8"?>
 <robot name="articubot">
-    <group name="arm_robot">
-        <joint name="arm_base_forearm_joint" />
-        <joint name="forearm_hand_1_joint" />
-        <joint name="forearm_hand_2_joint" />
-        <joint name="forearm_hand_3_joint" />
-        <joint name="forearm_claw_joint" />
-    </group>
-
-    <group name="gripper">
-        <joint name="joint_4" />
-    </group>
-
+  <!-- Define the mobile base group -->
     <group name="mobile_base">
         <joint name="left_wheel_joint" />
         <joint name="right_wheel_joint" />
     </group>
 
-    <end_effector name="gripper" parent_link="claw_support" group="gripper"/>
+  <!-- Define the main arm group -->
+    <group name="arm_robot">
+        <chain base_link="arm_base_link" tip_link="claw_support" />
+    </group>
 
-    <end_effector name="arm_tool" parent_link="claw_support" parent_group="arm_robot" group="gripper"/>
+  <!-- Define the gripper group -->
+    <group name="gripper">
+        <joint name="joint_4" />
+    </group>
 
+  <!-- Combine all groups into one -->
+  <group name="whole_robot">
+    <group name="mobile_base" />
+    <group name="arm_robot" />
+    <group name="gripper" />
+  </group>
 
-    <group_state name="vertical" group="arm_robot">
-        <joint name="arm_base_forearm_joint" value="0"/>
-        <joint name="forearm_hand_1_joint" value="0"/>
-        <joint name="forearm_hand_2_joint" value="0"/>
-        <joint name="forearm_hand_3_joint" value="0"/>
-        <joint name="forearm_claw_joint" value="0"/>
-    </group_state>
-    <group_state name="home" group="arm_robot">
+  <!-- Specify the end effector -->
+  <end_effector name="gripper" parent_link="claw_support" group="gripper" />
 
-        <joint name="arm_base_forearm_joint" value="0"/>
-        <joint name="forearm_hand_1_joint" value="-0.85"/>
-        <joint name="forearm_hand_2_joint" value="-1.2"/>
-        <joint name="forearm_hand_3_joint" value="-1.2"/>
-        <joint name="forearm_claw_joint" value="0"/>
-    </group_state>
-    <group_state name="open" group="gripper">
-        <joint name="joint_4" value="-0.785" />
-    </group_state>
+  <!-- Define the home position for joint control -->
+  <group_state name="vertical" group="arm_robot">
+    <joint name="arm_base_forearm_joint" value="0"/>
+    <joint name="forearm_hand_1_joint" value="0"/>
+    <joint name="forearm_hand_2_joint" value="0"/>
+    <joint name="forearm_hand_3_joint" value="0"/>
+    <joint name="forearm_claw_joint" value="0"/>
+  </group_state>
 
-    <group_state name="closed" group="gripper">
-        <joint name="joint_4" value="0" />
-    </group_state>
+  <!-- Define other useful positions -->
+  <group_state name="home" group="arm_robot">
+    <joint name="arm_base_forearm_joint" value="0"/>
+    <joint name="forearm_hand_1_joint" value="-0.85"/>
+    <joint name="forearm_hand_2_joint" value="-1.2"/>
+    <joint name="forearm_hand_3_joint" value="-1.2"/>
+    <joint name="forearm_claw_joint" value="0"/>
+  </group_state>
 
-    <disable_collisions link1="chassis" link2="arm_base_link" reason="Adjacent" />
-    <disable_collisions link1="arm_base_link" link2="forearm_link" reason="Adjacent" />
-    <disable_collisions link1="forearm_link" link2="hand_1_link" reason="Adjacent" />
-    <disable_collisions link1="hand_1_link" link2="hand_2_link" reason="Adjacent" />
-    <disable_collisions link1="hand_2_link" link2="hand_3_link" reason="Adjacent" />
-    <disable_collisions link1="hand_3_link" link2="claw_support" reason="Adjacent" />
-    <disable_collisions link1="claw_support" link2="gripper_right" reason="Adjacent" />
-    <disable_collisions link1="claw_support" link2="gripper_left" reason="Adjacent" />
+  <!-- Virtual joint for position control of the whole robot -->
+  <virtual_joint name="world_joint" type="planar" parent_frame="world" child_link="base_link" />
 
-    <disable_collisions link1="gripper_right" link2="gripper_left" reason="Never" />
-    <disable_collisions link1="chassis" link2="forearm_link" reason="Never" />
-    <disable_collisions link1="chassis" link2="hand_1_link" reason="Never" />
-    <disable_collisions link1="chassis" link2="hand_2_link" reason="Never" />
-    <disable_collisions link1="chassis" link2="hand_3_link" reason="Never" />
-    <disable_collisions link1="chassis" link2="claw_support" reason="Never" />
-    <disable_collisions link1="chassis" link2="gripper_right" reason="Never" />
-    <disable_collisions link1="chassis" link2="gripper_left" reason="Never" />
+  <!-- Disable collisions between adjacent links -->
+    <disable_collisions link1="base_link" link2="front_left_wheel" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="front_right_wheel" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="rear_left_wheel" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="rear_right_wheel" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="arm_base_link" reason="Adjacent" />
+    <disable_collisions link1="arm_base_link" link2="arm_link1" reason="Adjacent" />
+    <disable_collisions link1="arm_link1" link2="arm_link2" reason="Adjacent" />
+    <disable_collisions link1="arm_link2" link2="arm_link3" reason="Adjacent" />
+    <disable_collisions link1="arm_link3" link2="arm_link4" reason="Adjacent" />
+    <disable_collisions link1="arm_link4" link2="wrist_link" reason="Adjacent" />
+    <disable_collisions link1="wrist_link" link2="gripper_link" reason="Adjacent" />
 
-    <disable_collisions link1="arm_base_link" link2="hand_1_link" reason="Never" />
-    <disable_collisions link1="arm_base_link" link2="hand_2_link" reason="Never" />
-    <disable_collisions link1="arm_base_link" link2="hand_3_link" reason="Never" />
-    <disable_collisions link1="arm_base_link" link2="claw_support" reason="Never" />
-    <disable_collisions link1="arm_base_link" link2="gripper_right" reason="Never" />
-    <disable_collisions link1="arm_base_link" link2="gripper_left" reason="Never" />
-
-    <disable_collisions link1="forearm_link" link2="hand_2_link" reason="Never" />
-    <disable_collisions link1="forearm_link" link2="hand_3_link" reason="Never" />
-    <disable_collisions link1="forearm_link" link2="claw_support" reason="Never" />
-    <disable_collisions link1="forearm_link" link2="gripper_right" reason="Never" />
-    <disable_collisions link1="forearm_link" link2="gripper_left" reason="Never" />
-
-    <disable_collisions link1="hand_1_link" link2="hand_3_link" reason="Never" />
-    <disable_collisions link1="hand_1_link" link2="claw_support" reason="Never" />
-    <disable_collisions link1="hand_1_link" link2="gripper_right" reason="Never" />
-    <disable_collisions link1="hand_1_link" link2="gripper_left" reason="Never" />
-
-    <disable_collisions link1="hand_2_link" link2="claw_support" reason="Never" />
-    <disable_collisions link1="hand_2_link" link2="gripper_right" reason="Never" />
-    <disable_collisions link1="hand_2_link" link2="gripper_left" reason="Never" />
-
-    <disable_collisions link1="hand_3_link" link2="gripper_right" reason="Never" />
-    <disable_collisions link1="hand_3_link" link2="gripper_left" reason="Never" />
+  <!-- Disable collisions that are always impossible -->
+    <disable_collisions link1="base_link" link2="arm_link3" reason="Never" />
+    <disable_collisions link1="base_link" link2="arm_link4" reason="Never" />
+    <disable_collisions link1="base_link" link2="wrist_link" reason="Never" />
+    <disable_collisions link1="arm_link1" link2="arm_link4" reason="Never" />
+    <disable_collisions link1="arm_link1" link2="wrist_link" reason="Never" />
+    <disable_collisions link1="arm_link2" link2="wrist_link" reason="Never" />
 
     <disable_collisions link1="chassis" link2="left_wheel" reason="Adjacent" />
     <disable_collisions link1="chassis" link2="right_wheel" reason="Adjacent" />
 
-    <virtual_joint name="virtual_joint" type="planar" parent_frame="world" child_link="base_link" />
+  <!-- Define the gripper joint states -->
+  <group_state name="open" group="gripper">
+    <joint name="gripper_joint" value="0.08" />
+  </group_state>
+  <group_state name="closed" group="gripper">
+    <joint name="gripper_joint" value="0" />
+  </group_state>
 </robot>

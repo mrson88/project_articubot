@@ -100,6 +100,9 @@ private:
       case 2:
         success = closeGripper(move_group_gripper_interface);
         break;
+      case 3:
+        success = openGripper(move_group_gripper_interface);
+        break;
       default:
         RCLCPP_ERROR(get_logger(), "Invalid Task Number");
         result->success = false;
@@ -145,6 +148,13 @@ private:
   {
     RCLCPP_INFO(get_logger(), "Closing gripper...");
     move_group_gripper_interface->setNamedTarget("closed");
+    return (move_group_gripper_interface->move() == moveit::core::MoveItErrorCode::SUCCESS);
+  }
+
+  bool openGripper(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface)
+  {
+    RCLCPP_INFO(get_logger(), "Closing gripper...");
+    move_group_gripper_interface->setNamedTarget("open");
     return (move_group_gripper_interface->move() == moveit::core::MoveItErrorCode::SUCCESS);
   }
 

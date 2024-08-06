@@ -208,8 +208,8 @@ class MainWindow(QMainWindow):
         
         
         self.btn_home = QPushButton('Move to Home', self)
-        self.btn_position1 = QPushButton('Move to Position 1', self)
-        self.btn_position2 = QPushButton('Move to Position 2', self)
+        self.btn_position1 = QPushButton('Close Gripper', self)
+        self.btn_position2 = QPushButton('Open Gripper', self)
         self.launch_button = QPushButton("Launch Robot Recogntion")
         self.open_navigation_button = QPushButton("Open Robot Navigation")
         self.save_position_arm = QPushButton('Save Arm Position', self)
@@ -371,10 +371,10 @@ class MainWindow(QMainWindow):
         self.node.send_goal_robot_arm(0.5,1.2,1.2,1.2,0.0,0.0,0.0,1)
 
     def move_to_position1(self):
-        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6],1)
+        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6],2)
 
     def move_to_position2(self):
-        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6],2)
+        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6],3)
 
     def publish_joint_states(self, positions):
         msg = JointState()

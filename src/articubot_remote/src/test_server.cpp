@@ -92,7 +92,11 @@ private:
     bool success = false;
     switch (goal_handle->get_goal()->task) {
       case 0:
+        success = openGripper(move_group_gripper_interface);
         success = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
+        success = closeGripper(move_group_gripper_interface);
+        success = moveToHome(move_group_interface);
+        success = openGripper(move_group_gripper_interface);
         break;
       case 1:
         success = moveToHome(move_group_interface);
@@ -205,15 +209,7 @@ private:
         RCLCPP_ERROR(get_logger(), "Execution failed");
       }
     }
-    RCLCPP_INFO(get_logger(), "Closing gripper...");
-    move_group_gripper_interface->setNamedTarget("closed");
-    move_group_gripper_interface->move();
-    RCLCPP_INFO(get_logger(), "Move to Home...");
-    move_group_interface->setNamedTarget("home");
-    move_group_interface->move();
-    RCLCPP_INFO(get_logger(), "Open Gripper...");
-    move_group_gripper_interface->setNamedTarget("open");
-    move_group_gripper_interface->move();
+
     return success;
   }
 

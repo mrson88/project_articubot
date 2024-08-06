@@ -205,7 +205,15 @@ private:
         RCLCPP_ERROR(get_logger(), "Execution failed");
       }
     }
-
+    RCLCPP_INFO(get_logger(), "Closing gripper...");
+    move_group_gripper_interface->setNamedTarget("closed");
+    move_group_gripper_interface->move();
+    RCLCPP_INFO(get_logger(), "Move to Home...");
+    move_group_interface->setNamedTarget("home");
+    move_group_interface->move();
+    RCLCPP_INFO(get_logger(), "Open Gripper...");
+    move_group_gripper_interface->setNamedTarget("open");
+    move_group_gripper_interface->move();
     return success;
   }
 

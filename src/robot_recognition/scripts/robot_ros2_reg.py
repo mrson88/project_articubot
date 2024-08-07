@@ -142,7 +142,7 @@ class Camera_subscriber(Node):
         self.publisher_point.publish(point_msg)
         # self.get_logger().info(f"Published Point: {point_msg}")
         self.get_logger().info(f"Published Pose: {pose_msg}")
-        return point_msg
+        return pose_msg
 
 
     def camera_callback(self, data):
@@ -189,7 +189,7 @@ class Camera_subscriber(Node):
                                 self.detect=False
                                 self.get_logger().info("Send goal")
                                 # self.send_goal(0.2747167457640171, -2.249231717017409e-10,0.150327756881713867,0.0,155.0,0.0,0)
-                                self.send_goal(point_position.point.x, point_position.point.y,point_position.point.z,175.0,26.0,169.0,1)
+                                self.send_goal(point_position.pose.x, point_position.pose.y,point_position.pose.z,point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z,4)
                                 # self.send_goal(point_3d[0]+0.28, point_3d[1],point_3d[2]+0.03,0.0,155.0,0.0,0)
 
                         

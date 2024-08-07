@@ -154,9 +154,9 @@ class Camera_subscriber(Node):
         cx = self.camera_info.k[2]
         cy = self.camera_info.k[5]
         
-        x3d = (x - cx) * depth / fx
-        y3d = (y - cy) * depth / fy
-        z3d = depth
+        x3d = (cx - x) * depth / fx
+        y3d = (cy - y) * depth / fy
+        z3d = depth/10
         
         return x3d, y3d, z3d
 
@@ -215,7 +215,7 @@ class Camera_subscriber(Node):
                                 self.findball=False
                                 self.detect=False
                                 self.get_logger().info("Send goal")
-                                self.get_logger().info('Angula: {}'.format(point_3d))
+                                self.get_logger().info('Position: {}'.format(point_3d))
                                 # self.send_goal(0.2747167457640171, -2.249231717017409e-10,0.150327756881713867,0.0,155.0,0.0,0)
                                 self.send_goal(point_position.pose.position.x, point_position.pose.position.y,point_position.pose.position.z,point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z,4)
                                 # self.send_goal(point_3d[0]+0.28, point_3d[1],point_3d[2]+0.03,0.0,155.0,0.0,0)

@@ -145,7 +145,7 @@ class Camera_subscriber(Node):
         pose_msg.pose.orientation.w = quat[3]
         self.publisher_point.publish(point_msg)
         # self.get_logger().info(f"Published Point: {point_msg}")
-        self.get_logger().info(f"Published Pose: {pose_msg}")
+        # self.get_logger().info(f"Published Pose: {pose_msg}")
         return pose_msg
 
     def pixel_to_3d(self, x, y, depth):
@@ -211,7 +211,7 @@ class Camera_subscriber(Node):
                         print(f"Point 3d= {point_3d}")
                         point_position = self.publish_point(point_3d)
                         if self.target_dist>0:
-                            if self.target_dist<0.45 and self.detect:
+                            if self.target_dist<400 and self.detect:
                                 self.findball=False
                                 self.detect=False
                                 self.get_logger().info("Send goal")

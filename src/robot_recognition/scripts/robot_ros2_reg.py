@@ -209,9 +209,10 @@ class Camera_subscriber(Node):
                         K = np.array(self.camera_info.k).reshape(3, 3)
                         point_3d = self.deproject_pixel_to_point(K, [self.pixel_x/100, self.pixel_y/100], self.target_dist/100)
                         # print(f"Point 3d= {point_3d}")
+
+                        point_position = self.publish_point(point_3d)
                         self.get_logger().info('Position: x= {}, y= {}, z= {}'.format(point_position.pose.position.x,point_position.pose.position.y,point_position.pose.position.z))
                         self.get_logger().info('Orientation: x= {}, y= {}, z= {}'.format(point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z))
-                        point_position = self.publish_point(point_3d)
                         if self.target_dist>0:
                             if self.target_dist<445 and self.detect:
                                 self.findball=False

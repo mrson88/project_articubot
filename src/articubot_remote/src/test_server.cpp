@@ -110,6 +110,9 @@ private:
       case 4:
         success = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
         break;
+      case 5:
+        success = pickUp(move_group_interface, move_group_gripper_interface, goal_handle);
+        break;
       default:
         RCLCPP_ERROR(get_logger(), "Invalid Task Number");
         result->success = false;
@@ -143,7 +146,13 @@ private:
     geometry_msgs::msg::Pose target_pose = createTargetPose(goal_handle);
     return planAndExecute(move_group_interface, move_group_gripper_interface, target_pose);
   }
-
+  bool pickUp(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface,
+                   const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface,
+                   const std::shared_ptr<rclcpp_action::ServerGoalHandle<articubot_msgs::action::ArticubotTask>>& goal_handle)
+  {
+    geometry_msgs::msg::Pose target_pose = createTargetPosePickup(goal_handle);
+    return planAndExecute(move_group_interface, move_group_gripper_interface, target_pose);
+  }
   bool moveToHome(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface)
   {
     RCLCPP_INFO(get_logger(), "Moving to home position...");
@@ -177,7 +186,16 @@ private:
     target_pose.orientation.w = goal_handle->get_goal()->or_w;
     return target_pose;
   }
+  geometry_msgs::msg::Pose createTargetPosePickup(const std::shared_ptr<rclcpp_action::ServerGoalHandle<articubot_msgs::action::ArticubotTask>>& goal_handle)
+  {
+    geometry_msgs::msg::Pose target_pose;
+    target_pose.position.x = goal_handle->get_goal()->p_x;
+    target_pose.position.y = goal_handle->get_goal()->p_y;
+    target_pose.position.z = goal_handle->get_goal()->p_z;
 
+    target_pose.orientation.w = 1;
+    return target_pose;
+  }
   bool planAndExecute(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface,
                       const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface,
                       const geometry_msgs::msg::Pose& target_pose)

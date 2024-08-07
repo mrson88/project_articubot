@@ -186,8 +186,8 @@ private:
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
     bool success = false;
 
-    std::vector<std::string> planners = {"RRTConnect", "RRTstar", "PRMstar", "LBKPIECE", "BKPIECE"};
-    
+    // std::vector<std::string> planners = {"RRTConnect", "RRTstar", "PRMstar", "LBKPIECE", "BKPIECE"};
+    std::vector<std::string> planners = {"RRTConnect",};   
     for (const auto& planner : planners) {
       move_group_interface->setPlannerId(planner);
       RCLCPP_INFO(get_logger(), "Attempting to plan with %s", planner.c_str());

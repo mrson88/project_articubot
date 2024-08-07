@@ -20,6 +20,10 @@ from rclpy.action.client import ClientGoalHandle, GoalStatus
 import numpy as np
 from geometry_msgs.msg import PointStamped, PoseStamped
 from tf_transformations import quaternion_from_euler
+
+from geometry_msgs.msg import TransformStamped
+from cv_bridge import CvBridge
+from tf2_ros import TransformBroadcaster
 class Camera_subscriber(Node):
 
     def __init__(self):
@@ -144,7 +148,29 @@ class Camera_subscriber(Node):
         self.get_logger().info(f"Published Pose: {pose_msg}")
         return pose_msg
 
+    def pixel_to_3d(self, x, y, depth):
+        fx = self.camera_info.k[0]
+        fy = self.camera_info.k[4]
+        cx = self.camera_info.k[2]
+        cy = self.camera_info.k[5]
+        
+        x3d = (x - cx) * depth / fx
+        y3d = (y - cy) * depth / fy
+        z3d = depth
+        
+        return x3d, y3d, z3d
 
+    def publish_tf(self, x, y, z, frame_id):
+        t = TransformStamped()
+        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.frame_id = 'camera_color_optical_frame'
+        t.child_frame_id = frame_id
+        t.transform.translation.x = x
+        t.transform.translation.y = y
+        t.transform.translation.z = z
+        # Set rotation - in this example, we're not determining orientation
+        t.transform.rotation.w = 1.0
+        self.tf_broadcaster.sendTransform(t)
     def camera_callback(self, data):
         if self.depth_image is None :
             return
@@ -176,12 +202,13 @@ class Camera_subscriber(Node):
                 if len(self.depth_image)!=0:
                     if self.inference_result.class_name=="sports ball" or self.inference_result.class_name=="frisbee":
                         self.target_dist = self.depth_image[self.pixel_y, self.pixel_x]
-                        self.get_logger().info('x=: {}'.format(self.pixel_x))
-                        self.get_logger().info('y=: {}'.format(self.pixel_y))
-                        self.get_logger().info('Depth=: {}'.format(self.target_dist))
+                        # self.get_logger().info('x=: {}'.format(self.pixel_x))
+                        # self.get_logger().info('y=: {}'.format(self.pixel_y))
+                        # self.get_logger().info('Depth=: {}'.format(self.target_dist))
                         self.target_val=(self.pixel_x -320)/320
                         K = np.array(self.camera_info.k).reshape(3, 3)
                         point_3d = self.deproject_pixel_to_point(K, [self.pixel_x, self.pixel_y], self.target_dist)
+                        print(f"Point 3d= {point_3d}")
                         point_position = self.publish_point(point_3d)
                         if self.target_dist>0:
                             if self.target_dist<0.45 and self.detect:

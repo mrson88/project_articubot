@@ -135,9 +135,9 @@ class Camera_subscriber(Node):
         point_msg.point.x = point_3d[0]
         point_msg.point.y = point_3d[1]
         point_msg.point.z = point_3d[2]
-        pose_msg.pose.position.x = point_3d[0]
-        pose_msg.pose.position.y = point_3d[1]
-        pose_msg.pose.position.z = point_3d[2]
+        pose_msg.pose.position.x = abs(point_3d[0]/10)
+        pose_msg.pose.position.y = abs(point_3d[1]/10)
+        pose_msg.pose.position.z = abs(point_3d[2]/10)
         quat = quaternion_from_euler(0, 160, 0)
         pose_msg.pose.orientation.x = quat[0]
         pose_msg.pose.orientation.y = quat[1]
@@ -154,9 +154,9 @@ class Camera_subscriber(Node):
         cx = self.camera_info.k[2]
         cy = self.camera_info.k[5]
         
-        x3d = (cx - x) * depth / fx
-        y3d = (cy - y) * depth / fy
-        z3d = depth/10
+        x3d = (x - cx) * depth / fx
+        y3d = (y - cy) * depth / fy
+        z3d = depth
         
         return x3d, y3d, z3d
 

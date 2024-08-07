@@ -214,6 +214,7 @@ class MainWindow(QMainWindow):
         self.open_navigation_button = QPushButton("Open Robot Navigation")
         self.save_position_arm = QPushButton('Save Arm Position', self)
         self.btn_move_position_arm = QPushButton('Move Arm Position', self)
+        self.btn_pick_robot = QPushButton('Pick', self)
         self.button_quit = QPushButton("Quit", self)
 
         self.btn_forward.clicked.connect(self.move_forward)
@@ -228,6 +229,7 @@ class MainWindow(QMainWindow):
         self.open_navigation_button.clicked.connect(self.launch_robot_navigation)
         self.save_position_arm.clicked.connect(self.save_position_arm_to_position)
         self.btn_move_position_arm.clicked.connect(self.control_arm_to_position)
+        self.btn_pick_robot.clicked.connect(self.control_pick_robot)
         self.button_quit.clicked.connect(self.close)
         self.btn_run_navigation.clicked.connect(self.send_navigation_goal)
         
@@ -247,6 +249,7 @@ class MainWindow(QMainWindow):
         # control_layout.addStretch(1)
 
         control_position_arm_layout.addWidget(self.save_position_arm)  
+        control_position_arm_layout.addWidget(self.btn_pick_robot)  
         control_position_arm_layout.addWidget(self.btn_move_position_arm)  
         self.joint_sliders = []
         self.joint_labels = []
@@ -323,9 +326,12 @@ class MainWindow(QMainWindow):
         self.point=self.node.position_and_orientation
         # print(self.point)
         print(f"px={self.point[0]}, py={self.point[1]}, pz={self.point[2]}, orx={self.point[3]}, ory={self.point[4]}, orz={self.point[5]}, orw={self.point[6]}")
+        
     def control_arm_to_position(self):
-
         self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6],0)
+
+    def control_pick_robot(self):
+        self.node.send_goal_robot_arm(self.point[0],self.point[1],self.point[2],self.point[3],self.point[4],self.point[5],self.point[6],4)
     def update_label(self):
         for i, slider in enumerate(self.joint_sliders):
             value = slider.value() / 100.0  # Convert to -1.0 to 1.0 range

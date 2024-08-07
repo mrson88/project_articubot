@@ -209,15 +209,16 @@ class Camera_subscriber(Node):
                         K = np.array(self.camera_info.k).reshape(3, 3)
                         point_3d = self.deproject_pixel_to_point(K, [self.pixel_x/100, self.pixel_y/100], self.target_dist/100)
                         # print(f"Point 3d= {point_3d}")
+                        self.get_logger().info('Position: x= {}, y= {}, z= {}'.format(point_position.pose.position.x,point_position.pose.position.y,point_position.pose.position.z))
+                        self.get_logger().info('Orientation: x= {}, y= {}, z= {}'.format(point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z))
                         point_position = self.publish_point(point_3d)
                         if self.target_dist>0:
                             if self.target_dist<445 and self.detect:
                                 self.findball=False
                                 self.detect=False
                                 self.get_logger().info("Send goal")
-                                self.get_logger().info('Position: x= {}, y= {}, z= {}'.format(point_position.pose.position.x,point_position.pose.position.y,point_position.pose.position.z))
-                                # self.send_goal(0.2747167457640171, -2.249231717017409e-10,0.150327756881713867,0.0,155.0,0.0,0)
-                                self.send_goal(point_position.pose.position.x, point_position.pose.position.y,point_position.pose.position.z,point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z,5)
+                                # self.get_logger().info('Position: x= {}, y= {}, z= {}'.format(point_position.pose.position.x,point_position.pose.position.y,point_position.pose.position.z))
+                                # self.send_goal(point_position.pose.position.x, point_position.pose.position.y,point_position.pose.position.z,point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z,5)
                                 # self.send_goal(point_3d[0]+0.28, point_3d[1],point_3d[2]+0.03,0.0,155.0,0.0,0)
 
                         

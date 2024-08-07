@@ -86,7 +86,7 @@ class Camera_subscriber(Node):
         self.frame_width = 640
         self.depth_image=[]
         # self.face_recognition = FaceRecognition(0.7, self.frame_height, self.frame_width)
-        self.findball = False
+        self.findball = True
 
     def camera_info_callback(self, msg):
         self.camera_info = msg

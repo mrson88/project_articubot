@@ -95,18 +95,18 @@ class Camera_subscriber(Node):
         msg = Twist()
         if self.findball:
             # if (time.time() - self.lastrcvtime < self.rcv_timeout_secs):
-            if self.inference_result.class_name=="sports ball" or self.inference_result.class_name=="frisbee" or self.inference_result.class_name=="person":
-                self.get_logger().info('Target: {}={}'.format(self.inference_result.class_name,self.target_dist))
+            if self.inference_result.class_name=="sports ball" or self.inference_result.class_name=="frisbee" :
+                # self.get_logger().info('Target: {}={}'.format(self.inference_result.class_name,self.target_dist))
                 print(self.target_dist)
                 if (self.target_dist > self.max_size_thresh):
                     msg.linear.x = self.forward_chase_speed
                     self.detect=True
                 
                 msg.angular.z = -self.angular_chase_multiplier*self.target_val
-                self.get_logger().info('Angula: {}'.format(msg.angular.z))
+                # self.get_logger().info('Angula: {}'.format(msg.angular.z))
             else:
                 if self.pixel_y<180:
-                    self.get_logger().info('Target lost')
+                    # self.get_logger().info('Target lost')
                     msg.angular.z = self.search_angular_speed
         self.publisher_.publish(msg)
 

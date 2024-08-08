@@ -29,7 +29,7 @@ class Camera_subscriber(Node):
     def __init__(self):
         super().__init__('camera_subscriber')
         self.package_share_dir = get_package_share_directory("robot_recognition")
-        self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8m.pt")
+        self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n.pt")
         self.model = YOLO(self.model_dir)
         self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
         self.yolov8_inference = Yolov8Inference()

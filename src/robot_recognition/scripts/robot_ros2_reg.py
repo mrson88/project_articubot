@@ -29,13 +29,22 @@ class Camera_subscriber(Node):
     def __init__(self):
         super().__init__('camera_subscriber')
         self.package_share_dir = get_package_share_directory("robot_recognition")
-        self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n_quantized.pt")
+        self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n.pt")
+        self.quantize_model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n_quantized.pt")
         self.model = YOLO(self.model_dir)
-        self.model.model = torch.quantization.quantize_dynamic(
-        self.model.model,
-        {torch.nn.Linear, torch.nn.Conv2d},
-        dtype=torch.qint8
-    )
+        self.state_dict = torch.load(self.quantize_model_dir)
+        self.quantized_model = torch.quantization.quantize_dynamic(
+            self.model.model,
+            {torch.nn.Linear, torch.nn.Conv2d},
+            dtype=torch.qint8
+        )
+        
+        # Load the quantized state dict
+        self.quantized_model.load_state_dict(self.state_dict)
+        
+        # Replace the model in the YOLO object
+        self.model.model = self.quantized_model
+
         self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
         self.yolov8_inference = Yolov8Inference()
 

@@ -168,8 +168,8 @@ class Camera_subscriber(Node):
         cx = self.camera_info.k[2]
         cy = self.camera_info.k[5]
         
-        x3d = (x - cx) * depth / fx
-        y3d = (y - cy) * depth / fy
+        x3d = (x* 0.001  - cx) * depth / fx
+        y3d = (y * 0.001 - cy) * depth / fy
         z3d = depth * 0.001 
         
         return x3d, y3d, z3d

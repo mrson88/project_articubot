@@ -168,8 +168,8 @@ class Camera_subscriber(Node):
         cx = self.camera_info.k[2]
         cy = self.camera_info.k[5]
         
-        x3d = (x* 0.001  - cx) * depth / fx
-        y3d = (y * 0.001 - cy) * depth / fy
+        x3d = ((x  - cx) * depth / fx)* 0.001
+        y3d = ((y  - cy) * depth / fy)* 0.001
         z3d = depth * 0.001 
         
         return x3d, y3d, z3d
@@ -221,7 +221,7 @@ class Camera_subscriber(Node):
                         # self.get_logger().info('Depth=: {}'.format(self.target_dist))
                         self.target_val=(self.pixel_x -320)/320
                         K = np.array(self.camera_info.k).reshape(3, 3)
-                        point_3d = self.deproject_pixel_to_point(K, [self.pixel_x/10, self.pixel_y/10], self.target_dist/100)
+                        point_3d = self.deproject_pixel_to_point(K, [self.pixel_x/1000, self.pixel_y/1000], self.target_dist)
                         # print(f"Point 3d= {point_3d}")
 
                         point_position = self.publish_point(point_3d)

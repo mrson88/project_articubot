@@ -143,7 +143,7 @@ class Speech_Whisper_Node(Node):
         # embedmodel = getconfig()["embedmodel"]
         # mainmodel = getconfig()["mainmodel"]
         embedmodel = "nomic-embed-text"
-        mainmodel = "llama3"
+        mainmodel = "tinyllama"
         chroma = chromadb.HttpClient(host="localhost", port=8000)
         collection = chroma.get_or_create_collection("buildragwithpython")
 

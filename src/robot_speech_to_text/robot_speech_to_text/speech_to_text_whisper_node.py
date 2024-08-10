@@ -100,8 +100,8 @@ class Speech_Whisper_Node(Node):
 
                         # Generate and stream output
                         # generator = generate_openai(self.user_text)
-                        generator = self.generate_llama(self.user_text)
-                        # generator = self.chromadb_response(self.user_text)
+                        # generator = self.generate_llama(self.user_text)
+                        generator = self.chromadb_response(self.user_text)
                         # generator=generate_rag_test(self.user_text)
                         print(generator)
 

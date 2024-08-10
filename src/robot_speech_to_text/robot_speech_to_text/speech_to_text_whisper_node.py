@@ -22,7 +22,8 @@ from submodules.utilities import *
 class Speech_Whisper_Node(Node):
     def __init__(self):
         super().__init__('speech_to_text_whisper_node')
-        self.model, self.answer, self.history = faster_whisper.WhisperModel(model_size_or_path="medium", device='cuda' if torch.cuda.is_available() else 'cpu'), "", []
+        # self.model, self.answer, self.history = faster_whisper.WhisperModel(model_size_or_path="medium", device='cuda' if torch.cuda.is_available() else 'cpu'), "", []
+        self.model, self.answer, self.history = faster_whisper.WhisperModel(model_size_or_path="medium", device='cpu'), "", []
         # self.model  = pipeline("automatic-speech-recognition", model="vinai/PhoWhisper-small", device="cuda")
         self.client = chromadb.Client()
         self.collection = self.client.create_collection(name="docs")

@@ -435,7 +435,7 @@ private:
   bool stop_executor_ = false;
   std::atomic<bool> is_executing_{false};
   std::atomic<bool> stop_execution_{false};
-  const std::chrono::seconds TIMEOUT_DURATION{60}; // Timeout sau 60 giây
+  const std::chrono::seconds TIMEOUT_DURATION{20}; // Timeout sau 60 giây
 
   rclcpp_action::GoalResponse handle_goal(
     const rclcpp_action::GoalUUID & uuid,

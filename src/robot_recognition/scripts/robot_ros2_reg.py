@@ -399,33 +399,68 @@ from articubot_msgs.action import ArticubotTask
 class Camera_subscriber(Node):
     def __init__(self):
         super().__init__('camera_subscriber')
-        self.bridge = CvBridge()
-        package_share_dir = get_package_share_directory("robot_recognition")
-        model_dir = os.path.join(package_share_dir, "scripts", "yolov8m.pt")
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = YOLO(model_dir).to(self.device)
-        self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.point_pub = self.create_publisher(PointStamped, 'point_3d', 5)
+        self.package_share_dir = get_package_share_directory("robot_recognition")
+        self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8m.pt")
+        # self.quantize_model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n_quantized.pt")
+        if torch.cuda.is_available():
+            self.device=torch.device("cuda")
+        else:
+            self.device=torch.device("cpu")
+
+        self.model = YOLO(self.model_dir).to(self.device)
+        # self.state_dict = torch.load(self.quantize_model_dir)
+        # self.quantized_model = torch.quantization.quantize_dynamic(
+        #     self.model.model,
+        #     {torch.nn.Linear, torch.nn.Conv2d},
+        #     dtype=torch.qint8
+        # )
+        
+        # # Load the quantized state dict
+        # self.quantized_model.load_state_dict(self.state_dict)
+        
+        # # Replace the model in the YOLO object
+        # self.model.model = self.quantized_model
+
+        self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.yolov8_inference = Yolov8Inference()
+
+        self.subscription = self.create_subscription(
+            Image,
+            'camera/camera/color/image_raw',
+            self.camera_callback,
+            1)
+        # self.subscription = self.create_subscription(
+        #     Image,
+        #     '/image',
+        #     self.webcam_callback,
+        #     1)
+        self.subscription 
+        self.subscription_depth = self.create_subscription(
+            Image,
+            'camera/camera/depth/image_rect_raw',
+            self.depth_camera_callback,
+            1)
+        self.create_subscription(
+            CameraInfo,
+            'camera/camera/depth/camera_info',
+            self.camera_info_callback,
+            10)
+        self.publisher_point = self.create_publisher(PointStamped, 'point_3d', 5)
+        self.subscription_depth
         self.yolov8_pub = self.create_publisher(Yolov8Inference, "/Yolov8_Inference", 5)
         self.img_pub = self.create_publisher(Image, "/inference_result", 5)
-        self.create_subscription(Image, 'camera/camera/color/image_raw', self.camera_callback, 10)
-        self.create_subscription(Image, 'camera/camera/depth/image_rect_raw', self.depth_camera_callback, 10)
-        self.create_subscription(CameraInfo, 'camera/camera/depth/camera_info', self.camera_info_callback, 10)
-        self.create_subscription(String, 'find_ball', self.findball_callback, 5)
         self._action_client = ActionClient(self, ArticubotTask, 'test_server')
-
-        self.timer = self.create_timer(0.1, self.timer_callback)
-        self.camera_info = None
-        self.depth_image = None
-        self.last_process_time = time.time()
-        self.process_interval = 0.5
-        self.inference_result = InferenceResult()
+        self.sub_supress = self.create_subscription(String, 'find_ball', self.findball_callback, 5)
+        timer_period = 0.1  # seconds
+        self.timer = self.create_timer(timer_period, self.timer_callback)
         self.target_val = 0.0
         self.target_dist = 0.0
-        self.pixel_x = 0
-        self.pixel_y = 0
-        self.detect = False
-        self.findball = True
+        self.lastrcvtime = time.time() - 10000
+        self.pixel_x=0
+        self.pixel_y=0
+        self.detect=False
+        self.camera_info = None
+
         self.declare_parameter("rcv_timeout_secs", 1.0)
         self.declare_parameter("angular_chase_multiplier", 0.2)
         self.declare_parameter("forward_chase_speed", 0.1)
@@ -438,17 +473,14 @@ class Camera_subscriber(Node):
         self.search_angular_speed = self.get_parameter('search_angular_speed').get_parameter_value().double_value
         self.max_size_thresh = self.get_parameter('max_size_thresh').get_parameter_value().double_value
         self.filter_value = self.get_parameter('filter_value').get_parameter_value().double_value
-        # params = [
-        #     ("rcv_timeout_secs", 1.0),
-        #     ("angular_chase_multiplier", 0.2),
-        #     ("forward_chase_speed", 0.1),
-        #     ("search_angular_speed", 0.15),
-        #     ("max_size_thresh", 0.1),
-        #     ("filter_value", 0.9)
-        # ]
-        # for name, default in params:
-        #     self.declare_parameter(name, default)
-        #     setattr(self, name, self.get_parameter(name).value)
+        self.inference_result = InferenceResult()
+        self.recognition_on=True
+        self.registration_data = None
+        self.frame_height = 480
+        self.frame_width = 640
+        self.depth_image=[]
+        # self.face_recognition = FaceRecognition(0.7, self.frame_height, self.frame_width)
+        self.findball = True
 
 
 

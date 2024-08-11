@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
             Image,
             '/inference_result',  # Adjust this topic to match your camera's topic
             self.camera_callback,
-            2)
+            10)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_label_position)
         self.timer.start(100)  # Update every 1000 ms (1 second)  
@@ -393,30 +393,13 @@ class MainWindow(QMainWindow):
         msg.position = positions
         self.publisher_joint.publish(msg)
 
-    # def camera_callback(self, msg):
-    #     try:
-    #         cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
-    #         self.display_image(cv_image)
-    #     except Exception as e:
-    #         print(f'Error processing image: {str(e)}')
     def camera_callback(self, msg):
         try:
-            # Get the encoding of the image
-            encoding = msg.encoding if hasattr(msg, 'encoding') else "bgr8"
-            
-            # Convert the ROS image message to OpenCV image
-            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
-            
-            # If the image is not in BGR format, convert it
-            if encoding != "bgr8":
-                cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
-            
+            cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
             self.display_image(cv_image)
         except Exception as e:
             print(f'Error processing image: {str(e)}')
-            # Log additional information for debugging
-            print(f'Image encoding: {msg.encoding if hasattr(msg, "encoding") else "unknown"}')
-            print(f'Image shape: {msg.height}x{msg.width}x{msg.step // msg.width}')
+
     def display_image(self, cv_image):
         height, width, channel = cv_image.shape
         bytes_per_line = 3 * width

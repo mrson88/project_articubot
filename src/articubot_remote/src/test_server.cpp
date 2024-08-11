@@ -539,14 +539,19 @@ private:
     setupMoveGroupInterface(move_group_interface);
 
     bool success = false;
+    bool success1=false;
+    bool success2=false;
+    bool success3=false;
+    bool success4=false;
+    bool success5=false;
     switch (goal_handle->get_goal()->task) {
       case 0:
-          bool success1 = openGripper(move_group_gripper_interface);
-          bool success2 = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
-          bool success3 = closeGripper(move_group_gripper_interface);
-          bool success4 = moveToHome(move_group_interface);
-          bool success5 = openGripper(move_group_gripper_interface);
-          success=success1 && success2 && success3 && success4 && success5;
+          success1 = openGripper(move_group_gripper_interface);
+          success2 = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
+          success3 = closeGripper(move_group_gripper_interface);
+          success4 = moveToHome(move_group_interface);
+          success5 = openGripper(move_group_gripper_interface);
+          success = success1 && success2 && success3 && success4 && success5;
         break;
       case 1:
         success = moveToHome(move_group_interface);

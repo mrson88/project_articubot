@@ -17,6 +17,8 @@
 #include <string>
 #include <thread>
 #include <std_msgs/msg/string.hpp>  
+
+
 namespace articubot_remote
 {
 
@@ -45,6 +47,7 @@ public:
 private:
   rclcpp_action::Server<articubot_msgs::action::ArticubotTask>::SharedPtr action_server_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr subscription_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr find_ball_publisher_;  
   std::vector<double> current_joint = {0.0, -0.5, 1.0, 1.2, 0.5, 0, 0};
 
   rclcpp_action::GoalResponse goalCallback(

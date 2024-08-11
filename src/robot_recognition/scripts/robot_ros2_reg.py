@@ -399,11 +399,6 @@ from articubot_msgs.action import ArticubotTask
 class Camera_subscriber(Node):
     def __init__(self):
         super().__init__('camera_subscriber')
-        self.initialize_model()
-        self.setup_publishers()
-        self.setup_subscribers()
-        self.setup_action_client()
-        self.initialize_parameters()
         self.bridge = CvBridge()
         package_share_dir = get_package_share_directory("robot_recognition")
         model_dir = os.path.join(package_share_dir, "scripts", "yolov8m.pt")

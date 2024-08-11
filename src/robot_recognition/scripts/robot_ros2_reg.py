@@ -400,6 +400,13 @@ from tf2_geometry_msgs import do_transform_pose
 from geometry_msgs.msg import PoseStamped, TransformStamped
 import tf2_ros
 
+import tf2_geometry_msgs
+from geometry_msgs.msg import PoseStamped, Point, Quaternion, Vector3
+from tf2_ros import TransformException
+import rclpy
+
+
+
 class CameraSubscriber(Node):
     def __init__(self):
         super().__init__('camera_subscriber')
@@ -497,15 +504,25 @@ class CameraSubscriber(Node):
     def transform_to_base_link(self, point):
         try:
             transform = self.tf_buffer.lookup_transform('base_link', 'camera_color_optical_frame', rclpy.time.Time())
-            pose_stamped = PoseStamped()
-            pose_stamped.header.frame_id = 'camera_color_optical_frame'
-            pose_stamped.pose.position = point
-            pose_stamped.pose.orientation.w = 1.0
             
-            transformed_pose = do_transform_pose(pose_stamped, transform)
+            # Create a Vector3 from the point
+            v = Vector3(x=point.x, y=point.y, z=point.z)
+            
+            # Apply the transform to the vector
+            transformed_v = tf2_geometry_msgs.do_transform_vector3(v, transform)
+            
+            # Create a new pose with the transformed position
+            transformed_pose = PoseStamped()
+            transformed_pose.header.frame_id = 'base_link'
+            transformed_pose.header.stamp = self.get_clock().now().to_msg()
+            transformed_pose.pose.position.x = transformed_v.x
+            transformed_pose.pose.position.y = transformed_v.y
+            transformed_pose.pose.position.z = transformed_v.z
+            transformed_pose.pose.orientation.w = 1.0  # Identity rotation
+            
             return transformed_pose.pose
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
-            self.get_logger().error(f'TF2 error: {str(e)}')
+        except TransformException as ex:
+            self.get_logger().error(f'Could not transform point: {ex}')
             return None
 
     def send_pickup_goal(self):

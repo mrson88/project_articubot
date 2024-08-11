@@ -435,7 +435,7 @@ private:
   bool stop_executor_ = false;
   std::atomic<bool> is_executing_{false};
   std::atomic<bool> stop_execution_{false};
-  const std::chrono::seconds TIMEOUT_DURATION{20}; // Timeout sau 60 giây
+  const std::chrono::seconds TIMEOUT_DURATION{60}; // Timeout sau 60 giây
 
   rclcpp_action::GoalResponse handle_goal(
     const rclcpp_action::GoalUUID & uuid,
@@ -541,24 +541,13 @@ private:
     bool success = false;
     switch (goal_handle->get_goal()->task) {
       case 0:
-      std::vector<std::function<bool()>> tasks = {
-        [this, &move_group_gripper_interface]() { 
-          return openGripper(move_group_gripper_interface); 
-        },
-        [this, &move_group_interface, &move_group_gripper_interface, &goal_handle]() { 
-          return moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle); 
-        },
-        [this, &move_group_gripper_interface]() { 
-          return closeGripper(move_group_gripper_interface); 
-        },
-        [this, &move_group_interface]() { 
-          return moveToHome(move_group_interface); 
-        },
-        [this, &move_group_gripper_interface]() { 
-          return openGripper(move_group_gripper_interface); 
-        }
-      };
-      success = executeTaskSequence(move_group_interface, move_group_gripper_interface, tasks);
+        success = executeTaskSequence(move_group_interface, move_group_gripper_interface, {
+          std::bind(&Test_server::openGripper, this, move_group_gripper_interface),
+          std::bind(&Test_server::moveToPoint, this, move_group_interface, move_group_gripper_interface, goal_handle),
+          std::bind(&Test_server::closeGripper, this, move_group_gripper_interface),
+          std::bind(&Test_server::moveToHome, this, move_group_interface),
+          std::bind(&Test_server::openGripper, this, move_group_gripper_interface)
+        });
         break;
       case 1:
         success = moveToHome(move_group_interface);
@@ -596,13 +585,11 @@ private:
   }
 
   template<typename... Funcs>
-  bool executeTaskSequence(const std::vector<std::function<bool()>>& tasks)
+  bool executeTaskSequence(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface,
+                           const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface,
+                           Funcs... funcs)
   {
-    for (const auto& task : tasks) {
-      if (stop_execution_) return false;
-      if (!task()) return false;
-    }
-    return true;
+    return (... && executeWithTimeout(funcs));
   }
 
   void setupMoveGroupInterface(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface)

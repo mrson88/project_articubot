@@ -570,11 +570,11 @@ private:
       default:
         RCLCPP_ERROR(get_logger(), "Invalid Task Number");
         success = false;
+    }
+
     }catch (const std::exception& e) {
       RCLCPP_ERROR(get_logger(), "Exception during goal execution: %s", e.what());
       success = false;
-    }
-
     }
 
 

@@ -34,6 +34,12 @@ public:
         std::bind(&Test_server::acceptedCallback, this, std::placeholders::_1));
     subscription_ = this->create_subscription<sensor_msgs::msg::JointState>(
         "/joint_states", 10, std::bind(&Test_server::joint_states_callback, this, std::placeholders::_1));
+
+
+    // Create the publisher for the find_ball topic
+    find_ball_publisher_ = this->create_publisher<std_msgs::msg::String>("find_ball", 10);
+    
+
   }
 
 private:
@@ -57,7 +63,13 @@ private:
     (void)goal_handle;
     return rclcpp_action::CancelResponse::ACCEPT;
   }
-
+  void send_find_ball_message(bool success)
+  {
+    auto message = std_msgs::msg::String();
+    message.data = success ? "true" : "false";
+    RCLCPP_INFO(this->get_logger(), "Publishing find_ball message: '%s'", message.data.c_str());
+    find_ball_publisher_->publish(message);
+  }
   void acceptedCallback(
       const std::shared_ptr<rclcpp_action::ServerGoalHandle<articubot_msgs::action::ArticubotTask>> goal_handle)
   {
@@ -128,7 +140,9 @@ private:
       RCLCPP_ERROR(get_logger(), "Task execution failed");
       result->success = false;
       goal_handle->abort(result);
+      send_find_ball_message(false);
     }
+    send_find_ball_message(success);
   }
 
   void setupMoveGroupInterface(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface)

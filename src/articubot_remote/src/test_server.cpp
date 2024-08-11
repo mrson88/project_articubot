@@ -351,7 +351,6 @@
 
 
 
-
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <rclcpp/rclcpp.hpp>
@@ -376,6 +375,7 @@
 #include <queue>
 #include <future>
 #include <chrono>
+#include <atomic>
 
 namespace articubot_remote
 {
@@ -405,10 +405,13 @@ public:
 
     this->executor_thread_ = std::thread(&Test_server::executorThread, this);
 
-    // Tạo timer để kiểm tra trạng thái server định kỳ
     this->status_timer_ = this->create_wall_timer(
       std::chrono::seconds(10),
       std::bind(&Test_server::checkServerStatus, this));
+
+    this->executor_check_timer_ = this->create_wall_timer(
+      std::chrono::seconds(5),
+      std::bind(&Test_server::checkExecutorStatus, this));
   }
 
   ~Test_server()
@@ -428,6 +431,7 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr subscription_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr find_ball_publisher_;
   rclcpp::TimerBase::SharedPtr status_timer_;
+  rclcpp::TimerBase::SharedPtr executor_check_timer_;
   std::vector<double> current_joint = {0.0, -0.5, 1.0, 1.2, 0.5, 0, 0};
 
   std::thread executor_thread_;
@@ -435,6 +439,7 @@ private:
   std::condition_variable cv_;
   std::queue<std::shared_ptr<GoalHandleArticubotTask>> goal_queue_;
   bool stop_executor_ = false;
+  std::atomic<bool> is_processing_goal_{false};
 
   rclcpp_action::GoalResponse handle_goal(
     const rclcpp_action::GoalUUID & uuid,
@@ -464,26 +469,35 @@ private:
 
   void executorThread()
   {
+    RCLCPP_INFO(this->get_logger(), "Executor thread started");
     while (rclcpp::ok()) {
       std::unique_lock<std::mutex> lock(this->mutex_);
       this->cv_.wait(lock, [this] { return !this->goal_queue_.empty() || this->stop_executor_; });
 
       if (this->stop_executor_) {
+        RCLCPP_INFO(this->get_logger(), "Executor thread stopping");
         break;
       }
 
-      auto goal_handle = this->goal_queue_.front();
-      this->goal_queue_.pop();
-      lock.unlock();
+      if (!this->goal_queue_.empty()) {
+        auto goal_handle = this->goal_queue_.front();
+        this->goal_queue_.pop();
+        lock.unlock();
 
-      try {
-        execute(goal_handle);
-      } catch (const std::exception& e) {
-        RCLCPP_ERROR(this->get_logger(), "Exception in execute: %s", e.what());
-      } catch (...) {
-        RCLCPP_ERROR(this->get_logger(), "Unknown exception in execute");
+        RCLCPP_INFO(this->get_logger(), "Starting to process goal");
+        is_processing_goal_ = true;
+        try {
+          execute(goal_handle);
+        } catch (const std::exception& e) {
+          RCLCPP_ERROR(this->get_logger(), "Exception in execute: %s", e.what());
+        } catch (...) {
+          RCLCPP_ERROR(this->get_logger(), "Unknown exception in execute");
+        }
+        is_processing_goal_ = false;
+        RCLCPP_INFO(this->get_logger(), "Finished processing goal");
       }
     }
+    RCLCPP_INFO(this->get_logger(), "Executor thread ended");
   }
 
   void execute(const std::shared_ptr<GoalHandleArticubotTask> goal_handle)
@@ -633,7 +647,7 @@ private:
     geometry_msgs::msg::Pose target_pose;
     target_pose.position.x = goal_handle->get_goal()->p_x;
     target_pose.position.y = goal_handle->get_goal()->p_y;
-    target_pose.position.z = goal_handle->get_goal()->p_z;
+target_pose.position.z = goal_handle->get_goal()->p_z;
     target_pose.orientation.w = 1;
     return target_pose;
   }
@@ -649,7 +663,7 @@ private:
 
     std::vector<std::string> planners = {"RRTConnect"};   
     for (const auto& planner : planners) {
-move_group_interface->setPlannerId(planner);
+      move_group_interface->setPlannerId(planner);
       RCLCPP_INFO(get_logger(), "Attempting to plan with %s", planner.c_str());
       success = (move_group_interface->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
       if (success) {
@@ -759,6 +773,13 @@ move_group_interface->setPlannerId(planner);
     std::unique_lock<std::mutex> lock(this->mutex_);
     RCLCPP_INFO(this->get_logger(), "Action server status: Number of goals in queue: %ld",
                 this->goal_queue_.size());
+  }
+
+  void checkExecutorStatus()
+  {
+    std::unique_lock<std::mutex> lock(this->mutex_);
+    RCLCPP_INFO(this->get_logger(), "Executor status: Is processing goal: %s, Goals in queue: %ld",
+                is_processing_goal_ ? "Yes" : "No", this->goal_queue_.size());
   }
 };
 

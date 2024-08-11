@@ -148,12 +148,16 @@ class MainWindow(QMainWindow):
         self.action_client_navigation = ActionClient(self.node, NavigateToPose, 'navigate_to_pose')
         self.bridge = CvBridge()       
         # Initialize camera subscriber
+        # self.camera_subscriber = self.node.create_subscription(
+        #     Image,
+        #     '/camera/camera/color/image_raw',  # Adjust this topic to match your camera's topic
+        #     self.camera_callback,
+        #     10)
         self.camera_subscriber = self.node.create_subscription(
             Image,
-            '/camera/camera/color/image_raw',  # Adjust this topic to match your camera's topic
+            '/inference_result',  # Adjust this topic to match your camera's topic
             self.camera_callback,
             10)
-
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_label_position)
         self.timer.start(100)  # Update every 1000 ms (1 second)  

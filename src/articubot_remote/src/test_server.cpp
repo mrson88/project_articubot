@@ -17,7 +17,10 @@
 #include <string>
 #include <thread>
 #include <std_msgs/msg/string.hpp>  
-
+  double to_radians(const double deg_angle)
+{
+  return deg_angle * M_PI / 180.0;
+}
 
 namespace articubot_remote
 {

@@ -756,8 +756,8 @@ move_group_interface->setPlannerId(planner);
 
   void checkServerStatus()
   {
-    RCLCPP_INFO(this->get_logger(), "Action server status: Is server running: %s, Number of goals in queue: %ld",
-                this->action_server_->is_server_active() ? "Yes" : "No",
+    std::unique_lock<std::mutex> lock(this->mutex_);
+    RCLCPP_INFO(this->get_logger(), "Action server status: Number of goals in queue: %ld",
                 this->goal_queue_.size());
   }
 };

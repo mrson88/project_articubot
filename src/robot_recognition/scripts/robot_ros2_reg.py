@@ -53,7 +53,7 @@ class Camera_subscriber(Node):
 
         self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
         self.yolov8_inference = Yolov8Inference()
-
+        self.process_interval = 0.5
         self.subscription = self.create_subscription(
             Image,
             'camera/camera/color/image_raw',

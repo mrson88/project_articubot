@@ -437,6 +437,7 @@ private:
   std::atomic<bool> stop_execution_{false};
   const std::chrono::seconds TIMEOUT_DURATION{20}; // Timeout sau 60 giây
 
+
   rclcpp_action::GoalResponse handle_goal(
     const rclcpp_action::GoalUUID & uuid,
     std::shared_ptr<const ArticubotTask::Goal> goal)
@@ -449,7 +450,6 @@ private:
     }
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
   }
-
   rclcpp_action::CancelResponse handle_cancel(
     const std::shared_ptr<GoalHandleArticubotTask> goal_handle)
   {
@@ -461,10 +461,7 @@ private:
   void handle_accepted(const std::shared_ptr<GoalHandleArticubotTask> goal_handle)
   {
     RCLCPP_INFO(this->get_logger(), "Goal accepted, starting execution");
-    std::unique_lock<std::mutex> lock(this->mutex_);
-    current_goal_ = goal_handle;
-    is_executing_ = true;
-    this->cv_.notify_one();
+    std::thread{std::bind(&Test_server::execute, this, std::placeholders::_1), goal_handle}.detach();
   }
 
   void executorThread()
@@ -501,6 +498,7 @@ private:
     auto result = std::make_shared<ArticubotTask::Result>();
 
     stop_execution_ = false;
+    is_executing_ = true;
     auto future = std::async(std::launch::async, [this, goal_handle]() {
       return executeGoal(goal_handle);
     });
@@ -519,7 +517,7 @@ private:
         goal_handle->abort(result);
       }
     }
-
+    is_executing_ = false;
     send_find_ball_message(result->success);
     RCLCPP_INFO(get_logger(), "Goal execution completed with result: %s", result->success ? "success" : "failure");
   }
@@ -544,6 +542,7 @@ private:
     bool success3=false;
     bool success4=false;
     bool success5=false;
+    try{
     switch (goal_handle->get_goal()->task) {
       case 0:
           success1 = openGripper(move_group_gripper_interface);
@@ -571,7 +570,13 @@ private:
       default:
         RCLCPP_ERROR(get_logger(), "Invalid Task Number");
         success = false;
+    }catch (const std::exception& e) {
+      RCLCPP_ERROR(get_logger(), "Exception during goal execution: %s", e.what());
+      success = false;
     }
+
+    }
+
 
     if (success) {
       logRobotState(move_group_interface);
@@ -812,3 +817,12 @@ geometry_msgs::msg::Pose createTargetPose(const std::shared_ptr<GoalHandleArticu
 }  // namespace articubot_remote
 
 RCLCPP_COMPONENTS_REGISTER_NODE(articubot_remote::Test_server)
+
+
+
+
+
+
+
+
+

@@ -16,7 +16,7 @@
 #include <memory>
 #include <string>
 #include <thread>
-
+#include <std_msgs/msg/string.hpp>  
 namespace articubot_remote
 {
 

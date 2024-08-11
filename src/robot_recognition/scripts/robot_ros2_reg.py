@@ -426,18 +426,29 @@ class Camera_subscriber(Node):
         self.pixel_y = 0
         self.detect = False
         self.findball = True
-
-        params = [
-            ("rcv_timeout_secs", 1.0),
-            ("angular_chase_multiplier", 0.2),
-            ("forward_chase_speed", 0.1),
-            ("search_angular_speed", 0.15),
-            ("max_size_thresh", 0.1),
-            ("filter_value", 0.9)
-        ]
-        for name, default in params:
-            self.declare_parameter(name, default)
-            setattr(self, name, self.get_parameter(name).value)
+        self.declare_parameter("rcv_timeout_secs", 1.0)
+        self.declare_parameter("angular_chase_multiplier", 0.2)
+        self.declare_parameter("forward_chase_speed", 0.1)
+        self.declare_parameter("search_angular_speed", 0.15)
+        self.declare_parameter("max_size_thresh", 0.1)
+        self.declare_parameter("filter_value", 0.9)
+        self.rcv_timeout_secs = self.get_parameter('rcv_timeout_secs').get_parameter_value().double_value
+        self.angular_chase_multiplier = self.get_parameter('angular_chase_multiplier').get_parameter_value().double_value
+        self.forward_chase_speed = self.get_parameter('forward_chase_speed').get_parameter_value().double_value
+        self.search_angular_speed = self.get_parameter('search_angular_speed').get_parameter_value().double_value
+        self.max_size_thresh = self.get_parameter('max_size_thresh').get_parameter_value().double_value
+        self.filter_value = self.get_parameter('filter_value').get_parameter_value().double_value
+        # params = [
+        #     ("rcv_timeout_secs", 1.0),
+        #     ("angular_chase_multiplier", 0.2),
+        #     ("forward_chase_speed", 0.1),
+        #     ("search_angular_speed", 0.15),
+        #     ("max_size_thresh", 0.1),
+        #     ("filter_value", 0.9)
+        # ]
+        # for name, default in params:
+        #     self.declare_parameter(name, default)
+        #     setattr(self, name, self.get_parameter(name).value)
 
 
 

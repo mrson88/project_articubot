@@ -30,7 +30,7 @@ class Camera_subscriber(Node):
     def __init__(self):
         super().__init__('camera_subscriber')
         self.package_share_dir = get_package_share_directory("robot_recognition")
-        self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n.pt")
+        self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8m.pt")
         # self.quantize_model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n_quantized.pt")
         if torch.cuda.is_available():
             self.device=torch.device("cuda")

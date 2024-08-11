@@ -60,7 +60,7 @@ class Speech_Whisper_Node(Node):
 
                     if voice_activity_detected:
                         frames.append(data)            
-                        if current_noise_level < ambient_noise_level + 550:
+                        if current_noise_level < ambient_noise_level + 650:
                             break # voice actitivy ends 
 
                     if not voice_activity_detected and current_noise_level > long_term_noise_level + 800:

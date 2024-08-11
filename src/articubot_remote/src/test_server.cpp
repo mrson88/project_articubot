@@ -435,7 +435,7 @@ private:
   bool stop_executor_ = false;
   std::atomic<bool> is_executing_{false};
   std::atomic<bool> stop_execution_{false};
-  const std::chrono::seconds TIMEOUT_DURATION{60}; // Timeout sau 60 giây
+  const std::chrono::seconds TIMEOUT_DURATION{20}; // Timeout sau 60 giây
 
   rclcpp_action::GoalResponse handle_goal(
     const rclcpp_action::GoalUUID & uuid,
@@ -541,13 +541,11 @@ private:
     bool success = false;
     switch (goal_handle->get_goal()->task) {
       case 0:
-        success = executeTaskSequence(move_group_interface, move_group_gripper_interface, {
-          std::bind(&Test_server::openGripper, this, move_group_gripper_interface),
-          std::bind(&Test_server::moveToPoint, this, move_group_interface, move_group_gripper_interface, goal_handle),
-          std::bind(&Test_server::closeGripper, this, move_group_gripper_interface),
-          std::bind(&Test_server::moveToHome, this, move_group_interface),
-          std::bind(&Test_server::openGripper, this, move_group_gripper_interface)
-        });
+          success = openGripper(move_group_gripper_interface);
+          success = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
+          success = closeGripper(move_group_gripper_interface);
+          success = moveToHome(move_group_interface);
+          success = openGripper(move_group_gripper_interface);
         break;
       case 1:
         success = moveToHome(move_group_interface);

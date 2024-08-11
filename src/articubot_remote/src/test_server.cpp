@@ -541,11 +541,24 @@ private:
     bool success = false;
     switch (goal_handle->get_goal()->task) {
       case 0:
-          success = openGripper(move_group_gripper_interface);
-          success = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
-          success = closeGripper(move_group_gripper_interface);
-          success = moveToHome(move_group_interface);
-          success = openGripper(move_group_gripper_interface);
+      std::vector<std::function<bool()>> tasks = {
+        [this, &move_group_gripper_interface]() { 
+          return openGripper(move_group_gripper_interface); 
+        },
+        [this, &move_group_interface, &move_group_gripper_interface, &goal_handle]() { 
+          return moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle); 
+        },
+        [this, &move_group_gripper_interface]() { 
+          return closeGripper(move_group_gripper_interface); 
+        },
+        [this, &move_group_interface]() { 
+          return moveToHome(move_group_interface); 
+        },
+        [this, &move_group_gripper_interface]() { 
+          return openGripper(move_group_gripper_interface); 
+        }
+      };
+      success = executeTaskSequence(move_group_interface, move_group_gripper_interface, tasks);
         break;
       case 1:
         success = moveToHome(move_group_interface);

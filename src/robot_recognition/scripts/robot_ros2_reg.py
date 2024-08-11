@@ -197,7 +197,7 @@ class Camera_subscriber(Node):
         # msg = Twist()
 
         img = bridge.imgmsg_to_cv2(data, "bgr8")
-        resized_image = cv2.resize(img, (320, 240))
+        resized_image = cv2.resize(img, (self.frame_width, self.frame_height))
         
         # results, ids = self.face_recognition.process_frame(img, self.recognition_on, self.registration_data)
         results = self.model(resized_image, conf=0.5,verbose=False)

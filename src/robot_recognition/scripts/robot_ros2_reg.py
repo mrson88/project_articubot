@@ -50,7 +50,7 @@ class Camera_subscriber(Node):
         
         # # Replace the model in the YOLO object
         # self.model.model = self.quantized_model
-
+        self.bridge = CvBridge()
         self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
         self.yolov8_inference = Yolov8Inference()
         self.process_interval = 0.5

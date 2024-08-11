@@ -60,10 +60,10 @@ class Speech_Whisper_Node(Node):
 
                     if voice_activity_detected:
                         frames.append(data)            
-                        if current_noise_level < ambient_noise_level + 400:
+                        if current_noise_level < ambient_noise_level + 450:
                             break # voice actitivy ends 
 
-                    if not voice_activity_detected and current_noise_level > long_term_noise_level + 800:
+                    if not voice_activity_detected and current_noise_level > long_term_noise_level + 700:
                         voice_activity_detected = True
                         print("I'm all ears.\n")
                         ambient_noise_level = long_term_noise_level

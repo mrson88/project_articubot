@@ -30,7 +30,7 @@ class Camera_subscriber(Node):
     def __init__(self):
         super().__init__('camera_subscriber')
         self.package_share_dir = get_package_share_directory("robot_recognition")
-        self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8m.pt")
+        self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n.pt")
         # self.quantize_model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n_quantized.pt")
         if torch.cuda.is_available():
             self.device=torch.device("cuda")
@@ -50,10 +50,10 @@ class Camera_subscriber(Node):
         
         # # Replace the model in the YOLO object
         # self.model.model = self.quantized_model
-        self.bridge = CvBridge()
+
         self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
         self.yolov8_inference = Yolov8Inference()
-        self.process_interval = 0.5
+
         self.subscription = self.create_subscription(
             Image,
             'camera/camera/color/image_raw',
@@ -90,7 +90,7 @@ class Camera_subscriber(Node):
         self.pixel_y=0
         self.detect=False
         self.camera_info = None
-        self.last_process_time = time.time()
+
         self.declare_parameter("rcv_timeout_secs", 1.0)
         self.declare_parameter("angular_chase_multiplier", 0.2)
         self.declare_parameter("forward_chase_speed", 0.1)
@@ -191,128 +191,77 @@ class Camera_subscriber(Node):
         # Set rotation - in this example, we're not determining orientation
         t.transform.rotation.w = 1.0
         self.tf_broadcaster.sendTransform(t)
-    # def camera_callback(self, data):
-    #     if self.depth_image is None :
-    #         return
-    #     # msg = Twist()
-
-    #     img = bridge.imgmsg_to_cv2(data, "bgr8")
-    #     resized_image = cv2.resize(img, (640, 480))
-        
-    #     # results, ids = self.face_recognition.process_frame(img, self.recognition_on, self.registration_data)
-    #     results = self.model(resized_image, conf=0.5,verbose=False)
-    #     self.yolov8_inference.header.frame_id = "inference"
-    #     self.yolov8_inference.header.stamp = camera_subscriber.get_clock().now().to_msg()
-
-    #     for r in results:
-    #         boxes = r.boxes
-    #         for box in boxes:
-    #             self.inference_result = InferenceResult()
-    #             b = box.xyxy[0].to('cpu').detach().numpy().copy()  # get box coordinates in (top, left, bottom, right) format
-    #             c = box.cls
-    #             self.inference_result.class_name = self.model.names[int(c)]
-    #             self.inference_result.top = int(b[0])
-    #             self.inference_result.left = int(b[1])
-    #             self.inference_result.bottom = int(b[2])
-    #             self.inference_result.right = int(b[3])
-    #             self.pixel_x = int((self.inference_result.top+self.inference_result.bottom)/2)
-    #             self.pixel_y = int((self.inference_result.right+self.inference_result.left)/2)
-    #             self.yolov8_inference.yolov8_inference.append(self.inference_result)
-
-
-    #             if len(self.depth_image)!=0:
-    #                 if self.inference_result.class_name=="sports ball" or self.inference_result.class_name=="frisbee":
-    #                     self.target_dist = self.depth_image[self.pixel_y, self.pixel_x]
-    #                     # self.get_logger().info('x=: {}'.format(self.pixel_x))
-    #                     # self.get_logger().info('y=: {}'.format(self.pixel_y))
-    #                     # self.get_logger().info('Depth=: {}'.format(self.target_dist))
-    #                     self.target_val=(self.pixel_x -320)/320
-    #                     K = np.array(self.camera_info.k).reshape(3, 3)
-    #                     point_3d = self.deproject_pixel_to_point(K, [self.pixel_x/1000, self.pixel_y/1000], self.target_dist)
-    #                     # print(f"Point 3d= {point_3d}")
-
-    #                     point_position = self.publish_point(point_3d)
-    #                     self.get_logger().info('Position: x= {}, y= {}, z= {}'.format(point_position.pose.position.x,point_position.pose.position.y,point_position.pose.position.z))
-    #                     self.get_logger().info('Orientation: x= {}, y= {}, z= {}'.format(point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z))
-    #                     if self.target_dist>0:
-    #                         if self.target_dist<445 and self.detect:
-    #                             self.findball=False
-    #                             self.detect=False
-    #                             self.get_logger().info("Send goal")
-    #                             # self.get_logger().info('Position: x= {}, y= {}, z= {}'.format(point_position.pose.position.x,point_position.pose.position.y,point_position.pose.position.z))
-    #                             self.send_goal(point_position.pose.position.x, point_position.pose.position.y,point_position.pose.position.z,point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z,5)
-    #                             # self.send_goal(point_3d[0]+0.28, point_3d[1],point_3d[2]+0.03,0.0,155.0,0.0,0)
-
-                        
-    #                 else:
-
-    #                     self.target_dist=0
-    #                     self.pixel_y=0
-
-    #                 self.lastrcvtime = time.time()
-
-
-
-    #         # camera_subscriber.get_logger().info(f"{self.yolov8_inference}")
-
-    #     annotated_frame = results[0].plot()
-    #     img_msg = bridge.cv2_to_imgmsg(annotated_frame)  
-
-    #     self.img_pub.publish(img_msg)
-    #     self.yolov8_pub.publish(self.yolov8_inference)
-    #     self.yolov8_inference.yolov8_inference.clear()
-
     def camera_callback(self, data):
-        current_time = time.time()
-        if current_time - self.last_process_time < self.process_interval:
+        if self.depth_image is None :
             return
+        # msg = Twist()
 
-        self.last_process_time = current_time
-        try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            resized_image = cv2.resize(cv_image, (320, 240))
-            results = self.model(resized_image, conf=0.5, verbose=False)
-            self.process_results(results, cv_image)
-        except Exception as e:
-            self.get_logger().error(f'Error processing image: {str(e)}')
-
-
-    def process_results(self, results, original_image):
-        yolov8_inference = Yolov8Inference()
-        yolov8_inference.header.frame_id = "inference"
-        yolov8_inference.header.stamp = self.get_clock().now().to_msg()
+        img = bridge.imgmsg_to_cv2(data, "bgr8")
+        resized_image = cv2.resize(img, (320, 240))
+        
+        # results, ids = self.face_recognition.process_frame(img, self.recognition_on, self.registration_data)
+        results = self.model(resized_image, conf=0.5,verbose=False)
+        self.yolov8_inference.header.frame_id = "inference"
+        self.yolov8_inference.header.stamp = camera_subscriber.get_clock().now().to_msg()
 
         for r in results:
-            for box in r.boxes:
-                self.inference_result = self.create_inference_result(box)
-                yolov8_inference.yolov8_inference.append(self.inference_result)
-                if self.depth_image is not None and self.inference_result.class_name in ["sports ball", "frisbee"]:
-                    self.process_depth()
+            boxes = r.boxes
+            for box in boxes:
+                self.inference_result = InferenceResult()
+                b = box.xyxy[0].to('cpu').detach().numpy().copy()  # get box coordinates in (top, left, bottom, right) format
+                c = box.cls
+                self.inference_result.class_name = self.model.names[int(c)]
+                self.inference_result.top = int(b[0])
+                self.inference_result.left = int(b[1])
+                self.inference_result.bottom = int(b[2])
+                self.inference_result.right = int(b[3])
+                self.pixel_x = int((self.inference_result.top+self.inference_result.bottom)/2)
+                self.pixel_y = int((self.inference_result.right+self.inference_result.left)/2)
+                self.yolov8_inference.yolov8_inference.append(self.inference_result)
 
-        if yolov8_inference.yolov8_inference:
-            self.publish_results(results, yolov8_inference)
 
-    def create_inference_result(self, box):
-        result = InferenceResult()
-        b = box.xyxy[0].cpu().numpy()
-        result.class_name = self.model.names[int(box.cls)]
-        result.top, result.left, result.bottom, result.right = map(int, b)
-        self.pixel_x = int((result.top + result.bottom) / 2)
-        self.pixel_y = int((result.right + result.left) / 2)
-        return result
+                if len(self.depth_image)!=0:
+                    if self.inference_result.class_name=="sports ball" or self.inference_result.class_name=="frisbee":
+                        self.target_dist = self.depth_image[self.pixel_y, self.pixel_x]
+                        # self.get_logger().info('x=: {}'.format(self.pixel_x))
+                        # self.get_logger().info('y=: {}'.format(self.pixel_y))
+                        # self.get_logger().info('Depth=: {}'.format(self.target_dist))
+                        self.target_val=(self.pixel_x -320)/320
+                        K = np.array(self.camera_info.k).reshape(3, 3)
+                        point_3d = self.deproject_pixel_to_point(K, [self.pixel_x/1000, self.pixel_y/1000], self.target_dist)
+                        # print(f"Point 3d= {point_3d}")
 
-    def process_depth(self):
-        self.target_dist = self.depth_image[self.pixel_y, self.pixel_x]
-        self.target_val = (self.pixel_x - 160) / 160
-        if self.camera_info:
-            K = np.array(self.camera_info.k).reshape(3, 3)
-            point_3d = self.deproject_pixel_to_point(K, [self.pixel_x/500, self.pixel_y/500], self.target_dist)
-            point_position = self.publish_point(point_3d)
-            if 0 < self.target_dist < 445 and self.detect:
-                self.findball = False
-                self.detect = False
-                self.send_goal(point_position.pose.position.x, point_position.pose.position.y, point_position.pose.position.z,
-                               point_position.pose.orientation.x, point_position.pose.orientation.y, point_position.pose.orientation.z, 5)
+                        point_position = self.publish_point(point_3d)
+                        self.get_logger().info('Position: x= {}, y= {}, z= {}'.format(point_position.pose.position.x,point_position.pose.position.y,point_position.pose.position.z))
+                        self.get_logger().info('Orientation: x= {}, y= {}, z= {}'.format(point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z))
+                        if self.target_dist>0:
+                            if self.target_dist<445 and self.detect:
+                                self.findball=False
+                                self.detect=False
+                                self.get_logger().info("Send goal")
+                                # self.get_logger().info('Position: x= {}, y= {}, z= {}'.format(point_position.pose.position.x,point_position.pose.position.y,point_position.pose.position.z))
+                                self.send_goal(point_position.pose.position.x, point_position.pose.position.y,point_position.pose.position.z,point_position.pose.orientation.x,point_position.pose.orientation.y,point_position.pose.orientation.z,5)
+                                # self.send_goal(point_3d[0]+0.28, point_3d[1],point_3d[2]+0.03,0.0,155.0,0.0,0)
+
+                        
+                    else:
+
+                        self.target_dist=0
+                        self.pixel_y=0
+
+                    self.lastrcvtime = time.time()
+
+
+
+            # camera_subscriber.get_logger().info(f"{self.yolov8_inference}")
+
+        annotated_frame = results[0].plot()
+        img_msg = bridge.cv2_to_imgmsg(annotated_frame)  
+
+        self.img_pub.publish(img_msg)
+        self.yolov8_pub.publish(self.yolov8_inference)
+        self.yolov8_inference.yolov8_inference.clear()
+
 
     def webcam_callback(self, data):
         # msg = Twist()
@@ -392,11 +341,7 @@ class Camera_subscriber(Node):
         self.detect=True
         
 
-    def publish_results(self, results, yolov8_inference):
-        annotated_frame = results[0].plot()
-        img_msg = self.bridge.cv2_to_imgmsg(annotated_frame)
-        self.img_pub.publish(img_msg)
-        self.yolov8_pub.publish(yolov8_inference)
+
 
     def feedback_callback(self, feedback_msg):
             feedback = feedback_msg.feedback
@@ -427,6 +372,3 @@ if __name__ == '__main__':
     camera_subscriber = Camera_subscriber()
     rclpy.spin(camera_subscriber)
     rclpy.shutdown()
-
-
-

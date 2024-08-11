@@ -433,12 +433,6 @@ class Camera_subscriber(Node):
         self.detect = False
         self.findball = True
 
-
-
-
-
-
-    def declare_and_get_parameters(self):
         params = [
             ("rcv_timeout_secs", 1.0),
             ("angular_chase_multiplier", 0.2),
@@ -450,6 +444,11 @@ class Camera_subscriber(Node):
         for name, default in params:
             self.declare_parameter(name, default)
             setattr(self, name, self.get_parameter(name).value)
+
+
+
+
+
 
     def camera_info_callback(self, msg):
         self.camera_info = msg

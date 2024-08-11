@@ -541,11 +541,12 @@ private:
     bool success = false;
     switch (goal_handle->get_goal()->task) {
       case 0:
-          success = openGripper(move_group_gripper_interface);
-          success = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
-          success = closeGripper(move_group_gripper_interface);
-          success = moveToHome(move_group_interface);
-          success = openGripper(move_group_gripper_interface);
+          bool success1 = openGripper(move_group_gripper_interface);
+          bool success2 = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
+          bool success3 = closeGripper(move_group_gripper_interface);
+          bool success4 = moveToHome(move_group_interface);
+          bool success5 = openGripper(move_group_gripper_interface);
+          success=success1 && success2 && success2=3 && success4 && success5
         break;
       case 1:
         success = moveToHome(move_group_interface);

@@ -794,7 +794,7 @@ geometry_msgs::msg::Pose createTargetPose(const std::shared_ptr<GoalHandleArticu
   void send_find_ball_message(bool success)
   {
     auto message = std_msgs::msg::String();
-    message.data = success ? "true" : "false";
+    message.data = !is_executing_ ? "true" : "false";
     RCLCPP_INFO(this->get_logger(), "Publishing find_ball message: '%s'", message.data.c_str());
     find_ball_publisher_->publish(message);
   }

@@ -580,6 +580,7 @@ private:
 
     if (success) {
       logRobotState(move_group_interface);
+      is_executing_ = false;
     }
 
     return success;

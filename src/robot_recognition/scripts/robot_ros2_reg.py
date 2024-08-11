@@ -110,7 +110,7 @@ class Camera_subscriber(Node):
         self.frame_width = 640
         self.depth_image=[]
         # self.face_recognition = FaceRecognition(0.7, self.frame_height, self.frame_width)
-        self.findball = False
+        self.findball = True
 
     def camera_info_callback(self, msg):
         self.camera_info = msg
@@ -228,7 +228,7 @@ class Camera_subscriber(Node):
                         # self.get_logger().info('Depth=: {}'.format(self.target_dist))
                         self.target_val=(self.pixel_x -320)/320
                         K = np.array(self.camera_info.k).reshape(3, 3)
-                        point_3d = self.deproject_pixel_to_point(K, [self.pixel_x/1000, self.pixel_y/1000], self.target_dist)
+                        point_3d = self.deproject_pixel_to_point(K, [self.pixel_x/1000, self.pixel_y/1000], self.target_dist/1000)
                         # print(f"Point 3d= {point_3d}")
 
                         point_position = self.publish_point(point_3d)

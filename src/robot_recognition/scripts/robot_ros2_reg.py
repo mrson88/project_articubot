@@ -90,7 +90,7 @@ class Camera_subscriber(Node):
         self.pixel_y=0
         self.detect=False
         self.camera_info = None
-
+        self.last_process_time = time.time()
         self.declare_parameter("rcv_timeout_secs", 1.0)
         self.declare_parameter("angular_chase_multiplier", 0.2)
         self.declare_parameter("forward_chase_speed", 0.1)

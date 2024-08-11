@@ -459,7 +459,7 @@ class CameraSubscriber(Node):
                 msg.linear.x = self.forward_chase_speed
                 self.detect = True
             msg.angular.z = -self.angular_chase_multiplier * self.target_val
-        elif self.findball and self.pixel_y < 180:
+        elif self.findball and self.pixel_x < self.frame_height/2:
             msg.angular.z = self.search_angular_speed
         self.publisher_.publish(msg)
 

@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
             Image,
             '/inference_result',  # Adjust this topic to match your camera's topic
             self.camera_callback,
-            10)
+            2)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_label_position)
         self.timer.start(100)  # Update every 1000 ms (1 second)  

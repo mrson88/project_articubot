@@ -791,7 +791,7 @@ geometry_msgs::msg::Pose createTargetPose(const std::shared_ptr<GoalHandleArticu
                 current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w);
   }
 
-  void send_find_ball_message()
+  void send_find_ball_message(bool success)
   {
     auto message = std_msgs::msg::String();
     message.data = !is_executing_ ? "true" : "false";

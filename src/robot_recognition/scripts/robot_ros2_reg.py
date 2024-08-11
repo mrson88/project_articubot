@@ -483,14 +483,14 @@ class CameraSubscriber(Node):
         self.findball = "true" in msg.data.lower()
 
     def pixel_to_3d(self, x, y, depth):
-        fx = self.camera_info.k[0]
-        fy = self.camera_info.k[4]
-        cx = self.camera_info.k[2]
-        cy = self.camera_info.k[5]
+        fx = float(self.camera_info.k[0])
+        fy = float(self.camera_info.k[4])
+        cx = float(self.camera_info.k[2])
+        cy = float(self.camera_info.k[5])
         
-        x3d = (x - cx) * depth / fx
-        y3d = (y - cy) * depth / fy
-        z3d = depth
+        x3d = float((x - cx) * depth / fx)
+        y3d = float((y - cy) * depth / fy)
+        z3d = float(depth)
         
         return Point(x=x3d, y=y3d, z=z3d)
 

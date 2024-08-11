@@ -350,7 +350,6 @@
 // RCLCPP_COMPONENTS_REGISTER_NODE(articubot_remote::Test_server)
 
 
-
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <rclcpp/rclcpp.hpp>
@@ -405,10 +404,6 @@ public:
 
     this->executor_thread_ = std::thread(&Test_server::executorThread, this);
 
-    this->status_timer_ = this->create_wall_timer(
-      std::chrono::seconds(10),
-      std::bind(&Test_server::checkServerStatus, this));
-
     this->executor_check_timer_ = this->create_wall_timer(
       std::chrono::seconds(5),
       std::bind(&Test_server::checkExecutorStatus, this));
@@ -430,16 +425,17 @@ private:
   rclcpp_action::Server<ArticubotTask>::SharedPtr action_server_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr subscription_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr find_ball_publisher_;
-  rclcpp::TimerBase::SharedPtr status_timer_;
   rclcpp::TimerBase::SharedPtr executor_check_timer_;
   std::vector<double> current_joint = {0.0, -0.5, 1.0, 1.2, 0.5, 0, 0};
 
   std::thread executor_thread_;
   std::mutex mutex_;
   std::condition_variable cv_;
-  std::queue<std::shared_ptr<GoalHandleArticubotTask>> goal_queue_;
+  std::shared_ptr<GoalHandleArticubotTask> current_goal_;
   bool stop_executor_ = false;
-  std::atomic<bool> is_processing_goal_{false};
+  std::atomic<bool> is_executing_{false};
+  std::atomic<bool> stop_execution_{false};
+  const std::chrono::seconds TIMEOUT_DURATION{60}; // Timeout sau 60 giây
 
   rclcpp_action::GoalResponse handle_goal(
     const rclcpp_action::GoalUUID & uuid,
@@ -447,6 +443,10 @@ private:
   {
     RCLCPP_INFO(this->get_logger(), "Received goal request with order %d", goal->task);
     (void)uuid;
+    if (is_executing_) {
+      RCLCPP_WARN(this->get_logger(), "Rejecting new goal, currently executing another goal");
+      return rclcpp_action::GoalResponse::REJECT;
+    }
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
   }
 
@@ -460,10 +460,10 @@ private:
 
   void handle_accepted(const std::shared_ptr<GoalHandleArticubotTask> goal_handle)
   {
-    RCLCPP_INFO(this->get_logger(), "Goal accepted, adding to queue");
+    RCLCPP_INFO(this->get_logger(), "Goal accepted, starting execution");
     std::unique_lock<std::mutex> lock(this->mutex_);
-    this->goal_queue_.push(goal_handle);
-    RCLCPP_INFO(this->get_logger(), "Goal added to queue, queue size: %ld", this->goal_queue_.size());
+    current_goal_ = goal_handle;
+    is_executing_ = true;
     this->cv_.notify_one();
   }
 
@@ -472,28 +472,23 @@ private:
     RCLCPP_INFO(this->get_logger(), "Executor thread started");
     while (rclcpp::ok()) {
       std::unique_lock<std::mutex> lock(this->mutex_);
-      this->cv_.wait(lock, [this] { return !this->goal_queue_.empty() || this->stop_executor_; });
+      this->cv_.wait(lock, [this] { return current_goal_ != nullptr || this->stop_executor_; });
 
       if (this->stop_executor_) {
         RCLCPP_INFO(this->get_logger(), "Executor thread stopping");
         break;
       }
 
-      if (!this->goal_queue_.empty()) {
-        auto goal_handle = this->goal_queue_.front();
-        this->goal_queue_.pop();
+      if (current_goal_) {
+        auto goal_handle = current_goal_;
         lock.unlock();
 
         RCLCPP_INFO(this->get_logger(), "Starting to process goal");
-        is_processing_goal_ = true;
-        try {
-          execute(goal_handle);
-        } catch (const std::exception& e) {
-          RCLCPP_ERROR(this->get_logger(), "Exception in execute: %s", e.what());
-        } catch (...) {
-          RCLCPP_ERROR(this->get_logger(), "Unknown exception in execute");
-        }
-        is_processing_goal_ = false;
+        execute(goal_handle);
+
+        lock.lock();
+        current_goal_ = nullptr;
+        is_executing_ = false;
         RCLCPP_INFO(this->get_logger(), "Finished processing goal");
       }
     }
@@ -505,57 +500,15 @@ private:
     RCLCPP_INFO(get_logger(), "Starting goal execution");
     auto result = std::make_shared<ArticubotTask::Result>();
 
+    stop_execution_ = false;
     auto future = std::async(std::launch::async, [this, goal_handle]() {
-      auto move_group_node = std::make_shared<rclcpp::Node>("move_group_interface_tutorial");
-      
-      rclcpp::executors::SingleThreadedExecutor executor;
-      executor.add_node(move_group_node);
-      std::thread([&executor]() { executor.spin(); }).detach();
-
-      static const std::string PLANNING_GROUP = "arm_robot";
-      auto move_group_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, PLANNING_GROUP);
-      auto move_group_gripper_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, "gripper");
-
-      setupMoveGroupInterface(move_group_interface);
-
-      bool success = false;
-      switch (goal_handle->get_goal()->task) {
-        case 0:
-          success = openGripper(move_group_gripper_interface);
-          success = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
-          success = closeGripper(move_group_gripper_interface);
-          success = moveToHome(move_group_interface);
-          success = openGripper(move_group_gripper_interface);
-          break;
-        case 1:
-          success = moveToHome(move_group_interface);
-          break;
-        case 2:
-          success = closeGripper(move_group_gripper_interface);
-          break;
-        case 3:
-          success = openGripper(move_group_gripper_interface);
-          break;
-        case 4:
-          success = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
-          break;
-        case 5:
-          success = pickUp(move_group_interface, move_group_gripper_interface, goal_handle);
-          break;
-        default:
-          RCLCPP_ERROR(get_logger(), "Invalid Task Number");
-          success = false;
-      }
-
-      if (success) {
-        logRobotState(move_group_interface);
-      }
-
-      return success;
+      return executeGoal(goal_handle);
     });
 
-    if (future.wait_for(std::chrono::seconds(30)) == std::future_status::timeout) {
+    if (future.wait_for(TIMEOUT_DURATION) == std::future_status::timeout) {
       RCLCPP_ERROR(this->get_logger(), "Goal execution timed out");
+      stop_execution_ = true;
+      std::this_thread::sleep_for(std::chrono::seconds(1));
       result->success = false;
       goal_handle->abort(result);
     } else {
@@ -571,6 +524,74 @@ private:
     RCLCPP_INFO(get_logger(), "Goal execution completed with result: %s", result->success ? "success" : "failure");
   }
 
+  bool executeGoal(const std::shared_ptr<GoalHandleArticubotTask> goal_handle)
+  {
+    auto move_group_node = std::make_shared<rclcpp::Node>("move_group_interface_tutorial");
+    
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(move_group_node);
+    std::thread([&executor]() { executor.spin(); }).detach();
+
+    static const std::string PLANNING_GROUP = "arm_robot";
+    auto move_group_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, PLANNING_GROUP);
+    auto move_group_gripper_interface = std::make_shared<moveit::planning_interface::MoveGroupInterface>(move_group_node, "gripper");
+
+    setupMoveGroupInterface(move_group_interface);
+
+    bool success = false;
+    switch (goal_handle->get_goal()->task) {
+      case 0:
+        success = executeTaskSequence(move_group_interface, move_group_gripper_interface, {
+          std::bind(&Test_server::openGripper, this, move_group_gripper_interface),
+          std::bind(&Test_server::moveToPoint, this, move_group_interface, move_group_gripper_interface, goal_handle),
+          std::bind(&Test_server::closeGripper, this, move_group_gripper_interface),
+          std::bind(&Test_server::moveToHome, this, move_group_interface),
+          std::bind(&Test_server::openGripper, this, move_group_gripper_interface)
+        });
+        break;
+      case 1:
+        success = moveToHome(move_group_interface);
+        break;
+      case 2:
+        success = closeGripper(move_group_gripper_interface);
+        break;
+      case 3:
+        success = openGripper(move_group_gripper_interface);
+        break;
+      case 4:
+        success = moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle);
+        break;
+      case 5:
+        success = pickUp(move_group_interface, move_group_gripper_interface, goal_handle);
+        break;
+      default:
+        RCLCPP_ERROR(get_logger(), "Invalid Task Number");
+        success = false;
+    }
+
+    if (success) {
+      logRobotState(move_group_interface);
+    }
+
+    return success;
+  }
+
+  template<typename Func, typename... Args>
+  bool executeWithTimeout(Func&& func, Args&&... args)
+  {
+    if (stop_execution_) return false;
+    auto result = func(std::forward<Args>(args)...);
+    return result && !stop_execution_;
+  }
+
+  template<typename... Funcs>
+  bool executeTaskSequence(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface,
+                           const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface,
+                           Funcs... funcs)
+  {
+    return (... && executeWithTimeout(funcs));
+  }
+
   void setupMoveGroupInterface(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface)
   {
     move_group_interface->setPlanningTime(10.0);
@@ -583,6 +604,7 @@ private:
                    const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface,
                    const std::shared_ptr<GoalHandleArticubotTask>& goal_handle)
   {
+    if (stop_execution_) return false;
     RCLCPP_INFO(get_logger(), "Moving to point");
     geometry_msgs::msg::Pose target_pose = createTargetPose(goal_handle);
     return planAndExecute(move_group_interface, move_group_gripper_interface, target_pose);
@@ -592,6 +614,7 @@ private:
               const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface,
               const std::shared_ptr<GoalHandleArticubotTask>& goal_handle)
   {
+    if (stop_execution_) return false;
     RCLCPP_INFO(get_logger(), "Starting pickUp operation");
     geometry_msgs::msg::Pose target_pose = createTargetPosePickup(goal_handle);
     RCLCPP_INFO(get_logger(), "Target pose: x=%.3f, y=%.3f, z=%.3f", 
@@ -610,6 +633,7 @@ private:
 
   bool moveToHome(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface)
   {
+    if (stop_execution_) return false;
     RCLCPP_INFO(get_logger(), "Moving to home position...");
     move_group_interface->setNamedTarget("home");
     return (move_group_interface->move() == moveit::core::MoveItErrorCode::SUCCESS);
@@ -617,6 +641,7 @@ private:
 
   bool closeGripper(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface)
   {
+    if (stop_execution_) return false;
     RCLCPP_INFO(get_logger(), "Closing gripper...");
     move_group_gripper_interface->setNamedTarget("closed");
     return (move_group_gripper_interface->move() == moveit::core::MoveItErrorCode::SUCCESS);
@@ -624,12 +649,13 @@ private:
 
   bool openGripper(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface)
   {
+    if (stop_execution_) return false;
     RCLCPP_INFO(get_logger(), "Opening gripper...");
     move_group_gripper_interface->setNamedTarget("open");
     return (move_group_gripper_interface->move() == moveit::core::MoveItErrorCode::SUCCESS);
   }
 
-  geometry_msgs::msg::Pose createTargetPose(const std::shared_ptr<GoalHandleArticubotTask>& goal_handle)
+geometry_msgs::msg::Pose createTargetPose(const std::shared_ptr<GoalHandleArticubotTask>& goal_handle)
   {
     geometry_msgs::msg::Pose target_pose;
     target_pose.position.x = goal_handle->get_goal()->p_x;
@@ -647,7 +673,7 @@ private:
     geometry_msgs::msg::Pose target_pose;
     target_pose.position.x = goal_handle->get_goal()->p_x;
     target_pose.position.y = goal_handle->get_goal()->p_y;
-target_pose.position.z = goal_handle->get_goal()->p_z;
+    target_pose.position.z = goal_handle->get_goal()->p_z;
     target_pose.orientation.w = 1;
     return target_pose;
   }
@@ -656,6 +682,7 @@ target_pose.position.z = goal_handle->get_goal()->p_z;
                       const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_gripper_interface,
                       const geometry_msgs::msg::Pose& target_pose)
   {
+    if (stop_execution_) return false;
     RCLCPP_INFO(get_logger(), "Planning and executing movement");
     move_group_interface->setPoseTarget(target_pose);
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
@@ -663,6 +690,7 @@ target_pose.position.z = goal_handle->get_goal()->p_z;
 
     std::vector<std::string> planners = {"RRTConnect"};   
     for (const auto& planner : planners) {
+      if (stop_execution_) return false;
       move_group_interface->setPlannerId(planner);
       RCLCPP_INFO(get_logger(), "Attempting to plan with %s", planner.c_str());
       success = (move_group_interface->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
@@ -677,7 +705,7 @@ target_pose.position.z = goal_handle->get_goal()->p_z;
       success = attemptCartesianPath(move_group_interface, target_pose);
     }
 
-    if (success) {
+    if (success && !stop_execution_) {
       RCLCPP_INFO(get_logger(), "Execution starting...");
       move_group_gripper_interface->setNamedTarget("open");
       move_group_gripper_interface->move();
@@ -687,12 +715,13 @@ target_pose.position.z = goal_handle->get_goal()->p_z;
       }
     }
 
-    return success;
+    return success && !stop_execution_;
   }
 
   bool attemptCartesianPath(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface,
                             const geometry_msgs::msg::Pose& target_pose)
   {
+    if (stop_execution_) return false;
     RCLCPP_INFO(get_logger(), "Attempting Cartesian path planning...");
     std::vector<geometry_msgs::msg::Pose> waypoints;
     waypoints.push_back(move_group_interface->getCurrentPose().pose);
@@ -701,7 +730,7 @@ target_pose.position.z = goal_handle->get_goal()->p_z;
     moveit_msgs::msg::RobotTrajectory trajectory;
     double fraction = move_group_interface->computeCartesianPath(waypoints, 0.01, 0.0, trajectory);
 
-    if (fraction > 0.0) {
+    if (fraction > 0.0 && !stop_execution_) {
       RCLCPP_INFO(get_logger(), "Cartesian path (%.2f%% achieved)", fraction * 100.0);
       return (move_group_interface->execute(trajectory) == moveit::core::MoveItErrorCode::SUCCESS);
     } else {
@@ -768,18 +797,11 @@ target_pose.position.z = goal_handle->get_goal()->p_z;
     }
   }
 
-  void checkServerStatus()
-  {
-    std::unique_lock<std::mutex> lock(this->mutex_);
-    RCLCPP_INFO(this->get_logger(), "Action server status: Number of goals in queue: %ld",
-                this->goal_queue_.size());
-  }
-
   void checkExecutorStatus()
   {
     std::unique_lock<std::mutex> lock(this->mutex_);
-    RCLCPP_INFO(this->get_logger(), "Executor status: Is processing goal: %s, Goals in queue: %ld",
-                is_processing_goal_ ? "Yes" : "No", this->goal_queue_.size());
+    RCLCPP_INFO(this->get_logger(), "Executor status: Is executing goal: %s, Current goal: %s",
+                is_executing_ ? "Yes" : "No", current_goal_ ? "Present" : "None");
   }
 };
 

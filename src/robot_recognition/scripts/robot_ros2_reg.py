@@ -549,7 +549,7 @@ class CameraSubscriber(Node):
             point_position.pose.position.x,
             point_position.pose.position.y,
             point_position.pose.position.z,
-            0.8359, 0.0, 0.0, 0
+            0.0, 150.0, 0.0, 5
         )
 
     def send_goal(self, p_x, p_y, p_z, or_x, or_y, or_z, order):

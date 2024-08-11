@@ -206,11 +206,16 @@ private:
   geometry_msgs::msg::Pose createTargetPosePickup(const std::shared_ptr<rclcpp_action::ServerGoalHandle<articubot_msgs::action::ArticubotTask>>& goal_handle)
   {
     geometry_msgs::msg::Pose target_pose;
+    tf2::Quaternion q;
+
     target_pose.position.x = goal_handle->get_goal()->p_x;
     target_pose.position.y = goal_handle->get_goal()->p_y;
     target_pose.position.z = goal_handle->get_goal()->p_z;
-
-    target_pose.orientation.w = 1;
+    double goal_or_x = goal_handle->get_goal()->or_x;
+    double goal_or_y = goal_handle->get_goal()->or_y;
+    double goal_or_z = goal_handle->get_goal()->or_z;
+    q.setRPY(to_radians(or_x), to_radians(goal_or_y), to_radians(goal_or_z));
+    target_pose.orientation = tf2::toMsg(q);
     return target_pose;
   }
   bool planAndExecute(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface,

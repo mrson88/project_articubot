@@ -392,7 +392,11 @@ class Camera_subscriber(Node):
         self.detect=True
         
 
-
+    def publish_results(self, results, yolov8_inference):
+        annotated_frame = results[0].plot()
+        img_msg = self.bridge.cv2_to_imgmsg(annotated_frame)
+        self.img_pub.publish(img_msg)
+        self.yolov8_pub.publish(yolov8_inference)
 
     def feedback_callback(self, feedback_msg):
             feedback = feedback_msg.feedback

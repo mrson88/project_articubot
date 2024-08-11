@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import cv2
 from ultralytics import YOLO
 import rclpy
 from rclpy.node import Node
@@ -31,7 +32,12 @@ class Camera_subscriber(Node):
         self.package_share_dir = get_package_share_directory("robot_recognition")
         self.model_dir = os.path.join(self.package_share_dir, "scripts","yolov8m.pt")
         # self.quantize_model_dir = os.path.join(self.package_share_dir, "scripts","yolov8n_quantized.pt")
-        self.model = YOLO(self.model_dir)
+        if torch.cuda.is_available():
+            self.device=torch.device("cuda")
+        else:
+            self.device=torch.device("cpu")
+
+        self.model = YOLO(self.model_dir).to(self.device)
         # self.state_dict = torch.load(self.quantize_model_dir)
         # self.quantized_model = torch.quantization.quantize_dynamic(
         #     self.model.model,
@@ -191,9 +197,10 @@ class Camera_subscriber(Node):
         # msg = Twist()
 
         img = bridge.imgmsg_to_cv2(data, "bgr8")
+        resized_image = cv2.resize(img, (640, 480))
         
         # results, ids = self.face_recognition.process_frame(img, self.recognition_on, self.registration_data)
-        results = self.model(img, conf=0.5,verbose=False)
+        results = self.model(resized_image, conf=0.5,verbose=False)
         self.yolov8_inference.header.frame_id = "inference"
         self.yolov8_inference.header.stamp = camera_subscriber.get_clock().now().to_msg()
 

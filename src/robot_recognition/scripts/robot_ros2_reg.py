@@ -405,29 +405,20 @@ class Camera_subscriber(Node):
         self.setup_action_client()
         self.initialize_parameters()
         self.bridge = CvBridge()
-
-    def initialize_model(self):
         package_share_dir = get_package_share_directory("robot_recognition")
         model_dir = os.path.join(package_share_dir, "scripts", "yolov8m.pt")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = YOLO(model_dir).to(self.device)
-
-    def setup_publishers(self):
         self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
         self.point_pub = self.create_publisher(PointStamped, 'point_3d', 5)
         self.yolov8_pub = self.create_publisher(Yolov8Inference, "/Yolov8_Inference", 5)
         self.img_pub = self.create_publisher(Image, "/inference_result", 5)
-
-    def setup_subscribers(self):
         self.create_subscription(Image, 'camera/camera/color/image_raw', self.camera_callback, 10)
         self.create_subscription(Image, 'camera/camera/depth/image_rect_raw', self.depth_camera_callback, 10)
         self.create_subscription(CameraInfo, 'camera/camera/depth/camera_info', self.camera_info_callback, 10)
         self.create_subscription(String, 'find_ball', self.findball_callback, 5)
-
-    def setup_action_client(self):
         self._action_client = ActionClient(self, ArticubotTask, 'test_server')
 
-    def initialize_parameters(self):
         self.declare_and_get_parameters()
         self.timer = self.create_timer(0.1, self.timer_callback)
         self.camera_info = None
@@ -441,6 +432,11 @@ class Camera_subscriber(Node):
         self.pixel_y = 0
         self.detect = False
         self.findball = True
+
+
+
+
+
 
     def declare_and_get_parameters(self):
         params = [

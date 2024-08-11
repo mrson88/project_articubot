@@ -542,11 +542,11 @@ private:
     switch (goal_handle->get_goal()->task) {
       case 0:
         success = executeTaskSequence(move_group_interface, move_group_gripper_interface, {
-          std::bind(&Test_server::openGripper, this, move_group_gripper_interface),
-          std::bind(&Test_server::moveToPoint, this, move_group_interface, move_group_gripper_interface, goal_handle),
-          std::bind(&Test_server::closeGripper, this, move_group_gripper_interface),
-          std::bind(&Test_server::moveToHome, this, move_group_interface),
-          std::bind(&Test_server::openGripper, this, move_group_gripper_interface)
+          [this, &move_group_gripper_interface]() { return openGripper(move_group_gripper_interface); },
+          [this, &move_group_interface, &move_group_gripper_interface, &goal_handle]() { return moveToPoint(move_group_interface, move_group_gripper_interface, goal_handle); },
+          [this, &move_group_gripper_interface]() { return closeGripper(move_group_gripper_interface); },
+          [this, &move_group_interface]() { return moveToHome(move_group_interface); },
+          [this, &move_group_gripper_interface]() { return openGripper(move_group_gripper_interface); }
         });
         break;
       case 1:

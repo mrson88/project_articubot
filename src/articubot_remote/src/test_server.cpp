@@ -217,7 +217,7 @@ private:
     double goal_or_x = goal_handle->get_goal()->or_x;
     double goal_or_y = goal_handle->get_goal()->or_y;
     double goal_or_z = goal_handle->get_goal()->or_z;
-    q.setRPY(to_radians(or_x), to_radians(goal_or_y), to_radians(goal_or_z));
+    q.setRPY(to_radians(goal_or_x), to_radians(goal_or_y), to_radians(goal_or_z));
     target_pose.orientation = tf2::toMsg(q);
     return target_pose;
   }

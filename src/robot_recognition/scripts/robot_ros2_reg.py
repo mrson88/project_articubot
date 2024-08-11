@@ -71,8 +71,8 @@ class Camera_subscriber(Node):
             10)
         self.publisher_point = self.create_publisher(PointStamped, 'point_3d', 5)
         self.subscription_depth
-        self.yolov8_pub = self.create_publisher(Yolov8Inference, "/Yolov8_Inference", 2)
-        self.img_pub = self.create_publisher(Image, "/inference_result", 2)
+        self.yolov8_pub = self.create_publisher(Yolov8Inference, "/Yolov8_Inference", 5)
+        self.img_pub = self.create_publisher(Image, "/inference_result", 5)
         self._action_client = ActionClient(self, ArticubotTask, 'test_server')
         self.sub_supress = self.create_subscription(String, 'find_ball', self.findball_callback, 5)
         timer_period = 0.1  # seconds

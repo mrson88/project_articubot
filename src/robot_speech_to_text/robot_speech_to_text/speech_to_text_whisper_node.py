@@ -93,6 +93,7 @@ class Speech_Whisper_Node(Node):
                     else :
                         # print(f'>>>{self.user_text}\n<<< ', end="", flush=True)
                         print(f"user_talk: {self.user_text}")
+                        self.publish(self.pub_find_ball,"False")
 
                         # self.history.append({'role': 'user', 'content': self.user_text})
 

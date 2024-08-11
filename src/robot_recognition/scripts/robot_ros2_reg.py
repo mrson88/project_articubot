@@ -414,7 +414,6 @@ class Camera_subscriber(Node):
         self.create_subscription(String, 'find_ball', self.findball_callback, 5)
         self._action_client = ActionClient(self, ArticubotTask, 'test_server')
 
-        self.declare_and_get_parameters()
         self.timer = self.create_timer(0.1, self.timer_callback)
         self.camera_info = None
         self.depth_image = None

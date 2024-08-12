@@ -165,8 +165,8 @@ def generate_launch_description():
         joint_state_broadcaster_spawner,
         # rviz,
         moveit,
-        # robot_ros,
-        # robot_speech_reg,
+        robot_ros,
+        robot_speech_reg,
         camera_realsense_node,
         # ldlidar_node
     ])

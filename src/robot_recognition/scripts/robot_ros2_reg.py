@@ -72,7 +72,7 @@ class CameraSubscriber(Node):
         TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
         with open(model_engine_dir, "rb") as f, trt.Runtime(TRT_LOGGER) as runtime:
             self.engine = runtime.deserialize_cuda_engine(f.read())
-        self.context = self.engine.create_execution_context()
+        # self.context = self.engine.create_execution_context()
         
         # Prepare input and output buffers
         self.inputs = []
@@ -175,7 +175,7 @@ class CameraSubscriber(Node):
         # Run inference with TensorRT
         np.copyto(self.inputs[0]['host'], input_image.ravel())
         cuda.memcpy_htod_async(self.inputs[0]['device'], self.inputs[0]['host'], self.stream)
-        self.context.execute_async_v2(bindings=self.bindings, stream_handle=self.stream.handle)
+        # self.context.execute_async_v2(bindings=self.bindings, stream_handle=self.stream.handle)
         cuda.memcpy_dtoh_async(self.outputs[0]['host'], self.outputs[0]['device'], self.stream)
         self.stream.synchronize()
         

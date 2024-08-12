@@ -66,7 +66,7 @@ class CameraSubscriber(Node):
 
     def setup_model(self):
         package_share_dir = get_package_share_directory("robot_recognition")
-        model_engine_dir = os.path.join(package_share_dir, "scripts", "yolov8n_fp16.engine")
+        model_engine_dir = os.path.join(package_share_dir, "scripts", "yolov8n.engine")
         
         # Initialize TensorRT engine
         TRT_LOGGER = trt.Logger(trt.Logger.WARNING)

@@ -20,7 +20,7 @@ from articubot_msgs.msg import InferenceResult, Yolov8Inference
 from articubot_msgs.action import ArticubotTask
 from ament_index_python.packages import get_package_share_directory
 from tf_transformations import quaternion_from_euler
-from deep_sort_realtime.deep_sort import DeepSort
+from deep_sort_realtime.deepsort_tracker import DeepSort
 
 class CameraSubscriber(Node):
     def __init__(self):

@@ -10,9 +10,6 @@ from rclpy.action import ActionClient
 from cv_bridge import CvBridge
 from ultralytics import YOLO
 import torch
-import tensorrt as trt
-import pycuda.driver as cuda
-import pycuda.autoinit
 from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import Twist, PointStamped, PoseStamped
 from std_msgs.msg import String
@@ -20,7 +17,6 @@ from articubot_msgs.msg import InferenceResult, Yolov8Inference
 from articubot_msgs.action import ArticubotTask
 from ament_index_python.packages import get_package_share_directory
 from tf_transformations import quaternion_from_euler
-from deep_sort_realtime.deepsort_tracker import DeepSort
 
 class CameraSubscriber(Node):
     def __init__(self):
@@ -66,39 +62,12 @@ class CameraSubscriber(Node):
 
     def setup_model(self):
         package_share_dir = get_package_share_directory("robot_recognition")
-        model_engine_dir = os.path.join(package_share_dir, "scripts", "yolov8n.engine")
-        
-        # Initialize TensorRT engine
-        TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
-        with open(model_engine_dir, "rb") as f, trt.Runtime(TRT_LOGGER) as runtime:
-            self.engine = runtime.deserialize_cuda_engine(f.read())
-        # self.context = self.engine.create_execution_context()
-        
-        # Prepare input and output buffers
-        self.inputs = []
-        self.outputs = []
-        self.bindings = []
-        for binding in self.engine:
-            size = trt.volume(self.engine.get_binding_shape(binding)) * self.engine.max_batch_size
-            dtype = trt.nptype(self.engine.get_binding_dtype(binding))
-            host_mem = cuda.pagelocked_empty(size, dtype)
-            device_mem = cuda.mem_alloc(host_mem.nbytes)
-            self.bindings.append(int(device_mem))
-            if self.engine.binding_is_input(binding):
-                self.inputs.append({'host': host_mem, 'device': device_mem})
-            else:
-                self.outputs.append({'host': host_mem, 'device': device_mem})
-        
-        # Create CUDA stream
-        self.stream = cuda.Stream()
-        
-        # Initialize DeepSORT
-        self.deepsort = DeepSort(max_age=30, n_init=2, nms_max_overlap=1.0,
-                                 max_cosine_distance=0.3, nn_budget=None,
-                                 override_track_class=None, embedder="mobilenet",
-                                 half=True, bgr=True, embedder_gpu=True,
-                                 embedder_model_name=None, embedder_wts=None,
-                                 today=None, embedder_gd=False)
+        model_dir = os.path.join(package_share_dir, "scripts", "yolov8n.pt")
+        model_engine_onnx_dir = os.path.join(package_share_dir, "scripts", "yolov8n.engine")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.yolo_model = YOLO(model_dir).to(self.device)
+        # self.yolo_model.export(format="engine")
+        self.model=YOLO(model_engine_onnx_dir)
 
     def setup_variables(self):
         self.bridge = CvBridge()
@@ -163,66 +132,31 @@ class CameraSubscriber(Node):
         if self.depth_image is None or self.camera_info is None:
             return
 
-        cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-        resized_image = cv2.resize(cv_image, (self.frame_width, self.frame_height))
+        img = self.bridge.imgmsg_to_cv2(data, "bgr8")
+        resized_image = cv2.resize(img, (self.frame_width, self.frame_height))
         
-        # Preprocess image for TensorRT
-        input_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
-        input_image = input_image.transpose((2, 0, 1)).astype(np.float32)
-        input_image /= 255.0
-        input_image = np.expand_dims(input_image, axis=0)
-        
-        # Run inference with TensorRT
-        np.copyto(self.inputs[0]['host'], input_image.ravel())
-        cuda.memcpy_htod_async(self.inputs[0]['device'], self.inputs[0]['host'], self.stream)
-        # self.context.execute_async_v2(bindings=self.bindings, stream_handle=self.stream.handle)
-        cuda.memcpy_dtoh_async(self.outputs[0]['host'], self.outputs[0]['device'], self.stream)
-        self.stream.synchronize()
-        
-        # Process TensorRT output
-        output = self.outputs[0]['host'].reshape((-1, 85))  # 85 = 4 (box) + 1 (conf) + 80 (classes)
-        
-        # Filter detections
-        detections = []
-        for detection in output:
-            if detection[4] > 0.5:  # Confidence threshold
-                x1, y1, x2, y2 = detection[:4]
-                conf = detection[4]
-                cls = np.argmax(detection[5:])
-                detections.append(([x1, y1, x2-x1, y2-y1], conf, int(cls)))
-        
-        # Update DeepSORT
-        tracks = self.deepsort.update_tracks(detections, frame=resized_image)
-        
+        results = self.model(resized_image, conf=0.5, verbose=False)
         self.yolov8_inference = Yolov8Inference()
         self.yolov8_inference.header.frame_id = "inference"
         self.yolov8_inference.header.stamp = self.get_clock().now().to_msg()
 
-        for track in tracks:
-            if not track.is_confirmed():
-                continue
-            self.process_detection(track)
+        for r in results:
+            for box in r.boxes:
+                self.process_detection(box)
 
-        # Draw results on the image
-        for track in tracks:
-            if not track.is_confirmed():
-                continue
-            ltrb = track.to_ltrb()
-            cv2.rectangle(resized_image, (int(ltrb[0]), int(ltrb[1])), (int(ltrb[2]), int(ltrb[3])), (0, 255, 0), 2)
-            cv2.putText(resized_image, f"ID: {track.track_id}", (int(ltrb[0]), int(ltrb[1])-10), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-
-        img_msg = self.bridge.cv2_to_imgmsg(resized_image, encoding="bgr8")
+        annotated_frame = results[0].plot()
+        img_msg = self.bridge.cv2_to_imgmsg(annotated_frame)  
         self.img_pub.publish(img_msg)
         self.yolov8_pub.publish(self.yolov8_inference)
 
-    def process_detection(self, track):
-        ltrb = track.to_ltrb()
+    def process_detection(self, box):
+        b = box.xyxy[0].to('cpu').detach().numpy().copy()
+        c = box.cls
         self.inference_result = InferenceResult()
-        self.inference_result.class_name = self.model.names[track.get_class()]
-        self.inference_result.top, self.inference_result.left, self.inference_result.bottom, self.inference_result.right = map(int, ltrb)
-        self.pixel_x = int((self.inference_result.left + self.inference_result.right) / 2)
-        self.pixel_y = int((self.inference_result.top + self.inference_result.bottom) / 2)
+        self.inference_result.class_name = self.model.names[int(c)]
+        self.inference_result.top, self.inference_result.left, self.inference_result.bottom, self.inference_result.right = map(int, b)
+        self.pixel_x = int((self.inference_result.top + self.inference_result.bottom) / 2)
+        self.pixel_y = int((self.inference_result.right + self.inference_result.left) / 2)
         self.yolov8_inference.yolov8_inference.append(self.inference_result)
 
         if self.inference_result.class_name in ["sports ball", "frisbee"]:

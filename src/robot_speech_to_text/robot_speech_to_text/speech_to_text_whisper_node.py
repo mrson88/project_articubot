@@ -30,8 +30,8 @@ class Speech_Whisper_Node(Node):
         self.user_text = ""
         self.talk_with_ai = True
         self.history = [
-            {"role": "system", "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful. Short answer"},
-            {"role": "user", "content": "Hello, introduce yourself to someone opening this program for the first time. Be concise."},
+            {"role": "system", "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful."},
+            {"role": "user", "content": "Hello, introduce yourself to someone opening this program for the first time. Be concise. Short answer"},
         ]
         self.openai_client = OpenAI(base_url="http://192.168.2.5:1234/v1", api_key="lm-studio")
         self.locations_json = """

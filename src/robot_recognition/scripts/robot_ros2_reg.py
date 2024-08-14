@@ -62,7 +62,7 @@ class CameraSubscriber(Node):
 
     def setup_model(self):
         package_share_dir = get_package_share_directory("robot_recognition")
-        model_dir = os.path.join(package_share_dir, "scripts", "yolov83.pt")
+        model_dir = os.path.join(package_share_dir, "scripts", "yolov8m.pt")
         model_engine_onnx_dir = os.path.join(package_share_dir, "scripts", "yolov8m.engine")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.yolo_model = YOLO(model_dir).to(self.device)

@@ -68,7 +68,7 @@ class Speech_Whisper_Node(Node):
                         print("I'm all ears.\n")
                         ambient_noise_level = long_term_noise_level
                         frames.extend(list(audio_buffer))
-
+                print("Found voice chat, execute voice to text")
                 stream.stop_stream(), stream.close(), audio.terminate()        
                 # Transcribe recording using whisper
                 with wave.open("voice_record.wav", 'wb') as wf:
@@ -76,7 +76,7 @@ class Speech_Whisper_Node(Node):
                     wf.writeframes(b''.join(frames))
                 self.user_text ="".join(seg.text for seg in self.model.transcribe("voice_record.wav", language="en")[0])
                 print(self.user_text)
-                print("ERROR:No location found in the received JSON command")
+                print("No location found in the received JSON command")
 
                 if len(self.user_text)>10 :
                     for location in self.locations:
@@ -110,10 +110,11 @@ class Speech_Whisper_Node(Node):
                             
 
         except KeyboardInterrupt:
-            print("\nStopping...")
+            print("\nStopping hear voice chat...")
             
 
         finally:
+            print("\nStopped voice chat...")
             stream.stop_stream()
             stream.close()
             audio.terminate()

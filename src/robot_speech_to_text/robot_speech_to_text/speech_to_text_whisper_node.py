@@ -74,7 +74,7 @@ class Speech_Whisper_Node(Node):
                 with wave.open("voice_record.wav", 'wb') as wf:
                     wf.setparams((1, audio.get_sample_size(pyaudio.paInt16), 16000, 0, 'NONE', 'NONE'))
                     wf.writeframes(b''.join(frames))
-                self.user_text ="".join(seg.text for seg in self.model.transcribe("voice_record.wav", language="en",fp16=torch.cuda.is_available())[0])
+                self.user_text ="".join(seg.text for seg in self.model.transcribe("voice_record.wav", language="en")[0])
                 print(self.user_text)
                 print("No location found in the received JSON command")
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from sklearn import pipeline
 import openai, elevenlabs, pyaudio, wave, numpy, collections, faster_whisper, torch.cuda
 import os
 import time
@@ -21,8 +20,7 @@ class Speech_Whisper_Node(Node):
     def __init__(self):
         super().__init__('speech_to_text_whisper_node')
         # self.model, self.answer, self.history = faster_whisper.WhisperModel(model_size_or_path="small", device='cuda' if torch.cuda.is_available() else 'cpu'), "", []
-        # self.model, self.answer, self.history = faster_whisper.WhisperModel(model_size_or_path="small"), "", []
-        self.model, self.answer, self.history = faster_whisper.WhisperModel(model_size_or_path="small", device = 'cpu', compute_type = 'int8' , cpu_threads = '0'), "", []
+        self.model, self.answer, self.history = faster_whisper.WhisperModel(model_size_or_path="small", device='cpu'), "", []
         # self.model  = pipeline("automatic-speech-recognition", model="vinai/PhoWhisper-small", device="cuda")
         self.client = chromadb.Client()
         self.collection = self.client.create_collection(name="docs")
@@ -49,6 +47,7 @@ class Speech_Whisper_Node(Node):
             while True:
                 
                 audio = pyaudio.PyAudio()
+                # stream = audio.open(rate=16000, format=pyaudio.paInt16, channels=1, input=True, frames_per_buffer=1024)
                 stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
                 audio_buffer = collections.deque(maxlen=int((16000 // 512) * 0.5))
                 frames, long_term_noise_level, current_noise_level, voice_activity_detected = [], 0.0, 0.0, False

@@ -22,7 +22,8 @@ class Speech_Whisper_Node(Node):
         super().__init__('speech_to_text_whisper_node')
         # self.model, self.answer, self.history = faster_whisper.WhisperModel(model_size_or_path="small", device='cuda' if torch.cuda.is_available() else 'cpu'), "", []
         # self.model, self.answer, self.history = faster_whisper.WhisperModel(model_size_or_path="small"), "", []
-        self.model  = pipeline("automatic-speech-recognition", model="vinai/PhoWhisper-small", device="cuda")
+        self.model = faster_whisper.WhisperModel(model_size_or_path="small", device = 'cpu', compute_type = 'int8' , cpu_threads = '0')
+        # self.model  = pipeline("automatic-speech-recognition", model="vinai/PhoWhisper-small", device="cuda")
         self.client = chromadb.Client()
         self.collection = self.client.create_collection(name="docs")
         self.pub_result_voice = self.create_publisher(String, 'result', 10)

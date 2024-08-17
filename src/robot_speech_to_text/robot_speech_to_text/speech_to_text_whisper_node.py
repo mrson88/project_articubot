@@ -16,7 +16,6 @@ from rclpy.node import Node
 from std_msgs.msg import Bool, String  
 import sounddevice as sd
 from submodules.utilities import *
-# import robot_speech_to_text.api_local
 class Speech_Whisper_Node(Node):
     def __init__(self):
         super().__init__('speech_to_text_whisper_node')
@@ -61,8 +60,8 @@ class Speech_Whisper_Node(Node):
 
                     if voice_activity_detected:
                         frames.append(data)            
-                        if current_noise_level < ambient_noise_level + 400:
-                            break 
+                        if current_noise_level < ambient_noise_level + 300:
+                            break # voice actitivy ends 
 
                     if not voice_activity_detected and current_noise_level > long_term_noise_level + 600:
                         voice_activity_detected = True
@@ -105,8 +104,7 @@ class Speech_Whisper_Node(Node):
                         # generator=generate_rag_test(self.user_text)
                         print(generator)
                         self.play_text_to_speech(generator)
-                        self.talk_with_ai = True
-                        # voice_activity_detected=True
+                    self.talk_with_ai = True
 
                             
                             

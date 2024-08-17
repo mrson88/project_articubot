@@ -29,7 +29,7 @@ from submodules.utilities import *
 class Speech_Whisper_Node(Node):
     def __init__(self):
         super().__init__('speech_to_text_whisper_node')
-        self.model = faster_whisper.WhisperModel(model_size_or_path="base", device='cpu', compute_type="float32")
+        self.model = faster_whisper.WhisperModel(model_size_or_path="small", device='cpu', compute_type="float32")
         self.answer = ""
         self.history = [
             {"role": "system", "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful."},
@@ -51,9 +51,9 @@ class Speech_Whisper_Node(Node):
         ]
         """
         self.locations = json.loads(self.locations_json)
-        self.silence_threshold = 700  # Adjust this value based on your environment
-        self.silence_duration = 1.0  # Duration of silence to end recording (in seconds)
-        self.max_duration = 10  # Maximum recording duration in seconds
+        self.voice_threshold = 500  # Adjust this value based on your environment
+        self.silence_threshold = 300  # Threshold for silence, should be lower than voice_threshold
+        self.silence_limit = 1.5  # Time limit for silence before stopping (in seconds)
 
     def record_audio(self):
         CHUNK = 1024
@@ -74,7 +74,6 @@ class Speech_Whisper_Node(Node):
         frames = []
         is_speaking = False
         silence_start = None
-        recording_start = None
 
         try:
             while True:
@@ -83,27 +82,21 @@ class Speech_Whisper_Node(Node):
                 volume = np.abs(audio_data).mean()
 
                 if not is_speaking:
-                    if volume > self.silence_threshold:
+                    if volume > self.voice_threshold:
                         print("Speech detected, starting to record...")
                         is_speaking = True
-                        recording_start = time.time()
                         frames.append(data)
                 else:
                     frames.append(data)
-                    current_time = time.time()
                     
                     if volume <= self.silence_threshold:
                         if silence_start is None:
-                            silence_start = current_time
-                        elif current_time - silence_start >= self.silence_duration:
+                            silence_start = time.time()
+                        elif time.time() - silence_start >= self.silence_limit:
                             print("End of speech detected.")
                             break
                     else:
                         silence_start = None
-
-                    if current_time - recording_start >= self.max_duration:
-                        print(f"Maximum duration of {self.max_duration} seconds reached.")
-                        break
 
         except Exception as e:
             print(f"Error during audio recording: {e}")

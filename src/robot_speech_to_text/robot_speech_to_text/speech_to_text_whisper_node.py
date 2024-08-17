@@ -20,7 +20,7 @@ from submodules.utilities import *
 class Speech_Whisper_Node(Node):
     def __init__(self):
         super().__init__('speech_to_text_whisper_node')
-        self.model = faster_whisper.WhisperModel(model_size_or_path="small", device='cpu')
+        self.model = faster_whisper.WhisperModel(model_size_or_path="small", device='cpu',compute_type="float32" )
         self.answer = ""
         self.history = []
         self.client = chromadb.Client()

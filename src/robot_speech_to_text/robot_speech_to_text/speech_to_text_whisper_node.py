@@ -51,29 +51,40 @@ class Speech_Whisper_Node(Node):
         ]
         """
         self.locations = json.loads(self.locations_json)
-        self.mic_on = True
+        self.mic_on = False
         self.p = pyaudio.PyAudio()
         self.stream = None
+        self.toggle_mic(True)  # Initialize the microphone stream
 
     def toggle_mic(self, state):
-        if state and not self.mic_on:
-            self.stream = self.p.open(format=pyaudio.paInt16,
-                                      channels=1,
-                                      rate=16000,
-                                      input=True,
-                                      frames_per_buffer=1024)
-            self.mic_on = True
-            print("Microphone turned on")
-        elif not state and self.mic_on:
-            if self.stream:
-                self.stream.stop_stream()
-                self.stream.close()
+        try:
+            if state and not self.mic_on:
+                self.stream = self.p.open(format=pyaudio.paInt16,
+                                          channels=1,
+                                          rate=16000,
+                                          input=True,
+                                          frames_per_buffer=1024)
+                self.mic_on = True
+                print("Microphone turned on")
+            elif not state and self.mic_on:
+                if self.stream:
+                    self.stream.stop_stream()
+                    self.stream.close()
+                    self.stream = None
+                self.mic_on = False
+                print("Microphone turned off")
+        except Exception as e:
+            print(f"Error toggling microphone: {e}")
             self.mic_on = False
-            print("Microphone turned off")
+            self.stream = None
 
     def record_audio(self, duration=10, threshold=500):
-        if not self.mic_on:
+        if not self.mic_on or self.stream is None:
             self.toggle_mic(True)
+        
+        if self.stream is None:
+            print("Failed to initialize audio stream")
+            return [], 16000
 
         CHUNK = 1024
         RATE = 16000
@@ -85,31 +96,35 @@ class Speech_Whisper_Node(Node):
         silence_frames = 0
         max_silence_frames = int(RATE / CHUNK * 2)  # 2 seconds of silence
 
-        while True:
-            if not self.mic_on:
-                break
-            data = self.stream.read(CHUNK)
-            frames.append(data)
+        try:
+            while True:
+                if not self.mic_on or self.stream is None:
+                    break
+                data = self.stream.read(CHUNK, exception_on_overflow=False)
+                frames.append(data)
 
-            # Convert audio chunks to numpy array
-            audio_data = np.frombuffer(data, dtype=np.int16)
-            
-            # Calculate volume
-            volume = np.abs(audio_data).mean()
+                # Convert audio chunks to numpy array
+                audio_data = np.frombuffer(data, dtype=np.int16)
+                
+                # Calculate volume
+                volume = np.abs(audio_data).mean()
 
-            if volume > threshold:
-                is_speaking = True
-                silence_frames = 0
-            elif is_speaking:
-                silence_frames += 1
+                if volume > threshold:
+                    is_speaking = True
+                    silence_frames = 0
+                elif is_speaking:
+                    silence_frames += 1
 
-            # Stop recording if silence is detected for 2 seconds after speech
-            if is_speaking and silence_frames > max_silence_frames:
-                break
+                # Stop recording if silence is detected for 2 seconds after speech
+                if is_speaking and silence_frames > max_silence_frames:
+                    break
 
-            # Stop recording if total duration exceeds 15 seconds
-            if len(frames) > int(RATE / CHUNK * 15):
-                break
+                # Stop recording if total duration exceeds 15 seconds
+                if len(frames) > int(RATE / CHUNK * 15):
+                    break
+
+        except Exception as e:
+            print(f"Error during audio recording: {e}")
 
         print("Recording finished.")
         return frames, RATE
@@ -160,10 +175,9 @@ class Speech_Whisper_Node(Node):
         except KeyboardInterrupt:
             print("\nStopping voice chat...")
         finally:
-            if self.stream:
-                self.stream.stop_stream()
-                self.stream.close()
-            self.p.terminate()
+            self.toggle_mic(False)  # Ensure mic is turned off
+            if self.p:
+                self.p.terminate()
 
     def generate_llama(self, message):
         self.answer = ""

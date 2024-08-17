@@ -141,7 +141,7 @@ class Speech_Whisper_Node(Node):
                     self.user_text = self.transcribe_audio("voice_record.wav")
                     print(f"Transcribed text: {self.user_text}")
 
-                    if len(self.user_text) > 12 and self.user_text!="Thanks for watching!":
+                    if len(self.user_text) > 12 :
                         for location in self.locations:
                             if location["name"] in self.user_text:
                                 self.talk_with_ai = False
@@ -152,7 +152,7 @@ class Speech_Whisper_Node(Node):
                                 
                         if "home" in self.user_text and self.talk_with_ai:
                             self.publish(self.pub_find_ball, "True")
-                        else:
+                        elif  self.user_text!="Thanks for watching!":
                             self.publish(self.pub_find_ball, "False")
                             generator = self.openai_chat_response(self.user_text)
                             print(generator)

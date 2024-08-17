@@ -51,20 +51,32 @@ class Speech_Whisper_Node(Node):
         ]
         """
         self.locations = json.loads(self.locations_json)
+        self.mic_on = True
+        self.p = pyaudio.PyAudio()
+        self.stream = None
+
+    def toggle_mic(self, state):
+        if state and not self.mic_on:
+            self.stream = self.p.open(format=pyaudio.paInt16,
+                                      channels=1,
+                                      rate=16000,
+                                      input=True,
+                                      frames_per_buffer=1024)
+            self.mic_on = True
+            print("Microphone turned on")
+        elif not state and self.mic_on:
+            if self.stream:
+                self.stream.stop_stream()
+                self.stream.close()
+            self.mic_on = False
+            print("Microphone turned off")
 
     def record_audio(self, duration=10, threshold=500):
+        if not self.mic_on:
+            self.toggle_mic(True)
+
         CHUNK = 1024
-        FORMAT = pyaudio.paInt16
-        CHANNELS = 1
         RATE = 16000
-
-        p = pyaudio.PyAudio()
-
-        stream = p.open(format=FORMAT,
-                        channels=CHANNELS,
-                        rate=RATE,
-                        input=True,
-                        frames_per_buffer=CHUNK)
 
         print("Listening for speech...")
 
@@ -74,7 +86,9 @@ class Speech_Whisper_Node(Node):
         max_silence_frames = int(RATE / CHUNK * 2)  # 2 seconds of silence
 
         while True:
-            data = stream.read(CHUNK)
+            if not self.mic_on:
+                break
+            data = self.stream.read(CHUNK)
             frames.append(data)
 
             # Convert audio chunks to numpy array
@@ -98,17 +112,12 @@ class Speech_Whisper_Node(Node):
                 break
 
         print("Recording finished.")
-
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
-
         return frames, RATE
 
     def save_audio(self, frames, rate, filename="voice_record.wav"):
         wf = wave.open(filename, 'wb')
         wf.setnchannels(1)
-        wf.setsampwidth(pyaudio.PyAudio().get_sample_size(pyaudio.paInt16))
+        wf.setsampwidth(self.p.get_sample_size(pyaudio.paInt16))
         wf.setframerate(rate)
         wf.writeframes(b''.join(frames))
         wf.close()
@@ -119,33 +128,42 @@ class Speech_Whisper_Node(Node):
     def main_loop(self):
         try:
             while True:
-                frames, rate = self.record_audio()  # Auto record for about 10 seconds
-                self.save_audio(frames, rate)
+                self.toggle_mic(True)  # Ensure mic is on
+                frames, rate = self.record_audio()
+                self.toggle_mic(False)  # Turn off mic after recording
                 
-                self.user_text = self.transcribe_audio("voice_record.wav")
-                print(f"Transcribed text: {self.user_text}")
+                if frames:  # Only process if we actually recorded something
+                    self.save_audio(frames, rate)
+                    
+                    self.user_text = self.transcribe_audio("voice_record.wav")
+                    print(f"Transcribed text: {self.user_text}")
 
-                if len(self.user_text) > 10:
-                    for location in self.locations:
-                        if location["name"] in self.user_text:
+                    if len(self.user_text) > 10:
+                        for location in self.locations:
+                            if location["name"] in self.user_text:
+                                self.publish(self.pub_find_ball, "False")
+                                self.answer = ""
+                                self.publish(self.pub_result_voice, self.user_text)    
+                                self.talk_with_ai = False
+                                
+                        if "home" in self.user_text and self.talk_with_ai:
+                            self.publish(self.pub_find_ball, "True")
+                        else:
                             self.publish(self.pub_find_ball, "False")
-                            self.answer = ""
-                            self.publish(self.pub_result_voice, self.user_text)    
-                            self.talk_with_ai = False
-                            
-                    if "home" in self.user_text and self.talk_with_ai:
-                        self.publish(self.pub_find_ball, "True")
-                    else:
-                        self.publish(self.pub_find_ball, "False")
-                        generator = self.openai_chat_response(self.user_text)
-                        print(generator)
-                        self.play_text_to_speech(generator)
-                    self.talk_with_ai = True
+                            generator = self.openai_chat_response(self.user_text)
+                            print(generator)
+                            self.play_text_to_speech(generator)
+                        self.talk_with_ai = True
 
-                time.sleep(1)  # Short pause before next recording
+                time.sleep(0.1)  # Short pause before next recording attempt
 
         except KeyboardInterrupt:
             print("\nStopping voice chat...")
+        finally:
+            if self.stream:
+                self.stream.stop_stream()
+                self.stream.close()
+            self.p.terminate()
 
     def generate_llama(self, message):
         self.answer = ""
@@ -197,6 +215,7 @@ class Speech_Whisper_Node(Node):
         return new_message["content"]
 
     def play_text_to_speech(self, text, language='en', slow=False):
+        self.toggle_mic(False)  # Turn off mic before speaking
         tts = gTTS(text=text, lang=language, slow=slow)
         
         temp_audio_file = "temp_audio.mp3"
@@ -212,8 +231,9 @@ class Speech_Whisper_Node(Node):
         pygame.mixer.music.stop()
         pygame.mixer.quit()
 
-        time.sleep(3)
+        time.sleep(0.5)  # Short pause after speaking
         os.remove(temp_audio_file)
+        self.toggle_mic(True)  # Turn mic back on after speaking
 
     def publish(self, pub, text):
         msg = String()

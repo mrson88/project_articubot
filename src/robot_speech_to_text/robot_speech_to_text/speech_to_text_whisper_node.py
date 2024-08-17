@@ -141,13 +141,14 @@ class Speech_Whisper_Node(Node):
                     self.user_text = self.transcribe_audio("voice_record.wav")
                     print(f"Transcribed text: {self.user_text}")
 
-                    if len(self.user_text) > 10:
+                    if len(self.user_text) > 15:
                         for location in self.locations:
                             if location["name"] in self.user_text:
+                                self.talk_with_ai = False
                                 self.publish(self.pub_find_ball, "False")
                                 self.answer = ""
                                 self.publish(self.pub_result_voice, self.user_text)    
-                                self.talk_with_ai = False
+                                
                                 
                         if "home" in self.user_text and self.talk_with_ai:
                             self.publish(self.pub_find_ball, "True")
@@ -156,7 +157,7 @@ class Speech_Whisper_Node(Node):
                             generator = self.openai_chat_response(self.user_text)
                             print(generator)
                             self.play_text_to_speech(generator)
-                        self.talk_with_ai = True
+                            self.talk_with_ai = True
 
                 time.sleep(0.1)  # Short pause before next recording attempt
 
@@ -194,13 +195,13 @@ class Speech_Whisper_Node(Node):
 
     def openai_chat_response(self, user_input):
         self.history.append({"role": "user", "content": user_input})
-        
-        completion = self.openai_client.chat.completions.create(
-            model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
-            messages=self.history,
-            temperature=0.7,
-            stream=True,
-        )
+        if self.talk_with_ai:
+            completion = self.openai_client.chat.completions.create(
+                model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
+                messages=self.history,
+                temperature=0.7,
+                stream=True,
+            )
         
         new_message = {"role": "assistant", "content": ""}
         for chunk in completion:

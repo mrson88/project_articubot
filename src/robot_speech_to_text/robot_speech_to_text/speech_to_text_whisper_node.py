@@ -32,7 +32,8 @@ class NewChatVoiceNode(Node):
         Thread(target=self.main_processing_loop).start()
 
     def init_models_and_clients(self):
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device="cpu"
         self.whisper_model = faster_whisper.WhisperModel("small", device=device)
         self.chroma_client = chromadb.Client()
         self.chroma_collection = self.chroma_client.create_collection(name="docs")

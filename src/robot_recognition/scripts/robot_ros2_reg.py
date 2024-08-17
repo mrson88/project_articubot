@@ -66,7 +66,7 @@ class CameraSubscriber(Node):
         model_engine_onnx_dir = os.path.join(package_share_dir, "scripts", "yolov8n.engine")
         # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # self.model = YOLO(model_dir).to(self.device)
-        self.model=YOLO(model_engine_onnx_dir)
+        self.model=YOLO(model_engine_onnx_dir,task='detect')
 
     def setup_variables(self):
         self.bridge = CvBridge()

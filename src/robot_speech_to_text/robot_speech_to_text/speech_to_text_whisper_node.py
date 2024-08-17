@@ -47,7 +47,7 @@ class NewChatVoiceNode(Node):
     def init_audio_parameters(self):
         self.audio = pyaudio.PyAudio()
         self.stream = self.audio.open(format=pyaudio.paInt16, channels=1, rate=16000, 
-                                      input=True, frames_per_buffer=1024,input_device_index=1)
+                                      input=True, frames_per_buffer=1024)
         self.audio_buffer = collections.deque(maxlen=int((16000 // 512) * 0.5))
 
     def init_conversation(self):

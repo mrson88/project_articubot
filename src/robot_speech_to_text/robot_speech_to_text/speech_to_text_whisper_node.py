@@ -16,7 +16,7 @@ from rclpy.node import Node
 from std_msgs.msg import Bool, String  
 import sounddevice as sd
 from submodules.utilities import *
-from robot_speech_to_text.api_local import get_stock_price
+import robot_speech_to_text.api_local
 class Speech_Whisper_Node(Node):
     def __init__(self):
         super().__init__('speech_to_text_whisper_node')

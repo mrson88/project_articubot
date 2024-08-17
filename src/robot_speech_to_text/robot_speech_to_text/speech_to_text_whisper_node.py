@@ -92,9 +92,9 @@ class NewChatVoiceNode(Node):
 
             if voice_activity_detected:
                 frames.append(data)            
-                if current_noise_level < ambient_noise_level + 300:
+                if current_noise_level < ambient_noise_level + 450:
                     break
-            elif current_noise_level > long_term_noise_level + 600:
+            elif current_noise_level > long_term_noise_level + 750:
                 voice_activity_detected = True
                 self.get_logger().info("Voice detected. Listening...")
                 ambient_noise_level = long_term_noise_level

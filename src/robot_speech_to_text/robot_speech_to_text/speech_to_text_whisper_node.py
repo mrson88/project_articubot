@@ -41,7 +41,6 @@ class Speech_Whisper_Node(Node):
         self.pub_find_ball = self.create_publisher(String, 'find_ball', 10)
         self.sub_supress = self.create_subscription(Bool, 'supress', self.supress_callback, 10)
         self.user_text = ""
-        self.talk_with_ai = True
         self.openai_client = OpenAI(base_url="http://192.168.2.5:1234/v1", api_key="lm-studio")
         self.locations_json = """
         [
@@ -54,6 +53,7 @@ class Speech_Whisper_Node(Node):
         self.silence_threshold = 700  # Adjust this value based on your environment
         self.silence_duration = 1.0  # Duration of silence to end recording (in seconds)
         self.max_duration = 10  # Maximum recording duration in seconds
+        self.unwanted_phrases = ["Thanks for watching!", "Thanks for watching.", "Thank you for watching!", "Thank you for watching."]
 
     def record_audio(self):
         CHUNK = 1024
@@ -128,7 +128,18 @@ class Speech_Whisper_Node(Node):
         wf.close()
 
     def transcribe_audio(self, filename):
-        return "".join(seg.text for seg in self.model.transcribe(filename, language="en")[0])
+        transcription = "".join(seg.text for seg in self.model.transcribe(filename, language="en")[0])
+        return self.clean_transcription(transcription)
+
+    def clean_transcription(self, text):
+        # Remove unwanted phrases
+        for phrase in self.unwanted_phrases:
+            text = text.replace(phrase, "")
+        
+        # Remove extra whitespace
+        text = " ".join(text.split())
+        
+        return text.strip()
 
     def main_loop(self):
         try:
@@ -141,23 +152,23 @@ class Speech_Whisper_Node(Node):
                     self.user_text = self.transcribe_audio("voice_record.wav")
                     print(f"Transcribed text: {self.user_text}")
 
-                    if len(self.user_text) > 12 :
+                    if len(self.user_text) > 5:  # Reduced minimum length check
+                        location_mentioned = False
                         for location in self.locations:
                             if location["name"] in self.user_text:
-                                self.talk_with_ai = False
+                                location_mentioned = True
                                 self.publish(self.pub_find_ball, "False")
-                                self.answer = ""
-                                self.publish(self.pub_result_voice, self.user_text)    
-                                
-                                
-                        if "home" in self.user_text and self.talk_with_ai:
-                            self.publish(self.pub_find_ball, "True")
-                        elif  self.user_text!="Thanks for watching!":
-                            self.publish(self.pub_find_ball, "False")
-                            generator = self.openai_chat_response(self.user_text)
-                            print(generator)
-                            self.play_text_to_speech(generator)
-                            self.talk_with_ai = True
+                                self.publish(self.pub_result_voice, self.user_text)
+                                break
+                        
+                        if not location_mentioned:
+                            if "home" in self.user_text:
+                                self.publish(self.pub_find_ball, "True")
+                            else:
+                                self.publish(self.pub_find_ball, "False")
+                                generator = self.openai_chat_response(self.user_text)
+                                print(generator)
+                                self.play_text_to_speech(generator)
 
                 time.sleep(0.1)  # Short pause before next recording attempt
 
@@ -195,13 +206,13 @@ class Speech_Whisper_Node(Node):
 
     def openai_chat_response(self, user_input):
         self.history.append({"role": "user", "content": user_input})
-        if self.talk_with_ai:
-            completion = self.openai_client.chat.completions.create(
-                model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
-                messages=self.history,
-                temperature=0.7,
-                stream=True,
-            )
+        
+        completion = self.openai_client.chat.completions.create(
+            model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
+            messages=self.history,
+            temperature=0.7,
+            stream=True,
+        )
         
         new_message = {"role": "assistant", "content": ""}
         for chunk in completion:

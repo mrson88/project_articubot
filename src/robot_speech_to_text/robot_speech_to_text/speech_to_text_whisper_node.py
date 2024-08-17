@@ -105,7 +105,7 @@ class Speech_Whisper_Node(Node):
                         # generator=generate_rag_test(self.user_text)
                         print(generator)
                         self.play_text_to_speech(generator)
-                    self.talk_with_ai = True
+                        self.talk_with_ai = True
 
                             
                             

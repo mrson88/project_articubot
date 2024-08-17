@@ -44,12 +44,27 @@ class NewChatVoiceNode(Node):
         self.pub_find_ball = self.create_publisher(String, 'find_ball', 10)
         self.sub_suppress = self.create_subscription(Bool, 'suppress', self.suppress_callback, 10)
 
+    def select_audio_device(self):
+        p = pyaudio.PyAudio()
+        info = p.get_host_api_info_by_index(0)
+        numdevices = info.get('deviceCount')
+        
+        for i in range(0, numdevices):
+            if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                print(f"Input Device id {i} - {p.get_device_info_by_host_api_device_index(0, i).get('name')}")
+        
+        device_id = int(input("Enter the device ID you want to use: "))
+        return device_id
+
+    # In the init_audio_parameters method:
     def init_audio_parameters(self):
         self.audio = pyaudio.PyAudio()
+        device_id = self.select_audio_device()
         self.stream = self.audio.open(format=pyaudio.paInt16, channels=1, rate=16000, 
-                                      input=True, frames_per_buffer=1024)
+                                        input=True, frames_per_buffer=1024,
+                                        input_device_index=device_id)
         self.audio_buffer = collections.deque(maxlen=int((16000 // 512) * 0.5))
-
+    
     def init_conversation(self):
         self.history = [
             {"role": "system", "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful."},

@@ -106,6 +106,7 @@ class Speech_Whisper_Node(Node):
                         print(generator)
                         self.play_text_to_speech(generator)
                         self.talk_with_ai = True
+                        voice_activity_detected=True
 
                             
                             

@@ -4,7 +4,7 @@ import openai
 import elevenlabs
 import pyaudio
 import wave
-import numpy
+import numpy as np
 import collections
 import faster_whisper
 import torch.cuda
@@ -52,7 +52,7 @@ class Speech_Whisper_Node(Node):
         """
         self.locations = json.loads(self.locations_json)
 
-    def record_audio(self, duration=10):
+    def record_audio(self, duration=10, threshold=500):
         CHUNK = 1024
         FORMAT = pyaudio.paInt16
         CHANNELS = 1
@@ -66,13 +66,36 @@ class Speech_Whisper_Node(Node):
                         input=True,
                         frames_per_buffer=CHUNK)
 
-        print(f"Recording for {duration} seconds...")
+        print("Listening for speech...")
 
         frames = []
+        is_speaking = False
+        silence_frames = 0
+        max_silence_frames = int(RATE / CHUNK * 2)  # 2 seconds of silence
 
-        for i in range(0, int(RATE / CHUNK * duration)):
+        while True:
             data = stream.read(CHUNK)
             frames.append(data)
+
+            # Convert audio chunks to numpy array
+            audio_data = np.frombuffer(data, dtype=np.int16)
+            
+            # Calculate volume
+            volume = np.abs(audio_data).mean()
+
+            if volume > threshold:
+                is_speaking = True
+                silence_frames = 0
+            elif is_speaking:
+                silence_frames += 1
+
+            # Stop recording if silence is detected for 2 seconds after speech
+            if is_speaking and silence_frames > max_silence_frames:
+                break
+
+            # Stop recording if total duration exceeds 15 seconds
+            if len(frames) > int(RATE / CHUNK * 15):
+                break
 
         print("Recording finished.")
 
@@ -96,10 +119,7 @@ class Speech_Whisper_Node(Node):
     def main_loop(self):
         try:
             while True:
-                print("\n\nPress Enter to start recording...")
-                input()
-
-                frames, rate = self.record_audio(10)  # Record for 10 seconds
+                frames, rate = self.record_audio()  # Auto record for about 10 seconds
                 self.save_audio(frames, rate)
                 
                 self.user_text = self.transcribe_audio("voice_record.wav")
@@ -121,6 +141,8 @@ class Speech_Whisper_Node(Node):
                         print(generator)
                         self.play_text_to_speech(generator)
                     self.talk_with_ai = True
+
+                time.sleep(1)  # Short pause before next recording
 
         except KeyboardInterrupt:
             print("\nStopping voice chat...")

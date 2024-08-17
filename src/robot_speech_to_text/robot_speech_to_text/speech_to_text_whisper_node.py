@@ -141,7 +141,7 @@ class Speech_Whisper_Node(Node):
                     self.user_text = self.transcribe_audio("voice_record.wav")
                     print(f"Transcribed text: {self.user_text}")
 
-                    if len(self.user_text) > 12 and self.user_text.lower!="thanks for wathching!":
+                    if len(self.user_text) > 12 and self.user_text.lower!="thanks for watching!":
                         for location in self.locations:
                             if location["name"] in self.user_text:
                                 self.talk_with_ai = False

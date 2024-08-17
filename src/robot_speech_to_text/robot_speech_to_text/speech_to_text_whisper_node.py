@@ -51,7 +51,7 @@ class Speech_Whisper_Node(Node):
         ]
         """
         self.locations = json.loads(self.locations_json)
-        self.silence_threshold = 500  # Adjust this value based on your environment
+        self.silence_threshold = 700  # Adjust this value based on your environment
         self.silence_duration = 1.0  # Duration of silence to end recording (in seconds)
         self.max_duration = 10  # Maximum recording duration in seconds
 

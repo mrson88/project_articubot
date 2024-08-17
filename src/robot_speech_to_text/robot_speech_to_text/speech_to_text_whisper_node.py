@@ -64,7 +64,7 @@ class Speech_Whisper_Node(Node):
                         if current_noise_level < ambient_noise_level + 400:
                             break # voice actitivy ends 
 
-                    if not voice_activity_detected and current_noise_level > long_term_noise_level + 100:
+                    if not voice_activity_detected and current_noise_level > long_term_noise_level + 500:
                         voice_activity_detected = True
                         print("I'm all ears.\n")
                         ambient_noise_level = long_term_noise_level
@@ -106,7 +106,7 @@ class Speech_Whisper_Node(Node):
                         print(generator)
                         self.play_text_to_speech(generator)
                         self.talk_with_ai = True
-                        voice_activity_detected=True
+                        # voice_activity_detected=True
 
                             
                             

@@ -1,184 +1,92 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import openai, elevenlabs, pyaudio, wave, numpy, collections, faster_whisper, torch.cuda
-import os
-import time
-import pygame
-from gtts import gTTS
-import ollama
-import chromadb
-from openai import OpenAI
-import locale
-import json
-locale.getpreferredencoding = lambda: "UTF-8"
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Bool, String  
-import sounddevice as sd
-from submodules.utilities import *
+from std_msgs.msg import Bool, String
+import speech_recognition as sr
+from gtts import gTTS
+from playsound import playsound
+import os
+import openai
+from openai import OpenAI
+import json
 
-class Speech_Whisper_Node(Node):
+class Improved_Speech_Whisper_Node(Node):
     def __init__(self):
-        super().__init__('speech_to_text_whisper_node')
-        self.model = faster_whisper.WhisperModel(model_size_or_path="small", device='cpu',compute_type="float32" )
-        self.answer = ""
-        self.history = []
-        self.client = chromadb.Client()
-        self.collection = self.client.create_collection(name="docs")
+        super().__init__('improved_speech_to_text_whisper_node')
+        
         self.pub_result_voice = self.create_publisher(String, 'result', 10)
         self.pub_find_ball = self.create_publisher(String, 'find_ball', 10)
         self.sub_supress = self.create_subscription(Bool, 'supress', self.supress_callback, 10)
-        self.user_text = ""
-        self.talk_with_ai = True
-        self.history = [
-            {"role": "system", "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful."},
-            {"role": "user", "content": "Hello, introduce yourself to someone opening this program for the first time. Be concise. Short answer"},
-        ]
+        
+        self.recognizer = sr.Recognizer()
         self.openai_client = OpenAI(base_url="http://192.168.2.5:1234/v1", api_key="lm-studio")
+        
+        self.messages_array = [
+            {'role': 'system', 'content': 'You are an intelligent assistant named Cortana. You always provide well-reasoned answers that are both correct and helpful.'},
+        ]
+        
         self.locations_json = """
         [
-    {"name": "kitchen", "x": 1.0, "y": 1.0, "theta": 0.0},
-    {"name": "living room", "x": 1.0, "y": -1.0, "theta": 0.0},
-    {"name": "bedroom", "x": -1.0, "y": -1.0, "theta": 0.0}
+            {"name": "kitchen", "x": 1.0, "y": 1.0, "theta": 0.0},
+            {"name": "living room", "x": 1.0, "y": -1.0, "theta": 0.0},
+            {"name": "bedroom", "x": -1.0, "y": -1.0, "theta": 0.0}
         ]
         """
         self.locations = json.loads(self.locations_json)
         self.supress = False
-        self.queue = collections.deque(maxlen=int((16000 // 512) * 0.5))
 
     def run(self):
-        try:
-            while True:
-                audio = pyaudio.PyAudio()
-                stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
-                audio_buffer = collections.deque(maxlen=int((16000 // 512) * 0.5))
-                frames, long_term_noise_level, current_noise_level, voice_activity_detected = [], 0.0, 0.0, False
-                ambient_noise_level = 0.0
+        while rclpy.ok():
+            self.listen()
 
-                print("\n\nStart speaking. ", end="", flush=True)
-                while True:
-                    data = stream.read(512)
-                    pegel, long_term_noise_level, current_noise_level = self.get_levels(data, long_term_noise_level, current_noise_level)
-                    audio_buffer.append(data)
-
-                    if voice_activity_detected:
-                        frames.append(data)            
-                        if current_noise_level < ambient_noise_level + 400:
-                            break # voice activity ends 
-
-                    if not voice_activity_detected and current_noise_level > long_term_noise_level + 700:
-                        voice_activity_detected = True
-                        print("I'm all ears.\n")
-                        ambient_noise_level = long_term_noise_level
-                        frames.extend(list(audio_buffer))
-                print("Found voice chat, execute voice to text")
-                stream.stop_stream()
-                stream.close()
-                audio.terminate()        
-                
-                # Transcribe recording using whisper
-                with wave.open("voice_record.wav", 'wb') as wf:
-                    wf.setparams((1, audio.get_sample_size(pyaudio.paInt16), 16000, 0, 'NONE', 'NONE'))
-                    wf.writeframes(b''.join(frames))
-                self.user_text = "".join(seg.text for seg in self.model.transcribe("voice_record.wav", language="en")[0])
-                print(self.user_text)
-
-                if len(self.user_text) > 10:
-                    for location in self.locations:
-                        if location["name"] in self.user_text:
-                            self.publish(self.pub_find_ball, "False")
-                            self.answer = ""
-                            self.publish(self.pub_result_voice, self.user_text)    
-                            self.talk_with_ai = False
-                            
-                    if "home" in self.user_text and self.talk_with_ai:
-                        self.publish(self.pub_find_ball, "True")
-                    else:
-                        print(f"user_talk: {self.user_text}")
-                        self.publish(self.pub_find_ball, "False")
-
-                        generator = self.openai_chat_response(self.user_text)
-                        print(generator)
-                        self.play_text_to_speech(generator)
-                    self.talk_with_ai = True
-
-        except KeyboardInterrupt:
-            print("\nStopping hear voice chat...")
-        finally:
-            print("\nStopped voice chat...")
-
-    def generate_llama(self, message):
-        output = ollama.generate(
-            model="tinyllama",
-            prompt=f"Answer with short answer. Respond to this prompt: {message}"
-        )
-        return output['response']
-
-    def chromadb_response(self, data):
-        result = ''
-        embedmodel = "nomic-embed-text"
-        mainmodel = "tinyllama"
-        chroma = chromadb.HttpClient(host="localhost", port=8000)
-        collection = chroma.get_or_create_collection("buildragwithpython")
-
-        queryembed = ollama.embeddings(model=embedmodel, prompt=data)['embedding']
-
-        relevantdocs = collection.query(query_embeddings=[queryembed], n_results=1)["documents"][0]
-        docs = "\n\n".join(relevantdocs)
-        modelquery = f"{data} - Answer that question using the following text as a resource: {docs}"
-
-        stream = ollama.generate(model=mainmodel, prompt=modelquery, stream=True)
-
-        for chunk in stream:
-            if chunk["response"]:
-                result += chunk["response"]
-                
-        return result
-
-    def openai_chat_response(self, user_input):
-        self.history.append({"role": "user", "content": user_input})
+    def listen(self):
+        with sr.Microphone() as source:
+            print("Listening.....")
+            self.recognizer.pause_threshold = 1
+            audio = self.recognizer.listen(source)
         
+        try:
+            print('Recognizing...')
+            query = self.recognizer.recognize_google(audio, language='en-in')
+            print(f'User has said: {query}')
+            self.messages_array.append({'role': 'user', 'content': query})
+            self.process_query(query)
+        except Exception as e:
+            print('Say that again please...', e)
+
+    def process_query(self, query):
+        if len(query) > 10:
+            for location in self.locations:
+                if location["name"] in query.lower():
+                    self.publish(self.pub_find_ball, "False")
+                    self.publish(self.pub_result_voice, query)
+                    return
+
+            if "home" in query.lower():
+                self.publish(self.pub_find_ball, "True")
+            else:
+                self.publish(self.pub_find_ball, "False")
+                response = self.generate_response()
+                self.speak(response)
+
+    def generate_response(self):
+        print('Generating response...')
         completion = self.openai_client.chat.completions.create(
             model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
-            messages=self.history,
+            messages=self.messages_array,
             temperature=0.7,
-            stream=True,
         )
-        
-        new_message = {"role": "assistant", "content": ""}
-        for chunk in completion:
-            if chunk.choices[0].delta.content:
-                content = chunk.choices[0].delta.content
-                new_message["content"] += content
-                print(content, end="", flush=True)
-        
-        self.history.append(new_message)
-        return new_message["content"]
+        response = completion.choices[0].message.content
+        self.messages_array.append({'role': 'assistant', 'content': response})
+        return response
 
-    def play_text_to_speech(self, text, language='en', slow=False):
-        tts = gTTS(text=text, lang=language, slow=slow)
-        
-        temp_audio_file = "temp_audio.mp3"
-        tts.save(temp_audio_file)
-        
-        pygame.mixer.init()
-        pygame.mixer.music.load(temp_audio_file)
-        pygame.mixer.music.play()
-
-        while pygame.mixer.music.get_busy():
-            pygame.time.Clock().tick(10)
-
-        pygame.mixer.music.stop()
-        pygame.mixer.quit()
-
-        time.sleep(3)
-        os.remove(temp_audio_file)
-
-    def get_levels(self, data, long_term_noise_level, current_noise_level):
-        pegel = numpy.abs(numpy.frombuffer(data, dtype=numpy.int16)).mean()
-        long_term_noise_level = long_term_noise_level * 0.995 + pegel * (1.0 - 0.995)
-        current_noise_level = current_noise_level * 0.920 + pegel * (1.0 - 0.920)
-        return pegel, long_term_noise_level, current_noise_level
+    def speak(self, text):
+        print('Speaking:', text)
+        speech = gTTS(text=text, lang='en', slow=False)
+        speech.save('response.mp3')
+        playsound('response.mp3')
+        os.remove('response.mp3')
 
     def publish(self, pub, text):
         msg = String()
@@ -188,16 +96,11 @@ class Speech_Whisper_Node(Node):
 
     def supress_callback(self, msg):
         self.supress = msg.data
-        self.get_logger().debug("Publish boolean : %s" % (msg))
-    
-    def callback(self, indata, frames, time, status):
-        if status:
-            self.get_logger().info(status)
-        self.queue.put(bytes(indata))
+        self.get_logger().debug("Suppress boolean : %s" % (msg))
 
 def main(args=None):
     rclpy.init(args=args)
-    node = Speech_Whisper_Node()
+    node = Improved_Speech_Whisper_Node()
     node.run()
     rclpy.shutdown()
 

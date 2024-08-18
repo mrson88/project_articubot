@@ -151,7 +151,7 @@ class CameraSubscriber(Node):
     def process_detection(self, box):
         # b = box.xyxy[0].to('cpu').detach().numpy().copy()
         # c = box.cls
-        x1, y1, x2, y2 = box.xyxy[0].astype(int)
+        x1, y1, x2, y2 = box.xyxy[0].dtype(int)
 
         # self.inference_result = InferenceResult()
         # self.inference_result.class_name = self.model.names[int(c)]

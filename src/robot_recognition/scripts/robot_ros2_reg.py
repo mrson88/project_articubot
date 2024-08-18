@@ -62,10 +62,10 @@ class CameraSubscriber(Node):
 
     def setup_model(self):
         package_share_dir = get_package_share_directory("robot_recognition")
-        model_dir = os.path.join(package_share_dir, "scripts", "yolov8m.pt")
+        # model_dir = os.path.join(package_share_dir, "scripts", "yolov8m.pt")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.model = YOLO(model_dir).to(self.device)
         model_engine_onnx_dir = os.path.join(package_share_dir, "scripts", "yolov8m.engine")
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = YOLO(model_dir).to(self.device)
         self.model=YOLO(model_engine_onnx_dir,task='detect')
 
     def setup_variables(self):

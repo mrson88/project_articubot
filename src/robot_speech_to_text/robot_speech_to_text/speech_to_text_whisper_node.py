@@ -164,12 +164,14 @@ class Speech_Whisper_Node(Node):
                         if not location_mentioned:
                             if "home" in self.user_text:
                                 self.publish(self.pub_find_ball, "True")
+
                             else:
                                 self.publish(self.pub_find_ball, "False")
                                 generator = self.openai_chat_response(self.user_text)
                                 print(generator)
                                 self.play_text_to_speech(generator)
-
+                        if "stop" in self.user_text:
+                            self.publish(self.pub_find_ball, "False")
                 time.sleep(0.1)  # Short pause before next recording attempt
 
         except KeyboardInterrupt:

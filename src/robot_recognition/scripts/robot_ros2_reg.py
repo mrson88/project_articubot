@@ -80,7 +80,7 @@ class CameraSubscriber(Node):
         self.frame_height = 480
         self.frame_width = 640
         self.depth_image = None
-        self.findball = True
+        self.findball = False
 
     def camera_info_callback(self, msg):
         self.camera_info = msg

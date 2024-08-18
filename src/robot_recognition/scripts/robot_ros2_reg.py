@@ -152,9 +152,9 @@ class CameraSubscriber(Node):
         c = box.cls
         self.inference_result = InferenceResult()
         self.inference_result.class_name = self.model.names[int(c)]
-        self.inference_result.top, self.inference_result.left, self.inference_result.bottom, self.inference_result.right = map(int, b)
-        self.pixel_x = int((self.inference_result.top + self.inference_result.bottom) / 2)
-        self.pixel_y = int((self.inference_result.right + self.inference_result.left) / 2)
+        self.inference_result.x1, self.inference_result.y1, self.inference_result.x2, self.inference_result.y2 = map(int, b)
+        self.pixel_x = int((self.inference_result.x1 + self.inference_result.x2) / 2)
+        self.pixel_y = int((self.inference_result.y1 + self.inference_result.y2) / 2)
         self.yolov8_inference.yolov8_inference.append(self.inference_result)
 
         if self.inference_result.class_name in ["sports ball", "frisbee"]:
@@ -162,7 +162,7 @@ class CameraSubscriber(Node):
 
     def process_ball_detection(self):
         self.target_dist = self.depth_image[self.pixel_y, self.pixel_x]
-        self.target_val = 2 * self.pixel_y / self.frame_width - 1
+        self.target_val = 2 * self.pixel_x / self.frame_width - 1
         K = np.array(self.camera_info.k).reshape(3, 3)
         point_3d = self.deproject_pixel_to_point(K, [self.pixel_x / 1000, self.pixel_y / 1000], self.target_dist / 1000)
         point_position = self.publish_point(point_3d)

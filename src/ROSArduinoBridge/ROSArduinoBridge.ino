@@ -309,7 +309,7 @@ void loop() {
   if (Serial.available() > 0) {
     int i;
     for (i = 0; i < N_SERVOS; i++) {
-      SweepServo().setTargetPosition(i, servoCurrentPosition[i]);
+      // SweepServo().setTargetPosition(i, servoCurrentPosition[i]);
       SweepServo().doSweep(i, servoCurrentPosition[i]);
     }
   }

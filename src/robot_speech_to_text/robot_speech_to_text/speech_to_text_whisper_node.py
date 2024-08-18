@@ -205,24 +205,30 @@ class Speech_Whisper_Node(Node):
         return result
 
     def openai_chat_response(self, user_input):
-        self.history.append({"role": "user", "content": user_input})
+        try:
+            self.history.append({"role": "user", "content": user_input})
+            
+            completion = self.openai_client.chat.completions.create(
+                model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
+                messages=self.history,
+                temperature=0.7,
+                stream=True,
+            )
+            
+            new_message = {"role": "assistant", "content": ""}
+            for chunk in completion:
+                if chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
+                    new_message["content"] += content
+                    print(content, end="", flush=True)
+            
+            self.history.append(new_message)
+            return new_message["content"]
+        except:
+            print("Error connect to LM server")
+            return "Sorry I can't answer"
         
-        completion = self.openai_client.chat.completions.create(
-            model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
-            messages=self.history,
-            temperature=0.7,
-            stream=True,
-        )
         
-        new_message = {"role": "assistant", "content": ""}
-        for chunk in completion:
-            if chunk.choices[0].delta.content:
-                content = chunk.choices[0].delta.content
-                new_message["content"] += content
-                print(content, end="", flush=True)
-        
-        self.history.append(new_message)
-        return new_message["content"]
 
     def play_text_to_speech(self, text, language='en', slow=False):
         tts = gTTS(text=text, lang=language, slow=slow)

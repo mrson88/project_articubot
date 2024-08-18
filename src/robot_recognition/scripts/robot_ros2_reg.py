@@ -87,12 +87,12 @@ class CameraSubscriber(Node):
 
     def timer_callback(self):
         msg = Twist()
-        if self.findball and (self.inference_result.class_name in ["sports ball", "frisbee"]):
-            if self.target_dist > self.max_size_thresh:
+        if self.findball :
+            if self.target_dist > self.max_size_thresh and (self.inference_result.class_name in ["sports ball", "frisbee"]):
                 msg.linear.x = self.forward_chase_speed
                 self.detect = True
                 msg.angular.z = -self.angular_chase_multiplier * self.target_val
-        msg.angular.z = self.search_angular_speed
+            msg.angular.z = self.search_angular_speed
         self.publisher_.publish(msg)
 
     def deproject_pixel_to_point(self, K, pixel, depth):

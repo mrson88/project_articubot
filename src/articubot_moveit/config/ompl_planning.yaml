@@ -35,7 +35,7 @@ arm_robot:  # replace 'arm' with your actual planning group name
     - LBKPIECE
     - BKPIECE
   projection_evaluator: joints(arm_base_forearm_joint,forearm_hand_1_joint)  # replace with your actual joint names
-  longest_valid_segment_fraction: 0.005
+  longest_valid_segment_fraction: 0.001
 
 
 gripper:

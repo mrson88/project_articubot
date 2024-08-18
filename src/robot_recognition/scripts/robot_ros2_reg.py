@@ -148,15 +148,21 @@ class CameraSubscriber(Node):
         self.yolov8_pub.publish(self.yolov8_inference)
 
     def process_detection(self, box):
-        b = box.xyxy[0].to('cpu').detach().numpy().copy()
-        c = box.cls
-        self.inference_result = InferenceResult()
-        self.inference_result.class_name = self.model.names[int(c)]
-        self.inference_result.x1, self.inference_result.y1, self.inference_result.x2, self.inference_result.y2 = map(int, b)
-        self.pixel_x = int((self.inference_result.x1 + self.inference_result.x2) / 2)
-        self.pixel_y = int((self.inference_result.y1 + self.inference_result.y2) / 2)
-        self.yolov8_inference.yolov8_inference.append(self.inference_result)
+        # b = box.xyxy[0].to('cpu').detach().numpy().copy()
+        # c = box.cls
+        x1, y1, x2, y2 = box.xyxy[0].astype(int)
 
+        # self.inference_result = InferenceResult()
+        # self.inference_result.class_name = self.model.names[int(c)]
+        # self.inference_result.x1, self.inference_result.y1, self.inference_result.x2, self.inference_result.y2 = map(int, b)
+        # self.pixel_x = int((self.inference_result.x1 + self.inference_result.x2) / 2)
+        # self.pixel_y = int((self.inference_result.y1 + self.inference_result.y2) / 2)
+        # self.yolov8_inference.yolov8_inference.append(self.inference_result)
+
+
+
+        self.pixel_x = int((x1 + x2) / 2)
+        self.pixel_y = int((y1 + y2) / 2)
         if self.inference_result.class_name in ["sports ball", "frisbee"]:
             self.process_ball_detection()
 

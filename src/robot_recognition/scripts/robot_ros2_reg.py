@@ -25,7 +25,6 @@ class CameraSubscriber(Node):
         self.setup_publishers_subscribers()
         self.setup_model()
         self.setup_variables()
-        self.results=None
 
     def setup_parameters(self):
         self.declare_parameters(
@@ -89,7 +88,7 @@ class CameraSubscriber(Node):
     def timer_callback(self):
         msg = Twist()
         if self.findball :
-            if self.target_dist > self.max_size_thresh and (self.results.names in ["sports ball", "frisbee"]):
+            if self.target_dist > self.max_size_thresh and (self.inference_result.class_name in ["sports ball", "frisbee"]):
                 msg.linear.x = self.forward_chase_speed
                 self.detect = True
                 msg.angular.z = -self.angular_chase_multiplier * self.target_val
@@ -134,42 +133,36 @@ class CameraSubscriber(Node):
         img = self.bridge.imgmsg_to_cv2(data, "bgr8")
         resized_image = cv2.resize(img, (self.frame_width, self.frame_height))
         
-        self.results = self.model(resized_image, conf=0.5, verbose=False)
+        results = self.model(resized_image, conf=0.5, verbose=False)
         self.yolov8_inference = Yolov8Inference()
         self.yolov8_inference.header.frame_id = "inference"
         self.yolov8_inference.header.stamp = self.get_clock().now().to_msg()
 
-        for r in self.results:
+        for r in results:
             for box in r.boxes:
                 self.process_detection(box)
 
-        annotated_frame = self.results[0].plot()
+        annotated_frame = results[0].plot()
         img_msg = self.bridge.cv2_to_imgmsg(annotated_frame)  
         self.img_pub.publish(img_msg)
         self.yolov8_pub.publish(self.yolov8_inference)
 
     def process_detection(self, box):
-        # b = box.xyxy[0].to('cpu').detach().numpy().copy()
-        # c = box.cls
-        x1, y1, x2, y2 = box.xyxy[0].dtype(int)
+        b = box.xyxy[0].to('cpu').detach().numpy().copy()
+        c = box.cls
+        self.inference_result = InferenceResult()
+        self.inference_result.class_name = self.model.names[int(c)]
+        self.inference_result.x1, self.inference_result.y1, self.inference_result.x2, self.inference_result.y2 = map(int, b)
+        self.pixel_x = int((self.inference_result.x1 + self.inference_result.x2) / 2)
+        self.pixel_y = int((self.inference_result.y1 + self.inference_result.y2) / 2)
+        self.yolov8_inference.yolov8_inference.append(self.inference_result)
 
-        # self.inference_result = InferenceResult()
-        # self.inference_result.class_name = self.model.names[int(c)]
-        # self.inference_result.x1, self.inference_result.y1, self.inference_result.x2, self.inference_result.y2 = map(int, b)
-        # self.pixel_x = int((self.inference_result.x1 + self.inference_result.x2) / 2)
-        # self.pixel_y = int((self.inference_result.y1 + self.inference_result.y2) / 2)
-        # self.yolov8_inference.yolov8_inference.append(self.inference_result)
-
-
-
-        self.pixel_x = int((x1 + x2) / 2)
-        self.pixel_y = int((y1 + y2) / 2)
         if self.inference_result.class_name in ["sports ball", "frisbee"]:
             self.process_ball_detection()
 
     def process_ball_detection(self):
         self.target_dist = self.depth_image[self.pixel_y, self.pixel_x]
-        self.target_val = 2 * self.pixel_x / self.frame_width - 1
+        self.target_val = 2 * self.pixel_y / self.frame_width - 1
         K = np.array(self.camera_info.k).reshape(3, 3)
         point_3d = self.deproject_pixel_to_point(K, [self.pixel_x / 1000, self.pixel_y / 1000], self.target_dist / 1000)
         point_position = self.publish_point(point_3d)

@@ -254,8 +254,8 @@ private:
   {
     // move_group_interface->setPlanningTime(10.0);
     // move_group_interface->setNumPlanningAttempts(10);
-    move_group_interface->setMaxVelocityScalingFactor(0.1);
-    move_group_interface->setMaxAccelerationScalingFactor(0.1);
+    move_group_interface->setMaxVelocityScalingFactor(0.01);
+    move_group_interface->setMaxAccelerationScalingFactor(0.01);
   }
 
   bool moveToPoint(const std::shared_ptr<moveit::planning_interface::MoveGroupInterface>& move_group_interface,

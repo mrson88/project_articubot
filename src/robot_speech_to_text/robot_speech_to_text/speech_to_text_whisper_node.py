@@ -25,7 +25,7 @@ from rclpy.node import Node
 from std_msgs.msg import Bool, String
 import sounddevice as sd
 from submodules.utilities import *
-
+from ollama import Client
 class Speech_Whisper_Node(Node):
     def __init__(self):
         super().__init__('speech_to_text_whisper_node')
@@ -42,7 +42,7 @@ class Speech_Whisper_Node(Node):
         self.sub_supress = self.create_subscription(Bool, 'supress', self.supress_callback, 10)
         self.user_text = ""
         # self.openai_client = OpenAI(base_url="http://192.168.2.5:1234/v1", api_key="lm-studio")
-        self.openai_client = OpenAI(base_url="http://192.168.2.5:11434", api_key="lm-studio")
+        self.openai_client = Client(host='http://localhost:11434')
         self.locations_json = """
         [
             {"name": "kitchen", "x": 1.0, "y": 1.0, "theta": 0.0},
@@ -211,7 +211,7 @@ class Speech_Whisper_Node(Node):
         try:
             self.history.append({"role": "user", "content": user_input})
             
-            completion = self.openai_client.chat.completions.create(
+            completion = self.openai_client.chat(
                 model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
                 messages=self.history,
                 temperature=0.7,

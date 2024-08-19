@@ -41,8 +41,8 @@ class Speech_Whisper_Node(Node):
         self.pub_find_ball = self.create_publisher(String, 'find_ball', 10)
         self.sub_supress = self.create_subscription(Bool, 'supress', self.supress_callback, 10)
         self.user_text = ""
-        # self.openai_client = OpenAI(base_url="http://192.168.2.5:1234/v1", api_key="lm-studio")
-        self.openai_client = Client(host='http://192.168.2.5:11434')
+        self.openai_client = OpenAI(base_url="http://192.168.2.5:11434", api_key="lm-studio")
+        # self.openai_client = Client(host='http://192.168.2.5:11434')
         self.locations_json = """
         [
             {"name": "kitchen", "x": 1.0, "y": 1.0, "theta": 0.0},

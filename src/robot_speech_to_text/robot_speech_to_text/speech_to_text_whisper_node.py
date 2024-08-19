@@ -212,7 +212,7 @@ class Speech_Whisper_Node(Node):
             self.history.append({"role": "user", "content": user_input})
             
             completion = self.openai_client.chat(
-                model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
+                model="llama3.1",
                 messages=self.history,
                 temperature=0.7,
                 stream=True,

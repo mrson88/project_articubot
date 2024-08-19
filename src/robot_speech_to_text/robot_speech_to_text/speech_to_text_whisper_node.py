@@ -168,7 +168,7 @@ class Speech_Whisper_Node(Node):
 
                             else:
                                 self.publish(self.pub_find_ball, "False")
-                                generator = self.openai_chat_response(self.user_text)
+                                generator = self.ollama_chat_response(self.user_text)
                                 print(generator)
                                 self.play_text_to_speech(generator)
                         if "stop" in self.user_text:

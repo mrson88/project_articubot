@@ -33,7 +33,7 @@ class Speech_Whisper_Node(Node):
         self.answer = ""
         self.history = [
             {"role": "system", "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful."},
-            {"role": "user", "content": "Hello, introduce yourself to someone opening this program for the first time. Be concise. Short answer"},
+            {"role": "user", "content": "Hello, introduce yourself to someone opening this program for the first time. Be concise. Shortest answer if you can"},
         ]
         self.client = chromadb.Client()
         self.collection = self.client.create_collection(name="docs")
@@ -238,14 +238,12 @@ class Speech_Whisper_Node(Node):
             completion = self.ollama_client.chat(
                 model="llama3.1",
                 messages=self.history,
-                temperature=0.7,
-                stream=True,
             )
             
             new_message = {"role": "assistant", "content": ""}
             new_message["content"] += completion["message"]["content"]
             self.history.append(new_message)
-            return new_message["content"]
+            return completion["message"]["content"]
         except:
             print("Error connect to LM server")
             return "Sorry I can't answer"       

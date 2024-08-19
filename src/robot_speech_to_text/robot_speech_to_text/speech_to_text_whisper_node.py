@@ -238,8 +238,8 @@ class Speech_Whisper_Node(Node):
             completion = self.ollama_client.chat(
                 model="llama3.1",
                 messages=self.history,
-                temperature=0.7,
-                stream=True,
+                # temperature=0.7,
+                # stream=True,
             )
             
             new_message = {"role": "assistant", "content": ""}

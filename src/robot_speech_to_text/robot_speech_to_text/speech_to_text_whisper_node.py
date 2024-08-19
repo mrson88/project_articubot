@@ -41,8 +41,8 @@ class Speech_Whisper_Node(Node):
         self.pub_find_ball = self.create_publisher(String, 'find_ball', 10)
         self.sub_supress = self.create_subscription(Bool, 'supress', self.supress_callback, 10)
         self.user_text = ""
-        self.openai_client = OpenAI(base_url="http://192.168.2.5:11434", api_key="lm-studio")
-        # self.openai_client = Client(host='http://192.168.2.5:11434')
+        # self.openai_client = OpenAI(base_url="http://192.168.2.5:11434", api_key="lm-studio")
+        self.ollama_client = Client(host='http://192.168.2.5:11434')
         self.locations_json = """
         [
             {"name": "kitchen", "x": 1.0, "y": 1.0, "theta": 0.0},
@@ -231,7 +231,24 @@ class Speech_Whisper_Node(Node):
             print("Error connect to LM server")
             return "Sorry I can't answer"
         
-        
+    def ollama_chat_response(self, user_input):
+        try:
+            self.history.append({"role": "user", "content": user_input})
+            
+            completion = self.ollama_client.chat(
+                model="llama3.1",
+                messages=self.history,
+                temperature=0.7,
+                stream=True,
+            )
+            
+            new_message = {"role": "assistant", "content": ""}
+            new_message["content"] += completion["message"]["content"]
+            self.history.append(new_message)
+            return new_message["content"]
+        except:
+            print("Error connect to LM server")
+            return "Sorry I can't answer"       
 
     def play_text_to_speech(self, text, language='en', slow=False):
         tts = gTTS(text=text, lang=language, slow=slow)

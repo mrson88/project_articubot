@@ -243,6 +243,7 @@ class Speech_Whisper_Node(Node):
             new_message = {"role": "assistant", "content": ""}
             new_message["content"] += completion["message"]["content"]
             self.history.append(new_message)
+            print(new_message)
             return completion["message"]["content"]
         except:
             print("Error connect to LM server")

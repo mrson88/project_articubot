@@ -211,7 +211,7 @@ class Speech_Whisper_Node(Node):
         try:
             self.history.append({"role": "user", "content": user_input})
             
-            completion = self.openai_client.chat(
+            completion = self.openai_client.chat.completions.create(
                 model="llama3.1",
                 messages=self.history,
                 temperature=0.7,

@@ -1,7 +1,6 @@
 import json
 import ollama
 import asyncio
-# from vnstock3 import Vnstock
 from datetime import date
 
 # Simulates an API call to get flight times
@@ -32,24 +31,11 @@ def get_antonyms(word: str) -> str:
 
     return json.dumps(words.get(word, "Not available in database"))
 
-# def get_stock_price(stock, price_date=None):
-#     # Khoi tao stock object
-#     stock_obj = Vnstock().stock(symbol=stock.upper(), source="VCI")
-#     if price_date is not None:
-#         get_date = price_date
-#     else:
-#         get_date = date.today().strftime('%Y-%m-%d')
-
-#     df = stock_obj.quote.history(start = get_date, end=get_date, interval = "1D")
-#     response_json = {"stock": stock, "price": str(df['close'][0]*1000) + " VND", "last_update": get_date}
-#     # print(response_json)
-
-#     return json.dumps(response_json)
 
 async def run(model: str):
   client = ollama.AsyncClient()
   # Initialize conversation with a user query
-  messages = [{'role': 'user', 'content': 'What is the sky is blue'}]
+  messages = [{'role': 'user', 'content': 'opposite of dark'}]
 
   # First API call: Send the query and function description to the model
   response = await client.chat(
@@ -95,27 +81,7 @@ async def run(model: str):
                 },
             },
 
-            # {
-            #     "type": "function",
-            #     "function": {
-            #         "name": "get_stock_price",
-            #         "description": "Get the current price in a given stock",
-            #         "parameters": {
-            #             "type": "object",
-            #             "properties": {
-            #                 "stock": {
-            #                     "type": "string",
-            #                     "description": "The stock, e.g. SHB, SHS",
-            #                 },
-            #                 "price_date": {
-            #                     "type": "string",
-            #                     "description": "The date to get price of stock, e.g. 2024-08-11",
-            #                 },
-            #             },
-            #             "required": ["stock"],
-            #         },
-            #     },
-            # }
+
     ],
   )
 
@@ -170,4 +136,4 @@ async def run(model: str):
 
 
 # Run the async function
-# asyncio.run(run('llama3.1'))
+asyncio.run(run('llama3.1'))

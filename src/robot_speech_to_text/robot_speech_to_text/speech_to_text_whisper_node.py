@@ -26,6 +26,7 @@ from std_msgs.msg import Bool, String
 import sounddevice as sd
 from submodules.utilities import *
 from ollama import Client
+# from robot_speech_to_text.api_local import *
 class Speech_Whisper_Node(Node):
     def __init__(self):
         super().__init__('speech_to_text_whisper_node')
@@ -55,7 +56,31 @@ class Speech_Whisper_Node(Node):
         self.silence_duration = 1.0  # Duration of silence to end recording (in seconds)
         self.max_duration = 10  # Maximum recording duration in seconds
         self.unwanted_phrases = ["Thanks for watching!", "Thanks for watching.", "Thank you for watching!", "Thank you for watching."]
+    def get_flight_times(self,departure: str, arrival: str) -> str:
+        self.flights = {
+            'NYC-LAX': {'departure': '08:00 AM', 'arrival': '11:30 AM', 'duration': '5h 30m'},
+            'LAX-NYC': {'departure': '02:00 PM', 'arrival': '10:30 PM', 'duration': '5h 30m'},
+            'LHR-JFK': {'departure': '10:00 AM', 'arrival': '01:00 PM', 'duration': '8h 00m'},
+            'JFK-LHR': {'departure': '09:00 PM', 'arrival': '09:00 AM', 'duration': '7h 00m'},
+            'CDG-DXB': {'departure': '11:00 AM', 'arrival': '08:00 PM', 'duration': '6h 00m'},
+            'DXB-CDG': {'departure': '03:00 AM', 'arrival': '07:30 AM', 'duration': '7h 30m'},
+    }
 
+        key = f'{departure}-{arrival}'.upper()
+        return json.dumps(self.flights.get(key, {'error': 'Flight not found'}))
+    def get_antonyms(self,word: str) -> str:
+        "Get the antonyms of the any given word"
+
+        words = {
+            "hot": "cold",
+            "small": "big",
+            "weak": "strong",
+            "light": "dark",
+            "lighten": "darken",
+            "dark": "bright",
+        }
+
+        return json.dumps(words.get(word, "Not available in database"))
     def record_audio(self):
         CHUNK = 1024
         FORMAT = pyaudio.paInt16
@@ -238,13 +263,77 @@ class Speech_Whisper_Node(Node):
             completion = self.ollama_client.chat(
                 model="llama3.1",
                 messages=self.history,
+                tools=[
+                    {
+                        'type': 'function',
+                        'function': {
+                        'name': 'get_flight_times',
+                        'description': 'Get the flight times between two cities',
+                        'parameters': {
+                            'type': 'object',
+                            'properties': {
+                            'departure': {
+                                'type': 'string',
+                                'description': 'The departure city (airport code)',
+                            },
+                            'arrival': {
+                                'type': 'string',
+                                'description': 'The arrival city (airport code)',
+                            },
+                            },
+                            'required': ['departure', 'arrival'],
+                        },
+                        },
+                    },
+                            {
+                                "type": "function",
+                                "function": {
+                                    "name": "get_antonyms",
+                                    "description": "Get the antonyms of any given words",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "word": {
+                                                "type": "string",
+                                                "description": "The word for which the opposite is required.",
+                                            },
+                                        },
+                                        "required": ["word"],
+                                    },
+                                },
+                            },
+
+
+                        ],
             )
-            
-            new_message = {"role": "assistant", "content": ""}
-            new_message["content"] += completion["message"]["content"]
-            self.history.append(new_message)
-            print(completion["message"]["content"])
-            return completion["message"]["content"]
+
+            # Process function calls made by the model
+            if completion['message'].get('tool_calls'):
+                available_functions = {
+                    'get_flight_times': self.get_flight_times,
+                    "get_antonyms": self.get_antonyms,
+                    # "get_stock_price": get_stock_price,
+                }
+                for tool in completion['message']['tool_calls']:
+                    function_to_call = available_functions[tool['function']['name']]
+                    if function_to_call == self.get_flight_times:
+                        function_response = function_to_call(
+                            tool["function"]["arguments"]["departure"],
+                            tool["function"]["arguments"]["arrival"],
+                        )
+                        print(f"function response: {function_response}")
+
+                    elif function_to_call == self.get_antonyms:
+                        function_response = function_to_call(
+                            tool["function"]["arguments"]["word"],
+                        )
+                        print(f"function response: {function_response}")            
+            else:
+                new_message = {"role": "assistant", "content": ""}
+                new_message["content"] += completion["message"]["content"]
+                self.history.append(new_message)
+                print(completion["message"]["content"])
+                return completion["message"]["content"]
         except:
             print("Error connect to Ollama server")
             return "Sorry I can't answer"       

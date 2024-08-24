@@ -322,12 +322,14 @@ class Speech_Whisper_Node(Node):
                             tool["function"]["arguments"]["arrival"],
                         )
                         print(f"function response: {function_response}")
+                        return f"function response: {function_response}"
 
                     elif function_to_call == self.get_antonyms:
                         function_response = function_to_call(
                             tool["function"]["arguments"]["word"],
                         )
-                        print(f"function response: {function_response}")            
+                        print(f"function response: {function_response}")   
+                        return f"function response: {function_response}"         
             else:
                 new_message = {"role": "assistant", "content": ""}
                 new_message["content"] += completion["message"]["content"]

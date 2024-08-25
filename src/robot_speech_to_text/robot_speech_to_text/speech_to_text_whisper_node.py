@@ -26,6 +26,8 @@ from std_msgs.msg import Bool, String
 import sounddevice as sd
 from submodules.utilities import *
 from ollama import Client
+from openai import OpenAI
+from groq import Groq
 # from robot_speech_to_text.api_local import *
 class Speech_Whisper_Node(Node):
     def __init__(self):
@@ -56,6 +58,13 @@ class Speech_Whisper_Node(Node):
         self.silence_duration = 1.0  # Duration of silence to end recording (in seconds)
         self.max_duration = 10  # Maximum recording duration in seconds
         self.unwanted_phrases = ["Thanks for watching!", "Thanks for watching.", "Thank you for watching!", "Thank you for watching."]
+
+        self.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+        self.GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+        self.DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
+        self.ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+        self.LOCAL_MODEL_PATH = os.getenv("LOCAL_MODEL_PATH")
+        self.CARTESIA_API_KEY = os.getenv("CARTESIA_API_KEY")
     def get_flight_times(self,departure: str, arrival: str) -> str:
         self.flights = {
             'NYC-LAX': {'departure': '08:00 AM', 'arrival': '11:30 AM', 'duration': '5h 30m'},
@@ -155,8 +164,38 @@ class Speech_Whisper_Node(Node):
 
     def transcribe_audio(self, filename):
         transcription = "".join(seg.text for seg in self.model.transcribe(filename, language="en")[0])
+        
         return self.clean_transcription(transcription)
 
+    def transcribe_audio_api(self,model, api_key, audio_file_path, local_model_path=None):
+        try:
+            if model == 'openai':
+                client = OpenAI(api_key=api_key)
+                with open(audio_file_path, "rb") as audio_file:
+                    transcription = client.audio.transcriptions.create(
+                        model="whisper-1",
+                        file=audio_file,
+                        language='vi'
+                    )
+                return transcription.text
+            elif model == 'groq':
+                client = Groq(api_key=api_key)
+                with open(audio_file_path, "rb") as audio_file:
+                    transcription = client.audio.transcriptions.create(
+                        model="whisper-large-v3",
+                        file=audio_file,
+                        language='vi'
+                    )
+                return transcription.text
+
+            
+            else:
+                raise ValueError("Unsupported transcription model")
+
+        except Exception as e:
+            # logging.error(Fore.RED + f"Failed to transcribe audio: {e}" + Fore.RESET)
+            raise Exception("Error in transcribing audio")
+        return
     def clean_transcription(self, text):
         # Remove unwanted phrases
         for phrase in self.unwanted_phrases:
@@ -175,7 +214,8 @@ class Speech_Whisper_Node(Node):
                 if frames:  # Only process if we actually recorded something
                     self.save_audio(frames, rate)
                     
-                    self.user_text = self.transcribe_audio("voice_record.wav")
+                    # self.user_text = self.transcribe_audio("voice_record.wav")
+                    self.user_text = self.transcribe_audio_api("groq", self.GROQ_API_KEY, "voice_record.wav")
                     print(f"Transcribed text: {self.user_text}")
 
                     if len(self.user_text) > 5:  # Reduced minimum length check

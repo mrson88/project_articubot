@@ -357,6 +357,7 @@ class Speech_Whisper_Node(Node):
             
             completion = self.ollama_client.chat(
                 model="llama3.1",
+                messages=self.history,
             )
             new_message = {"role": "assistant", "content": ""}
             new_message["content"] += completion["message"]["content"]

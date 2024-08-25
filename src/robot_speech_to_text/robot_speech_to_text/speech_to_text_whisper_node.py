@@ -297,10 +297,10 @@ class Speech_Whisper_Node(Node):
                 frames, rate = self.record_audio()
                 
                 if frames:  # Only process if we actually recorded something
-                    self.save_audio(frames, rate)
-                    self.save_audio_mp3(frames, rate)
+                    # self.save_audio(frames, rate)
+                    # self.save_audio_mp3(frames, rate)
                     transcription_api_key = get_transcription_api_key()
-                    # self.record_audio_api("voice_record.mp3")
+                    self.record_audio_api("voice_record.mp3")
                     
                     # self.user_text = self.transcribe_audio("voice_record.wav")
                     self.user_text = self.transcribe_audio_api("fastwhisperapi", transcription_api_key, "voice_record.mp3")

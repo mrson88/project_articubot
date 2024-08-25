@@ -67,7 +67,19 @@ class Speech_Whisper_Node(Node):
         self.silence_duration = 1.0  # Duration of silence to end recording (in seconds)
         self.max_duration = 10  # Maximum recording duration in seconds
         self.unwanted_phrases = ["Thanks for watching!", "Thanks for watching.", "Thank you for watching!", "Thank you for watching."]
+        self.fast_url = "http://192.168.2.5:8000"
+        self.checked_fastwhisperapi = False
 
+    def check_fastwhisperapi(self):
+        if not self.checked_fastwhisperapi:
+            infopoint = self.fast_url + "/info"
+            try:
+                response = requests.get(infopoint)
+                if response.status_code != 200:
+                    raise Exception("FastWhisperAPI is not running")
+            except Exception:
+                raise Exception("FastWhisperAPI is not running")
+        self.checked_fastwhisperapi = True
 
     def get_flight_times(self,departure: str, arrival: str) -> str:
         self.flights = {
@@ -239,7 +251,28 @@ class Speech_Whisper_Node(Node):
                         language='en'
                     )
                 return transcription.text
+            elif model == 'fastwhisperapi':
 
+                self.check_fastwhisperapi()
+
+                endpoint = self.fast_url + "/v1/transcriptions"
+
+                files = {
+                    'file': (audio_file_path, open(audio_file_path, 'rb')),
+                }
+                data = {
+                    'model': "base",
+                    'language': "en",
+                    'initial_prompt': None,
+                    'vad_filter': True,
+                }
+                headers = {
+                    'Authorization': 'Bearer dummy_api_key',
+                    
+                }
+                response = requests.post(endpoint, files=files, data=data, headers=headers)
+                response_json = response.json()
+                return response_json.get('text', 'No text found in the response.')
             
             else:
                 raise ValueError("Unsupported transcription model")
@@ -270,7 +303,7 @@ class Speech_Whisper_Node(Node):
                     # self.record_audio_api("voice_record.mp3")
                     
                     # self.user_text = self.transcribe_audio("voice_record.wav")
-                    self.user_text = self.transcribe_audio_api("groq", transcription_api_key, "voice_record.mp3")
+                    self.user_text = self.transcribe_audio_api("fastwhisperapi", transcription_api_key, "voice_record.mp3")
                     print(f"Transcribed text: {self.user_text}")
 
                     if len(self.user_text) > 5:  # Reduced minimum length check

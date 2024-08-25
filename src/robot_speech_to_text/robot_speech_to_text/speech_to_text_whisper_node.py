@@ -37,6 +37,7 @@ from io import BytesIO
 from pydub import AudioSegment
 from robot_speech_to_text.config import Config
 from robot_speech_to_text.api_key_manager import get_transcription_api_key, get_response_api_key, get_tts_api_key
+from robot_speech_to_text.api_local import *
 # from robot_speech_to_text.api_local import *
 class Speech_Whisper_Node(Node):
     def __init__(self):
@@ -53,7 +54,7 @@ class Speech_Whisper_Node(Node):
         self.pub_find_ball = self.create_publisher(String, 'find_ball', 10)
         self.sub_supress = self.create_subscription(Bool, 'supress', self.supress_callback, 10)
         self.user_text = ""
-        self.openai_client = OpenAI(base_url="http://192.168.2.5:11434", api_key="lm-studio")
+        self.lm_studio_client = OpenAI(base_url="http://192.168.2.5:11434", api_key="lm-studio")
         self.ollama_client = Client(host='http://192.168.2.5:11434')
         self.locations_json = """
         [
@@ -81,31 +82,6 @@ class Speech_Whisper_Node(Node):
                 raise Exception("FastWhisperAPI is not running")
         self.checked_fastwhisperapi = True
 
-    def get_flight_times(self,departure: str, arrival: str) -> str:
-        self.flights = {
-            'NYC-LAX': {'departure': '08:00 AM', 'arrival': '11:30 AM', 'duration': '5h 30m'},
-            'LAX-NYC': {'departure': '02:00 PM', 'arrival': '10:30 PM', 'duration': '5h 30m'},
-            'LHR-JFK': {'departure': '10:00 AM', 'arrival': '01:00 PM', 'duration': '8h 00m'},
-            'JFK-LHR': {'departure': '09:00 PM', 'arrival': '09:00 AM', 'duration': '7h 00m'},
-            'CDG-DXB': {'departure': '11:00 AM', 'arrival': '08:00 PM', 'duration': '6h 00m'},
-            'DXB-CDG': {'departure': '03:00 AM', 'arrival': '07:30 AM', 'duration': '7h 30m'},
-    }
-
-        key = f'{departure}-{arrival}'.upper()
-        return json.dumps(self.flights.get(key, {'error': 'Flight not found'}))
-    def get_antonyms(self,word: str) -> str:
-        "Get the antonyms of the any given word"
-
-        words = {
-            "hot": "cold",
-            "small": "big",
-            "weak": "strong",
-            "light": "dark",
-            "lighten": "darken",
-            "dark": "bright",
-        }
-
-        return json.dumps(words.get(word, "Not available in database"))
     def record_audio(self):
         CHUNK = 1024
         FORMAT = pyaudio.paInt16
@@ -321,7 +297,8 @@ class Speech_Whisper_Node(Node):
 
                             else:
                                 self.publish(self.pub_find_ball, "False")
-                                generator = self.ollama_chat_response(self.user_text)
+                                # generator = self.ollama_chat_response(self.user_text)
+                                generator = self.ollama_chat_response_toocall(self.user_text)
                                 print(generator)
                                 self.play_text_to_speech(generator)
                         if "stop" in self.user_text:
@@ -364,7 +341,7 @@ class Speech_Whisper_Node(Node):
         try:
             self.history.append({"role": "user", "content": user_input})
             
-            completion = self.openai_client.chat.completions.create(
+            completion = self.lm_studio_client.chat.completions.create(
                 model="llama3.1",
                 messages=self.history,
                 temperature=0.7,
@@ -431,6 +408,25 @@ class Speech_Whisper_Node(Node):
                         },
                         },
                     },
+
+                    {
+                        'type': 'function',
+                        'function': {
+                        'name': 'get_weather',
+                        'description': 'Get the temperature and humidity in city',
+                        'parameters': {
+                            'type': 'object',
+                            'properties': {
+                            'city': {
+                                'type': 'string',
+                                'description': 'The temperature in (city)',
+                            },
+
+                            },
+                            'required': ['city', 'temperature','humidity'],
+                        },
+                        },
+                    },
                             {
                                 "type": "function",
                                 "function": {
@@ -456,13 +452,13 @@ class Speech_Whisper_Node(Node):
             # Process function calls made by the model
             if completion['message'].get('tool_calls'):
                 available_functions = {
-                    'get_flight_times': self.get_flight_times,
-                    "get_antonyms": self.get_antonyms,
-                    # "get_stock_price": get_stock_price,
+                    'get_flight_times': get_flight_times,
+                    "get_antonyms": get_antonyms,
+                    "get_weather": get_weather,
                 }
                 for tool in completion['message']['tool_calls']:
                     function_to_call = available_functions[tool['function']['name']]
-                    if function_to_call == self.get_flight_times:
+                    if function_to_call == get_flight_times:
                         function_response = function_to_call(
                             tool["function"]["arguments"]["departure"],
                             tool["function"]["arguments"]["arrival"],
@@ -470,12 +466,20 @@ class Speech_Whisper_Node(Node):
                         print(f"function response: {function_response}")
                         return f"function response: {function_response}"
 
-                    elif function_to_call == self.get_antonyms:
+                    elif function_to_call == get_antonyms:
                         function_response = function_to_call(
                             tool["function"]["arguments"]["word"],
                         )
                         print(f"function response: {function_response}")   
                         return f"function response: {function_response}"         
+                    
+                    elif function_to_call == get_weather:
+                        function_response = function_to_call(
+                            tool["function"]["arguments"]["city"],
+                        )
+                        print(f"function response: {function_response}")   
+                        
+                        return f"In City: {function_response['description']} Temperature: {function_response['temperature']}°C and Humidity: {function_response['humidity']}%"
             else:
                 new_message = {"role": "assistant", "content": ""}
                 new_message["content"] += completion["message"]["content"]

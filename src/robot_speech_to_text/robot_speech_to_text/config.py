@@ -40,7 +40,7 @@ class Config:
     ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
     LOCAL_MODEL_PATH = os.getenv("LOCAL_MODEL_PATH")
     CARTESIA_API_KEY = os.getenv("CARTESIA_API_KEY")
-
+    API_WEATHER_KEY = os.getenv("api_weather_key")
     # for serving the MeloTTS model
     TTS_PORT_LOCAL = 5150
 

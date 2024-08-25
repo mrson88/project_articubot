@@ -2,7 +2,8 @@ import json
 import ollama
 import asyncio
 from datetime import date
-
+import requests
+from robot_speech_to_text.config import Config
 # Simulates an API call to get flight times
 # In a real application, this would fetch data from a live database or API
 def get_flight_times(departure: str, arrival: str) -> str:
@@ -30,7 +31,31 @@ def get_antonyms(word: str) -> str:
     }
 
     return json.dumps(words.get(word, "Not available in database"))
+def go_to_anywhere(word: str) -> str:
+    go_to=f"ok robot go to {word}"
+    return go_to
 
+
+
+def get_weather(city: str) -> str:
+    base_url = "http://api.openweathermap.org/data/2.5/weather"
+    params = {
+        "q": city,
+        "appid": Config.API_WEATHER_KEY,
+        "units": "metric"
+    }
+    
+    response = requests.get(base_url, params=params)
+    
+    if response.status_code == 200:
+        data = response.json()
+        return {
+            "temperature": data["main"]["temp"],
+            "description": data["weather"][0]["description"],
+            "humidity": data["main"]["humidity"]
+        }
+    else:
+        return None
 
 async def run(model: str):
   client = ollama.AsyncClient()

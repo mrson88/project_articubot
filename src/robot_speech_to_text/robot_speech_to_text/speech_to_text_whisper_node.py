@@ -479,7 +479,7 @@ class Speech_Whisper_Node(Node):
                         )
                         print(f"function response: {function_response}")   
                         
-                        return f"In City: {function_response['description']} Temperature: {function_response['temperature']}°C and Humidity: {function_response['humidity']}%"
+                        return f"In {function_response['city']} city, temperature is {function_response['temperature']}°C and Humidity is {function_response['humidity']}%"
             else:
                 new_message = {"role": "assistant", "content": ""}
                 new_message["content"] += completion["message"]["content"]

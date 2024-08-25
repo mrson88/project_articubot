@@ -384,7 +384,7 @@ class Speech_Whisper_Node(Node):
             self.history.append({"role": "user", "content": user_input})
             
             completion = self.ollama_client.chat(
-                model="llama3.1",
+                model="llama3.1:8b",
                 messages=self.history,
                 tools=[
                     {

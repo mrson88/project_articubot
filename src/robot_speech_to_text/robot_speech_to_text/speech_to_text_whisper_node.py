@@ -227,7 +227,7 @@ class Speech_Whisper_Node(Node):
                     transcription = client.audio.transcriptions.create(
                         model="whisper-1",
                         file=audio_file,
-                        language='vi'
+                        language='en'
                     )
                 return transcription.text
             elif model == 'groq':
@@ -236,7 +236,7 @@ class Speech_Whisper_Node(Node):
                     transcription = client.audio.transcriptions.create(
                         model="whisper-large-v3",
                         file=audio_file,
-                        language='vi'
+                        language='en'
                     )
                 return transcription.text
 

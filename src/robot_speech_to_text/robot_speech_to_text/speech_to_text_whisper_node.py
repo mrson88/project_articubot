@@ -13,7 +13,7 @@ import time
 import pygame
 from gtts import gTTS
 import ollama
-import chromadb
+# import chromadb
 from openai import OpenAI
 import locale
 import json
@@ -306,26 +306,26 @@ class Speech_Whisper_Node(Node):
         )
         return output['response']
 
-    def chromadb_response(self, data):
-        result = ''
-        embedmodel = "nomic-embed-text"
-        mainmodel = "tinyllama"
-        chroma = chromadb.HttpClient(host="localhost", port=8000)
-        collection = chroma.get_or_create_collection("buildragwithpython")
+    # def chromadb_response(self, data):
+    #     result = ''
+    #     embedmodel = "nomic-embed-text"
+    #     mainmodel = "tinyllama"
+    #     chroma = chromadb.HttpClient(host="localhost", port=8000)
+    #     collection = chroma.get_or_create_collection("buildragwithpython")
 
-        queryembed = ollama.embeddings(model=embedmodel, prompt=data)['embedding']
-        relevantdocs = collection.query(query_embeddings=[queryembed], n_results=1)["documents"][0]
-        docs = "\n\n".join(relevantdocs)
-        modelquery = f"{data} - Answer that question using the following text as a resource: {docs}"
+    #     queryembed = ollama.embeddings(model=embedmodel, prompt=data)['embedding']
+    #     relevantdocs = collection.query(query_embeddings=[queryembed], n_results=1)["documents"][0]
+    #     docs = "\n\n".join(relevantdocs)
+    #     modelquery = f"{data} - Answer that question using the following text as a resource: {docs}"
 
-        stream = ollama.generate(model=mainmodel, prompt=modelquery, stream=True)
+    #     stream = ollama.generate(model=mainmodel, prompt=modelquery, stream=True)
 
-        for chunk in stream:
-            if chunk["response"]:
-                data_text = "".join(chunk["response"])
-                result += data_text
+    #     for chunk in stream:
+    #         if chunk["response"]:
+    #             data_text = "".join(chunk["response"])
+    #             result += data_text
                 
-        return result
+    #     return result
 
     def openai_chat_response(self, user_input):
         try:

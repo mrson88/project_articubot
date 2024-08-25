@@ -236,7 +236,7 @@ class Speech_Whisper_Node(Node):
                     transcription = client.audio.transcriptions.create(
                         model="whisper-large-v3",
                         file=audio_file,
-                        language='en'
+                        language='vi'
                     )
                 return transcription.text
 

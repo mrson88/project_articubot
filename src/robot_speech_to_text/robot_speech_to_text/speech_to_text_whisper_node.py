@@ -303,7 +303,7 @@ class Speech_Whisper_Node(Node):
                     # self.record_audio_api("voice_record.mp3")
                     
                     # self.user_text = self.transcribe_audio("voice_record.wav")
-                    self.user_text = self.transcribe_audio_api("groq", transcription_api_key, "voice_record.mp3")
+                    self.user_text = self.transcribe_audio_api("fastwhisperapi", transcription_api_key, "voice_record.mp3")
                     print(f"Transcribed text: {self.user_text}")
 
                     if len(self.user_text) > 5:  # Reduced minimum length check

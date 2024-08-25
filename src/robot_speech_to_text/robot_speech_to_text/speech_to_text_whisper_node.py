@@ -342,7 +342,7 @@ class Speech_Whisper_Node(Node):
             self.history.append({"role": "user", "content": user_input})
             
             completion = self.lm_studio_client.chat.completions.create(
-                model="llama3.1",
+                model="llama3.1:8b",
                 messages=self.history,
                 temperature=0.7,
                 stream=True,

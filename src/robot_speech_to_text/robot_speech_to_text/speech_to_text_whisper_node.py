@@ -294,9 +294,9 @@ class Speech_Whisper_Node(Node):
     def main_loop(self):
         try:
             while True:
-                frames, rate = self.record_audio()
+                # frames, rate = self.record_audio()
                 
-                if frames:  # Only process if we actually recorded something
+                # if frames:  # Only process if we actually recorded something
                     # self.save_audio(frames, rate)
                     # self.save_audio_mp3(frames, rate)
                     transcription_api_key = get_transcription_api_key()
@@ -326,7 +326,7 @@ class Speech_Whisper_Node(Node):
                                 self.play_text_to_speech(generator)
                         if "stop" in self.user_text:
                             self.publish(self.pub_find_ball, "False")
-                time.sleep(0.1)  # Short pause before next recording attempt
+                    time.sleep(0.1)  # Short pause before next recording attempt
 
         except KeyboardInterrupt:
             print("\nStopping voice chat...")

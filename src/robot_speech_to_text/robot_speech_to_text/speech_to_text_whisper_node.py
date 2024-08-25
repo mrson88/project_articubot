@@ -47,7 +47,7 @@ class Speech_Whisper_Node(Node):
             {"role": "system", "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful."},
             {"role": "user", "content": "Hello, introduce yourself to someone opening this program for the first time. Be concise. Shortest answer if you can"},
         ]
-        self.client = chromadb.Client()
+        # self.client = chromadb.Client()
         self.collection = self.client.create_collection(name="docs")
         self.pub_result_voice = self.create_publisher(String, 'result', 10)
         self.pub_find_ball = self.create_publisher(String, 'find_ball', 10)

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:property name="PI" value="3.14159265359" />
+    <xacro:property name="pi" value="3.14159265359" />
     <xacro:unless value="$(arg sim_mode)">
         <ros2_control name="articubot" type="system">
             <hardware>
@@ -36,8 +36,8 @@
             
             <joint name="arm_base_forearm_joint">
                 <command_interface name="position">
-                <param name="min">-${2*PI/3}</param>
-                <param name="max">${2*PI/3}</param>
+                <param name="min">-${2*pi/3}</param>
+                <param name="max">${2*pi/3}</param>
                 </command_interface>
                 <state_interface name="position"/>
 
@@ -45,8 +45,8 @@
 
             <joint name="forearm_hand_1_joint">
                 <command_interface name="position">
-                <param name="min">-${2*PI/3}</param>
-                <param name="max">${2*PI/3}</param>
+                <param name="min">-${2*pi/3}</param>
+                <param name="max">${2*pi/3}</param>
                 </command_interface>
                 <state_interface name="position"/>
 
@@ -54,8 +54,8 @@
 
             <joint name="forearm_hand_2_joint">
                 <command_interface name="position">
-                <param name="min">-${2*PI/3}</param>
-                <param name="max">${2*PI/3}</param>
+                <param name="min">-${2*pi/3}</param>
+                <param name="max">${2*pi/3}</param>
                 </command_interface>
                 <state_interface name="position"/>
 
@@ -63,8 +63,8 @@
 
             <joint name="forearm_hand_3_joint">
                 <command_interface name="position">
-                <param name="min">-${2*PI/3}</param>
-                <param name="max">${2*PI/3}</param>
+                <param name="min">-${2*pi/3}</param>
+                <param name="max">${2*pi/3}</param>
                 </command_interface>
                 <state_interface name="position"/>
 
@@ -72,8 +72,8 @@
 
              <joint name="forearm_claw_joint">
                 <command_interface name="position">
-                <param name="min">-${2*PI/3}</param>
-                <param name="max">${2*PI/3}</param>
+                <param name="min">-${2*pi/3}</param>
+                <param name="max">${2*pi/3}</param>
                 </command_interface>
                 <state_interface name="position"/>
 
@@ -81,8 +81,8 @@
 
             <joint name="joint_4">
                 <command_interface name="position">
-                <param name="min">-${PI / 2}</param>
-                <param name="max">${PI / 2}</param>
+                <param name="min">-${pi / 2}</param>
+                <param name="max">${pi / 2}</param>
                 </command_interface>
                 <state_interface name="position"/>
 
@@ -93,7 +93,7 @@
                 <param name="multiplier">-1</param>
                 <command_interface name="position">
                 <param name="min">0.0</param>
-                <param name="max">${PI / 2}</param>
+                <param name="max">${pi / 2}</param>
                 </command_interface>
             </joint> -->
 
@@ -125,8 +125,8 @@
             
             <joint name="arm_base_forearm_joint">
                 <command_interface name="position">
-                <param name="min">-${PI / 2}</param>
-                <param name="max">${PI / 2}</param>
+                <param name="min">-${pi / 2}</param>
+                <param name="max">${pi / 2}</param>
                 </command_interface>
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
@@ -135,8 +135,8 @@
 
             <joint name="forearm_hand_1_joint">
                 <command_interface name="position">
-                <param name="min">-${PI / 2}</param>
-                <param name="max">${PI / 2}</param>
+                <param name="min">-${pi / 2}</param>
+                <param name="max">${pi / 2}</param>
                 </command_interface>
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
@@ -145,8 +145,8 @@
 
             <joint name="forearm_hand_2_joint">
                 <command_interface name="position">
-                <param name="min">-${PI / 2}</param>
-                <param name="max">${PI / 2}</param>
+                <param name="min">-${pi / 2}</param>
+                <param name="max">${pi / 2}</param>
                 </command_interface>
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
@@ -155,8 +155,8 @@
 
             <joint name="forearm_hand_3_joint">
                 <command_interface name="position">
-                <param name="min">-${PI / 2}</param>
-                <param name="max">${PI / 2}</param>
+                <param name="min">-${pi / 2}</param>
+                <param name="max">${pi / 2}</param>
                 </command_interface>
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
@@ -165,8 +165,8 @@
 
              <joint name="forearm_claw_joint">
                 <command_interface name="position">
-                <param name="min">-${PI / 2}</param>
-                <param name="max">${PI / 2}</param>
+                <param name="min">-${pi / 2}</param>
+                <param name="max">${pi / 2}</param>
                 </command_interface>
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
@@ -175,7 +175,7 @@
 
             <joint name="joint_4">
                 <command_interface name="position">
-                <param name="min">-${PI / 2}</param>
+                <param name="min">-${pi / 2}</param>
                 <param name="max">0.0</param>
                 </command_interface>
                 <state_interface name="position"/>
@@ -189,7 +189,7 @@
                 <command_interface name="position">
                 
                 <param name="min">0.0</param>
-                <param name="max">${PI / 2}</param>
+                <param name="max">${pi / 2}</param>
                 </command_interface>
                 <state_interface name="position"/>
             </joint> -->

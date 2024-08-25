@@ -350,8 +350,25 @@ class Speech_Whisper_Node(Node):
         except:
             print("Error connect to LM server")
             return "Sorry I can't answer"
-        
+
     def ollama_chat_response(self, user_input):
+        try:
+            self.history.append({"role": "user", "content": user_input})
+            
+            completion = self.ollama_client.chat(
+                model="llama3.1",
+            )
+            new_message = {"role": "assistant", "content": ""}
+            new_message["content"] += completion["message"]["content"]
+            self.history.append(new_message)
+            print(completion["message"]["content"])
+            return completion["message"]["content"]
+        except:
+            print("Error connect to Ollama server")
+            return "Sorry I can't answer"       
+
+
+    def ollama_chat_response_toocall(self, user_input):
         try:
             self.history.append({"role": "user", "content": user_input})
             

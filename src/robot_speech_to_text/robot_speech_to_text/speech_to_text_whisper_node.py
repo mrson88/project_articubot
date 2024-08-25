@@ -161,7 +161,13 @@ class Speech_Whisper_Node(Node):
         wf.setframerate(rate)
         wf.writeframes(b''.join(frames))
         wf.close()
-
+    def save_audio_mp3(self, frames, rate, filename="voice_record.mp3"):
+        wf = wave.open(filename, 'wb')
+        wf.setnchannels(1)
+        wf.setsampwidth(pyaudio.PyAudio().get_sample_size(pyaudio.paInt16))
+        wf.setframerate(rate)
+        wf.writeframes(b''.join(frames))
+        wf.close()
     def transcribe_audio(self, filename):
         transcription = "".join(seg.text for seg in self.model.transcribe(filename, language="en")[0])
         
@@ -212,10 +218,11 @@ class Speech_Whisper_Node(Node):
                 frames, rate = self.record_audio()
                 
                 if frames:  # Only process if we actually recorded something
-                    self.save_audio(frames, rate)
+                    # self.save_audio(frames, rate)
+                    self.save_audio_mp3(frames, rate)
                     
                     # self.user_text = self.transcribe_audio("voice_record.wav")
-                    self.user_text = self.transcribe_audio_api("groq", self.GROQ_API_KEY, "voice_record.wav")
+                    self.user_text = self.transcribe_audio_api("groq", self.GROQ_API_KEY, "voice_record.mp3")
                     print(f"Transcribed text: {self.user_text}")
 
                     if len(self.user_text) > 5:  # Reduced minimum length check

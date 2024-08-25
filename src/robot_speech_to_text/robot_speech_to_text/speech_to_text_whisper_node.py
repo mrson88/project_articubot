@@ -13,7 +13,7 @@ import time
 import pygame
 from gtts import gTTS
 import ollama
-# import chromadb
+import chromadb
 from openai import OpenAI
 import locale
 import json
@@ -41,13 +41,13 @@ from robot_speech_to_text.api_key_manager import get_transcription_api_key, get_
 class Speech_Whisper_Node(Node):
     def __init__(self):
         super().__init__('speech_to_text_whisper_node')
-        self.model = faster_whisper.WhisperModel(model_size_or_path="small", device='cuda', compute_type="float32")
+        self.model = faster_whisper.WhisperModel(model_size_or_path="small", device='cpu', compute_type="float32")
         self.answer = ""
         self.history = [
             {"role": "system", "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful."},
             {"role": "user", "content": "Hello, introduce yourself to someone opening this program for the first time. Be concise. Shortest answer if you can"},
         ]
-        # self.client = chromadb.Client()
+        self.client = chromadb.Client()
         self.collection = self.client.create_collection(name="docs")
         self.pub_result_voice = self.create_publisher(String, 'result', 10)
         self.pub_find_ball = self.create_publisher(String, 'find_ball', 10)
@@ -265,12 +265,12 @@ class Speech_Whisper_Node(Node):
                 
                 if frames:  # Only process if we actually recorded something
                     self.save_audio(frames, rate)
-                    # self.save_audio_mp3(frames, rate)
-                    # transcription_api_key = get_transcription_api_key()
+                    self.save_audio_mp3(frames, rate)
+                    transcription_api_key = get_transcription_api_key()
                     # self.record_audio_api("voice_record.mp3")
                     
-                    self.user_text = self.transcribe_audio("voice_record.wav")
-                    # self.user_text = self.transcribe_audio_api("groq", transcription_api_key, "voice_record.mp3")
+                    # self.user_text = self.transcribe_audio("voice_record.wav")
+                    self.user_text = self.transcribe_audio_api("groq", transcription_api_key, "voice_record.mp3")
                     print(f"Transcribed text: {self.user_text}")
 
                     if len(self.user_text) > 5:  # Reduced minimum length check
@@ -306,26 +306,26 @@ class Speech_Whisper_Node(Node):
         )
         return output['response']
 
-    # def chromadb_response(self, data):
-    #     result = ''
-    #     embedmodel = "nomic-embed-text"
-    #     mainmodel = "tinyllama"
-    #     chroma = chromadb.HttpClient(host="localhost", port=8000)
-    #     collection = chroma.get_or_create_collection("buildragwithpython")
+    def chromadb_response(self, data):
+        result = ''
+        embedmodel = "nomic-embed-text"
+        mainmodel = "tinyllama"
+        chroma = chromadb.HttpClient(host="localhost", port=8000)
+        collection = chroma.get_or_create_collection("buildragwithpython")
 
-    #     queryembed = ollama.embeddings(model=embedmodel, prompt=data)['embedding']
-    #     relevantdocs = collection.query(query_embeddings=[queryembed], n_results=1)["documents"][0]
-    #     docs = "\n\n".join(relevantdocs)
-    #     modelquery = f"{data} - Answer that question using the following text as a resource: {docs}"
+        queryembed = ollama.embeddings(model=embedmodel, prompt=data)['embedding']
+        relevantdocs = collection.query(query_embeddings=[queryembed], n_results=1)["documents"][0]
+        docs = "\n\n".join(relevantdocs)
+        modelquery = f"{data} - Answer that question using the following text as a resource: {docs}"
 
-    #     stream = ollama.generate(model=mainmodel, prompt=modelquery, stream=True)
+        stream = ollama.generate(model=mainmodel, prompt=modelquery, stream=True)
 
-    #     for chunk in stream:
-    #         if chunk["response"]:
-    #             data_text = "".join(chunk["response"])
-    #             result += data_text
+        for chunk in stream:
+            if chunk["response"]:
+                data_text = "".join(chunk["response"])
+                result += data_text
                 
-    #     return result
+        return result
 
     def openai_chat_response(self, user_input):
         try:

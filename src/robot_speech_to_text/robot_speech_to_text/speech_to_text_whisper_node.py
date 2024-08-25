@@ -423,7 +423,7 @@ class Speech_Whisper_Node(Node):
                             },
 
                             },
-                            'required': ['city', 'temperature','humidity'],
+                            'required': ['city', 'temperature','humidity','weather'],
                         },
                         },
                     },

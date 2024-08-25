@@ -453,7 +453,7 @@ class Speech_Whisper_Node(Node):
             print("Error connect to Ollama server")
             return "Sorry I can't answer"       
 
-    def play_text_to_speech(self, text, language='en', slow=False):
+    def play_text_to_speech(self, text, language='vi', slow=False):
         tts = gTTS(text=text, lang=language, slow=slow)
         
         temp_audio_file = "temp_audio.mp3"

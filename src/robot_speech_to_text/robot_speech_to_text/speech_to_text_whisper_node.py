@@ -68,12 +68,7 @@ class Speech_Whisper_Node(Node):
         self.max_duration = 10  # Maximum recording duration in seconds
         self.unwanted_phrases = ["Thanks for watching!", "Thanks for watching.", "Thank you for watching!", "Thank you for watching."]
 
-        self.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-        self.GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-        self.DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
-        self.ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
-        self.LOCAL_MODEL_PATH = os.getenv("LOCAL_MODEL_PATH")
-        self.CARTESIA_API_KEY = os.getenv("CARTESIA_API_KEY")
+
     def get_flight_times(self,departure: str, arrival: str) -> str:
         self.flights = {
             'NYC-LAX': {'departure': '08:00 AM', 'arrival': '11:30 AM', 'duration': '5h 30m'},
@@ -232,7 +227,7 @@ class Speech_Whisper_Node(Node):
                     transcription = client.audio.transcriptions.create(
                         model="whisper-1",
                         file=audio_file,
-                        language='en'
+                        language='vi'
                     )
                 return transcription.text
             elif model == 'groq':
@@ -241,7 +236,7 @@ class Speech_Whisper_Node(Node):
                     transcription = client.audio.transcriptions.create(
                         model="whisper-large-v3",
                         file=audio_file,
-                        language='en'
+                        language='vi'
                     )
                 return transcription.text
 

@@ -52,7 +52,8 @@ def get_weather(city: str) -> str:
         return {
             "temperature": data["main"]["temp"],
             "description": data["weather"][0]["description"],
-            "humidity": data["main"]["humidity"]
+            "humidity": data["main"]["humidity"],
+            "city": city
         }
     else:
         return None

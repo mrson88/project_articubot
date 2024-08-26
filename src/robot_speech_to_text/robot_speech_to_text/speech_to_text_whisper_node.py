@@ -413,7 +413,7 @@ class Speech_Whisper_Node(Node):
                         'type': 'function',
                         'function': {
                         'name': 'get_weather',
-                        'description': 'Get the weather, temperature and humidity in city',
+                        'description': 'Get weather in city',
                         'parameters': {
                             'type': 'object',
                             'properties': {
@@ -423,7 +423,7 @@ class Speech_Whisper_Node(Node):
                             },
 
                             },
-                            'required': ['city', 'temperature','humidity','weather'],
+                            'required': ['city'],
                         },
                         },
                     },

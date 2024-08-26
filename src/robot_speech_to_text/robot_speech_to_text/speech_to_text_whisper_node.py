@@ -297,8 +297,11 @@ class Speech_Whisper_Node(Node):
 
                             else:
                                 self.publish(self.pub_find_ball, "False")
-                                # generator = self.ollama_chat_response(self.user_text)
-                                generator = self.ollama_chat_response_toocall(self.user_text)
+                                if 'robot' in self.user_text:
+                                
+                                    generator = self.ollama_chat_response_toocall(self.user_text)
+                                else:
+                                    generator = self.ollama_chat_response(self.user_text)
                                 print(generator)
                                 self.play_text_to_speech(generator)
                         if "stop" in self.user_text:
@@ -450,7 +453,7 @@ class Speech_Whisper_Node(Node):
             )
 
             # Process function calls made by the model
-            if completion['message'].get('tool_calls') and 'robot' in completion['message']:
+            if completion['message'].get('tool_calls') :
                 available_functions = {
                     'get_flight_times': get_flight_times,
                     "get_antonyms": get_antonyms,

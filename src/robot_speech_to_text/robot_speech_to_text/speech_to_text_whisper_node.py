@@ -297,7 +297,7 @@ class Speech_Whisper_Node(Node):
 
                             else:
                                 self.publish(self.pub_find_ball, "False")
-                                if 'robot' in self.user_text:
+                                if 'robot' in self.user_text.lower():
                                 
                                     generator = self.ollama_chat_response_toocall(self.user_text)
                                 else:

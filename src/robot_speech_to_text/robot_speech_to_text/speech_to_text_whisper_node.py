@@ -419,7 +419,7 @@ class Speech_Whisper_Node(Node):
                             'properties': {
                             'city': {
                                 'type': 'string',
-                                'description': 'The temperature in (city)',
+                                'description': 'The weather in (city)',
                             },
 
                             },

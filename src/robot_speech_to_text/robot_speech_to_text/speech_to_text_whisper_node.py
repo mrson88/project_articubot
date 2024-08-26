@@ -450,7 +450,7 @@ class Speech_Whisper_Node(Node):
             )
 
             # Process function calls made by the model
-            if completion['message'].get('tool_calls'):
+            if completion['message'].get('tool_calls') and 'robot' in completion['message']:
                 available_functions = {
                     'get_flight_times': get_flight_times,
                     "get_antonyms": get_antonyms,
